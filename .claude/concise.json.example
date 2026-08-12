@@ -1,0 +1,8 @@
+{
+  "maxCommentLines": 2,
+  "maxFileLines": 300,
+  "maxPrBodyParagraphs": 1,
+  "maxPrBodySentences": 3,
+  "maxRetries": 2,
+  "ignoreGlobs": ["**/node_modules/**", "**/*.generated.*", "**/vendor/**"]
+}
