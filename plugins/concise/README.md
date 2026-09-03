@@ -43,21 +43,25 @@ Copy `.claude/concise.json.example` to `.claude/concise.json` (Claude Code) or `
 
 ## Install
 
+Git, Node.js, Bash, `jq`, `realpath`, and core Unix tools must be available on `PATH`.
+
 Claude Code:
 
 ```
-/plugin marketplace add <owner>/be-concise
+/plugin marketplace add https://github.com/yannelli/be-concise
 /plugin install concise@be-concise
 ```
 
-Codex (CLI 0.152 or newer, `hooks` and `plugins` features enabled by default):
+Review the hooks and choose an installation scope. If the install summary requests it, run `/reload-plugins`.
+
+Codex CLI 0.152.0 or newer:
 
 ```
-codex plugin marketplace add <owner>/be-concise   # or a local checkout path
+codex plugin marketplace add yannelli/be-concise
 codex plugin add concise@be-concise
 ```
 
-Codex runs plugin hooks only after you trust them once: open a Codex session and run `/hooks`, then trust the three `concise` entries. Non-interactive runs can pass `codex exec --dangerously-bypass-hook-trust`.
+Start a new Codex session, run `/hooks`, open `PreToolUse`, and review and trust each `concise` hook. Codex asks for review again when a hook definition changes. Automation that already validates its hook sources can pass `codex exec --dangerously-bypass-hook-trust "<prompt>"`; the bypass applies to that invocation and does not save trust.
 
 Both hosts expose `${CLAUDE_PLUGIN_ROOT}` to hook commands, so one `hooks/hooks.json` serves both. The Claude manifest is `.claude-plugin/plugin.json`, the Codex manifest is `.codex-plugin/plugin.json`, and the marketplaces are `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json` at the repo root.
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title description">
+  <title id="title">Concise</title>
+  <desc id="description">Stops verbose comments, oversized files, and padded PRs.</desc>
+  <rect width="1280" height="640" fill="#FAF7F2"/>
+  <g transform="translate(-14 12) scale(.54)">
+    <g fill="#18191D">
+      <path d="M160 272h260c34 0 58 12 82 36l136 140c14 15 32 24 52 24v80c-46 0-84-16-114-47L438 364c-6-6-14-10-22-10H160Z"/>
+      <path d="M160 752h260c34 0 58-12 82-36l136-140c14-15 32-24 52-24v-80c-46 0-84 16-114 47L438 660c-6 6-14 10-22 10H160Z"/>
+      <path d="M160 460h530v104H160Z"/>
+    </g>
+    <rect width="136" height="104" x="728" y="460" fill="#FF4A24" rx="22"/>
+  </g>
+  <g fill="#18191D" font-family="Inter, 'Nimbus Sans', Arial, sans-serif" font-style="normal">
+    <text x="540" y="272" font-size="124" font-weight="700">concise</text>
+    <text x="542" y="338" font-size="34">Stops verbose comments,</text>
+    <text x="542" y="382" font-size="34">oversized files, and padded PRs.</text>
+    <text x="80" y="560" font-size="24" fill-opacity=".64">Claude Code + Codex</text>
+    <text x="1200" y="560" font-size="24" text-anchor="end" fill-opacity=".64">yannelli/be-concise</text>
+  </g>
+</svg>
