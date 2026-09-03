@@ -1,6 +1,10 @@
-/** Pulls the body text out of a `gh pr/issue ...` command — heredoc form or a quoted flag. */
+// The terminator is anchored to its own line (tabs allowed, for `<<-`) so a body
+// that merely mentions "EOF" mid-line doesn't truncate the capture.
+const HEREDOC = /<<[-~]?['"]?(\w+)['"]?\r?\n([\s\S]*?)\r?\n\t*\1(?=\r?\n|$)/;
+
+/** Pulls the body text out of a `gh pr/issue ...` command: heredoc form or a quoted flag. */
 export function extractBody(command) {
-  const heredoc = /<<[-~]?['"]?(\w+)['"]?\r?\n([\s\S]*?)\r?\n\1/m.exec(command);
+  const heredoc = HEREDOC.exec(command);
   if (heredoc) return heredoc[2];
 
   const dq = /(?:--body|-b)[= ]"((?:[^"\\]|\\.)*)"/.exec(command);
@@ -14,10 +18,8 @@ export function extractBody(command) {
 const STRUCTURAL = [/^#{1,6}\s/, /^[-*]\s/, /^\d+\.\s/, /^>/];
 const isStructural = (trimmed) => trimmed === "" || STRUCTURAL.some((re) => re.test(trimmed));
 
-/**
- * Flags prose paragraphs, not structure — a "## Summary" + bullets body (this
- * project's own PR template) always passes; walls of prose don't.
- */
+// Flags prose paragraphs, not structure: a "## Summary" + bullets body always
+// passes, walls of prose don't.
 export function isVerbose(body, { maxParagraphs, maxSentences }) {
   const paragraphs = [];
   let current = [];
@@ -40,7 +42,7 @@ export function isVerbose(body, { maxParagraphs, maxSentences }) {
   if (paragraphs.length > maxParagraphs) {
     return {
       verbose: true,
-      reason: `${paragraphs.length} prose paragraphs (limit ${maxParagraphs}) — use short bullets instead`,
+      reason: `${paragraphs.length} prose paragraphs (limit ${maxParagraphs}), use short bullets instead`,
     };
   }
 
@@ -49,7 +51,7 @@ export function isVerbose(body, { maxParagraphs, maxSentences }) {
     if (sentenceCount > maxSentences) {
       return {
         verbose: true,
-        reason: `a paragraph has ${sentenceCount} sentences (limit ${maxSentences}) — cut it down`,
+        reason: `a paragraph has ${sentenceCount} sentences (limit ${maxSentences}), cut it down`,
       };
     }
   }

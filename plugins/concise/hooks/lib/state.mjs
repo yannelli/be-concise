@@ -20,7 +20,7 @@ function writeState(sessionId, state) {
   try {
     writeFileSync(statePath(sessionId), JSON.stringify(state));
   } catch {
-    // Best effort — if we can't persist, every future call just looks like a fresh attempt.
+        // Best effort: if we can't persist, every future call just looks like a fresh attempt.
   }
 }
 
@@ -30,4 +30,12 @@ export function bumpAttempt(sessionId, key) {
   state[key] = (state[key] || 0) + 1;
   writeState(sessionId, state);
   return state[key];
+}
+
+/** Clears a counter so a later violation on the same key starts nudging from scratch. */
+export function resetAttempt(sessionId, key) {
+    const state = readState(sessionId);
+    if (!(key in state)) return;
+    delete state[key];
+    writeState(sessionId, state);
 }

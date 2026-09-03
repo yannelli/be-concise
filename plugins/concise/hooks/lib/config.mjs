@@ -38,7 +38,7 @@ function globToRegExp(glob) {
   const pattern = escaped.replace(/\*\*\/|\*\*|\*/g, (m) => {
     if (m === "**/") return "(?:.*/)?"; // zero or more leading path segments
     if (m === "**") return ".*";
-    return "[^/]*"; // "*" — within one path segment
+      return "[^/]*"; // "*", within one path segment
   });
   return new RegExp(`^${pattern}$`);
 }

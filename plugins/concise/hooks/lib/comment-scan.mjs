@@ -19,12 +19,8 @@ function extOf(filePath) {
   return m ? m[1].toLowerCase() : "";
 }
 
-/**
- * Returns every comment run found in `content`: contiguous `//`/`#` line-comment
- * blocks (blank lines break a run) and each `/* *\/`-style block span, each as
- * { startLine, length, text }. Heuristic, not a real parser — a block-comment
- * token inside a string literal can produce a false positive.
- */
+// Returns each comment run in `content` as { startLine, length, text }: contiguous
+// line comments, plus block spans. Heuristic, so a token in a string can misfire.
 export function scanComments(content, filePath) {
   const ext = extOf(filePath);
   const runs = [];
@@ -59,6 +55,12 @@ export function scanComments(content, filePath) {
     while (true) {
       const start = content.indexOf(open, searchFrom);
       if (start === -1) break;
+      // Only openers that start their own line count. A real multi-line comment
+      // always does, and this keeps "/*" inside a glob or URL from misfiring.
+      if (!/(^|\n)[ \t]*$/.test(content.slice(0, start))) {
+        searchFrom = start + open.length;
+        continue;
+      }
       const end = content.indexOf(close, start + open.length);
       if (end === -1) break;
       const span = content.slice(start, end + close.length);
