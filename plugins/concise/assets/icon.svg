@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">Concise</title>
+  <g fill="#18191D">
+    <path d="M160 272h260c34 0 58 12 82 36l136 140c14 15 32 24 52 24v80c-46 0-84-16-114-47L438 364c-6-6-14-10-22-10H160Z"/>
+    <path d="M160 752h260c34 0 58-12 82-36l136-140c14-15 32-24 52-24v-80c-46 0-84 16-114 47L438 660c-6 6-14 10-22 10H160Z"/>
+    <path d="M160 460h530v104H160Z"/>
+  </g>
+  <rect width="136" height="104" x="728" y="460" fill="#FF4A24" rx="22"/>
+</svg>
