@@ -1,6 +1,6 @@
 # Avoid AI speak
 
-Agent reference for the concise plugin's em dash check and AI writing check. House rules from Ryan Yannelli's writing voice. Pattern catalog adapted from avoid-ai-writing by Conor Bronsdon (MIT).
+Agent reference for the concise plugin's em dash check and AI writing check. House rules from Ryan Yannelli's writing voice (100+ documents from the past 15 years reviewed for patterns). Additional pattern catalog adapted from avoid-ai-writing by Conor Bronsdon (MIT).
 
 ## When this applies
 
@@ -84,7 +84,7 @@ To keep the text instead, send the identical text once more. The hook lets it th
 Every `Bad:` line sits inside backticks, so this file passes its own scan.
 
 Bad: `The parser — which runs first — rejects the file.`
-Good: The parser runs first. It rejects the file.
+Good: The parser runs first, then it rejects the file.
 
 Bad: `The backoff window is 20–35 seconds.`
 Good: The backoff window is 20 to 35 seconds.
@@ -93,7 +93,7 @@ Bad: `This isn't a config change, it's a rewrite of the loader.`
 Good: The change rewrites the loader.
 
 Bad: `The hook scans the written text, not the file on disk.`
-Good: The hook scans the written text. The file on disk is never read.
+Good: The hook scans the written text (file on disk is never read).
 
 Bad: `The configuration serves as the source of truth for the application.`
 Good: The application reads this configuration at startup.
@@ -105,7 +105,7 @@ Bad: `Great question! I hope this helps, and feel free to reach out.`
 Good: Delete the line.
 
 Bad: `In conclusion, the migration is complete and the future looks bright.`
-Good: The migration finished 03/07/2021. 2 tables were skipped and are still on the old host.
+Good: The migration finished 03/07/2026. 2 tables were skipped and are still on the old host.
 
 Bad: `Note that this could potentially break the build in some cases.`
 Good: This breaks the build when `NODE_ENV` is unset.
