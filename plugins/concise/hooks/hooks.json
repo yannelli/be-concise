@@ -1,9 +1,9 @@
 {
-    "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions; denies the tool call with a reason so Claude revises before the write lands.",
+    "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions; denies the tool call with a reason so the agent revises before the write lands. Works in Claude Code and Codex.",
     "hooks": {
         "PreToolUse": [
             {
-                "matcher": "Write|Edit|MultiEdit",
+                "matcher": "Write|Edit|MultiEdit|apply_patch",
                 "hooks": [
                     {
                         "type": "command",
@@ -23,6 +23,11 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
+                        "timeout": 15
+                    },
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
                         "timeout": 15
                     }
                 ]

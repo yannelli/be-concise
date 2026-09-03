@@ -22,6 +22,15 @@ function attemptKey(command, body) {
   return `pr-body:${createHash("sha256").update(scaffolding).digest("hex").slice(0, 12)}`;
 }
 
+// Claude Code shows systemMessage to the user; Codex drops it, so the same text also
+// goes to the model as additionalContext.
+function flagged(text) {
+  return {
+    systemMessage: text,
+    hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text },
+  };
+}
+
 function decide(input) {
   if (input.tool_name !== "Bash") return {};
   const command = (input.tool_input || {}).command || "";
@@ -47,9 +56,7 @@ function decide(input) {
   if (attempt > config.maxRetries) {
     // Reset on the way out, so the next episode nudges again instead of being exempt.
     resetAttempt(input.session_id, key);
-    return {
-      systemMessage: `${message}\n\n(Allowed through after ${config.maxRetries} nudges, flagging for manual review.)`,
-    };
+    return flagged(`${message}\n\n(Allowed through after ${config.maxRetries} nudges, flagging for manual review.)`);
   }
 
   return {

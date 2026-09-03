@@ -1,0 +1,20 @@
+{
+    "name": "be-concise",
+    "interface": {
+        "displayName": "Be Concise"
+    },
+    "plugins": [
+        {
+            "name": "concise",
+            "source": {
+                "source": "local",
+                "path": "./plugins/concise"
+            },
+            "policy": {
+                "installation": "AVAILABLE",
+                "authentication": "ON_INSTALL"
+            },
+            "category": "Developer Tools"
+        }
+    ]
+}

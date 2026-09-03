@@ -1,0 +1,35 @@
+{
+    "name": "concise",
+    "version": "0.3.0",
+    "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions, and nudges Codex to trim them before you see the bloated version.",
+    "author": {
+        "name": "Ryan Yannelli",
+        "email": "ryanyannelli@gmail.com",
+        "url": "https://github.com/yannelli"
+    },
+    "license": "MIT",
+    "keywords": [
+        "concise",
+        "hooks",
+        "comments",
+        "verbosity",
+        "pr-description"
+    ],
+    "skills": "./skills/",
+    "hooks": "./hooks/hooks.json",
+    "interface": {
+        "displayName": "Concise",
+        "shortDescription": "Catch verbose comments, oversized files, and padded PR bodies",
+        "longDescription": "PreToolUse hooks deny a write or gh call that is over the verbosity limits and tell the agent exactly what to trim, so the fix lands before you see the bloated version.",
+        "developerName": "Ryan Yannelli",
+        "category": "Developer Tools",
+        "capabilities": [
+            "Read",
+            "Write"
+        ],
+        "websiteURL": "https://ryanyannelli.com",
+        "defaultPrompt": [
+            "Trim the comments in this file to the limits in the concise rules."
+        ]
+    }
+}

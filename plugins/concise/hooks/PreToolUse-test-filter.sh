@@ -1,9 +1,9 @@
 #!/bin/bash
-# Claude Code PreToolUse hook (Bash): filters test-runner output. concise-ignore
+# Claude Code / Codex PreToolUse hook (Bash): filters test-runner output. concise-ignore
 #
 #   Bypass:  NOFILTER=1 pytest tests/
 #   Adjust:  FILTER_LINES=300 FILTER_PATTERN='FAIL|timeout' FILTER_CONTEXT=10 FILTER_TAIL=20 go test ./...
-#   Defaults can also live in ~/.claude/test-filter.conf (same variable names).
+#   Defaults can also live in ~/.claude/test-filter.conf or ~/.codex/test-filter.conf.
 #   Full log of the last run: /tmp/claude-test-last.log
 set -uo pipefail
 
@@ -28,7 +28,9 @@ cmd=$(jq -r '.tool_input.command // empty' <<<"$input")
 [[ "$tool" == "Bash" && -n "$cmd" ]] || { echo '{}'; exit 0; }
 
 FILTER_LINES=100 FILTER_CONTEXT=5 FILTER_TAIL=5 FILTER_PATTERN="" NOFILTER=0
-[[ -f "$HOME/.claude/test-filter.conf" ]] && source "$HOME/.claude/test-filter.conf"
+for conf in "$HOME/.claude/test-filter.conf" "$HOME/.codex/test-filter.conf"; do
+  [[ -f "$conf" ]] && source "$conf"
+done
 
 knob_re="^[[:space:]]*(NOFILTER|FILTER_LINES|FILTER_PATTERN|FILTER_CONTEXT|FILTER_TAIL)=('[^']*'|\"[^\"]*\"|[^[:space:]]+)[[:space:]]+(.*)$"
 while [[ "$cmd" =~ $knob_re ]]; do

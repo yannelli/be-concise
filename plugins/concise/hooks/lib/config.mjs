@@ -20,15 +20,21 @@ const DEFAULTS = {
   ],
 };
 
+// Codex projects keep config under .codex/; Claude Code under .claude/. First hit wins.
+const CONFIG_DIRS = [".claude", ".codex"];
+
 export function loadConfig(cwd) {
-  const configPath = join(cwd || ".", ".claude", "concise.json");
-  if (!existsSync(configPath)) return DEFAULTS;
-  try {
-    const userConfig = JSON.parse(readFileSync(configPath, "utf8"));
-    return { ...DEFAULTS, ...userConfig };
-  } catch {
-    return DEFAULTS;
+  for (const dir of CONFIG_DIRS) {
+    const configPath = join(cwd || ".", dir, "concise.json");
+    if (!existsSync(configPath)) continue;
+    try {
+      const userConfig = JSON.parse(readFileSync(configPath, "utf8"));
+      return { ...DEFAULTS, ...userConfig };
+    } catch {
+      return DEFAULTS;
+    }
   }
+  return DEFAULTS;
 }
 
 // One pass, one callback: chained .replace() calls would let later steps

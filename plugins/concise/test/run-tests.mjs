@@ -1,59 +1,8 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
 import { writeFileSync, mkdtempSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
-const ROOT = new URL("..", import.meta.url).pathname;
-const CHECK_EDIT = join(ROOT, "hooks", "check-edit.mjs");
-const CHECK_BASH = join(ROOT, "hooks", "check-bash.mjs");
-
-let pass = 0;
-let fail = 0;
-
-function ok(name) {
-    console.log(`  ok - ${name}`);
-    pass++;
-}
-
-function bad(name, detail) {
-    console.log(`  FAIL - ${name}: ${detail}`);
-    fail++;
-}
-
-function run(script, inputObj) {
-  const res = spawnSync("node", [script], { input: JSON.stringify(inputObj), encoding: "utf8" });
-  if (res.status !== 0) throw new Error(`${script} exited ${res.status}: ${res.stderr}`);
-  try {
-    return JSON.parse(res.stdout || "{}");
-  } catch {
-    throw new Error(`${script} produced non-JSON stdout: ${res.stdout}`);
-  }
-}
-
-function isDeny(result) {
-  return result?.hookSpecificOutput?.permissionDecision === "deny";
-}
-
-// The reason is the only field Claude reads back, so a deny without one is a silent block.
-function assertDenied(name, result) {
-    if (!isDeny(result)) return bad(name, `expected deny, got ${JSON.stringify(result)}`);
-    const reason = result.hookSpecificOutput.permissionDecisionReason;
-    if (!reason || !reason.includes("[concise]"))
-        return bad(name, `deny is missing a reason: ${JSON.stringify(result)}`);
-    if (result.hookSpecificOutput.hookEventName !== "PreToolUse") return bad(name, "deny is not a PreToolUse payload");
-    ok(name);
-}
-
-function assertAllowed(name, result) {
-    if (isDeny(result)) return bad(name, `expected allow, got deny: ${JSON.stringify(result)}`);
-    ok(name);
-}
-
-function assertFlagged(name, result) {
-    if (result.systemMessage?.includes("Allowed through")) return ok(name);
-    bad(name, `expected an allowed-with-flag systemMessage, got ${JSON.stringify(result)}`);
-}
+import { CHECK_EDIT, CHECK_BASH, run, assertDenied, assertAllowed, assertFlagged, summary } from "./lib.mjs";
 
 const workDir = mkdtempSync(join(tmpdir(), "concise-test-"));
 const sessionId = `test-${Date.now()}`;
@@ -293,5 +242,6 @@ console.log("\ncheck-bash.mjs (retry counter)");
 
 rmSync(workDir, { recursive: true, force: true });
 
-console.log(`\n${pass} passed, ${fail} failed`);
-process.exit(fail > 0 ? 1 : 0);
+await import("./codex-tests.mjs");
+
+process.exit(summary());
