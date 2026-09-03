@@ -243,5 +243,8 @@ console.log("\ncheck-bash.mjs (retry counter)");
 rmSync(workDir, { recursive: true, force: true });
 
 await import("./codex-tests.mjs");
+await import("./patterns-tests.mjs");
+await import("./vocabulary-tests.mjs");
+await import("./features-tests.mjs");
 
 process.exit(summary());

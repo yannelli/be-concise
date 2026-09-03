@@ -1,9 +1,18 @@
 import { spawnSync } from "node:child_process";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const ROOT = new URL("..", import.meta.url).pathname;
 export const CHECK_EDIT = join(ROOT, "hooks", "check-edit.mjs");
 export const CHECK_BASH = join(ROOT, "hooks", "check-bash.mjs");
+export const CHECK_REPLY = join(ROOT, "hooks", "check-reply.mjs");
+
+/** Writes .claude/concise.json into a tmp dir, so a case can be spawned with its own config. */
+export function withConfig(dir, config) {
+  mkdirSync(join(dir, ".claude"), { recursive: true });
+  writeFileSync(join(dir, ".claude", "concise.json"), JSON.stringify(config, null, 2));
+  return dir;
+}
 
 let pass = 0;
 let fail = 0;

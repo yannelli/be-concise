@@ -1,6 +1,6 @@
 // The terminator is anchored to its own line (tabs allowed, for `<<-`) so a body
 // that merely mentions "EOF" mid-line doesn't truncate the capture.
-const HEREDOC = /<<[-~]?['"]?(\w+)['"]?\r?\n([\s\S]*?)\r?\n\t*\1(?=\r?\n|$)/;
+export const HEREDOC = /<<[-~]?['"]?(\w+)['"]?\r?\n([\s\S]*?)\r?\n\t*\1(?=\r?\n|$)/;
 
 /** Pulls the body text out of a `gh pr/issue ...` command: heredoc form or a quoted flag. */
 export function extractBody(command) {

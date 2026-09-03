@@ -2,7 +2,10 @@
 import { createHash } from "node:crypto";
 import { loadConfig } from "./lib/config.mjs";
 import { extractBody, isVerbose } from "./lib/pr-body.mjs";
+import { gitCommitMessages } from "./lib/prose.mjs";
 import { bumpAttempt, resetAttempt } from "./lib/state.mjs";
+import { deny, mergeFlag } from "./lib/respond.mjs";
+import { styleDecisionForText } from "./lib/style-check.mjs";
 
 function readStdin() {
   return new Promise((resolve) => {
@@ -15,57 +18,54 @@ function readStdin() {
 
 const GH_PATTERN = /\bgh\s+(pr|issue)\s+(create|comment|edit)\b/;
 
+const shortHash = (text) => createHash("sha256").update(text).digest("hex").slice(0, 12);
+
 // Keyed on the command minus its body, so revisions of the same PR share a counter
 // while an unrelated PR later in the session starts fresh.
-function attemptKey(command, body) {
-  const scaffolding = command.replace(body, "");
-  return `pr-body:${createHash("sha256").update(scaffolding).digest("hex").slice(0, 12)}`;
-}
+const scaffoldHash = (command, bodies) => shortHash(bodies.reduce((acc, body) => acc.replace(body, ""), command));
 
-// Claude Code shows systemMessage to the user; Codex drops it, so the same text also
-// goes to the model as additionalContext.
-function flagged(text) {
-  return {
-    systemMessage: text,
-    hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text },
-  };
-}
-
-function decide(input) {
-  if (input.tool_name !== "Bash") return {};
-  const command = (input.tool_input || {}).command || "";
-  if (!GH_PATTERN.test(command)) return {};
-
+function ghDecision(command, input, config) {
   const body = extractBody(command);
   if (!body || body.includes("concise-ignore")) return {};
 
-  const key = attemptKey(command, body);
-  const config = loadConfig(input.cwd);
+  const digest = scaffoldHash(command, [body]);
+  const key = `pr-body:${digest}`;
+  const label = /\bgh\s+issue\b/.test(command) ? "issue body" : "PR body";
+  const styled = () => styleDecisionForText(body, `style:gh:${digest}`, label, input, config);
+
   const result = isVerbose(body, {
     maxParagraphs: config.maxPrBodyParagraphs,
     maxSentences: config.maxPrBodySentences,
   });
   if (!result.verbose) {
     resetAttempt(input.session_id, key);
-    return {};
+    return styled();
   }
 
   const attempt = bumpAttempt(input.session_id, key);
   const message = `[concise] PR/issue body is too verbose: ${result.reason}. Use a short "## Summary" bullet list instead of prose paragraphs.`;
+  if (attempt <= config.maxRetries) return deny(message);
 
-  if (attempt > config.maxRetries) {
-    // Reset on the way out, so the next episode nudges again instead of being exempt.
-    resetAttempt(input.session_id, key);
-    return flagged(`${message}\n\n(Allowed through after ${config.maxRetries} nudges, flagging for manual review.)`);
-  }
+  // Reset on the way out, so the next episode nudges again instead of being exempt.
+  resetAttempt(input.session_id, key);
+  const flagText = `${message}\n\n(Allowed through after ${config.maxRetries} nudges, flagging for manual review.)`;
+  return mergeFlag(flagText, styled());
+}
 
-  return {
-    hookSpecificOutput: {
-      hookEventName: "PreToolUse",
-      permissionDecision: "deny",
-      permissionDecisionReason: message,
-    },
-  };
+function commitDecision(command, messages, input, config) {
+  const text = messages.join("\n\n");
+  if (text.includes("concise-ignore")) return {};
+  return styleDecisionForText(text, `style:commit:${scaffoldHash(command, messages)}`, "commit message", input, config);
+}
+
+function decide(input) {
+  if (input.tool_name !== "Bash") return {};
+  const command = (input.tool_input || {}).command || "";
+  if (GH_PATTERN.test(command)) return ghDecision(command, input, loadConfig(input.cwd));
+
+  const messages = gitCommitMessages(command);
+  if (messages.length === 0) return {};
+  return commitDecision(command, messages, input, loadConfig(input.cwd));
 }
 
 const raw = await readStdin();

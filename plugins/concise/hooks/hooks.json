@@ -1,5 +1,5 @@
 {
-    "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions; denies the tool call with a reason so the agent revises before the write lands. Works in Claude Code and Codex.",
+    "description": "Detects verbose comments, oversized files, padded PR/issue descriptions, and (when enabled) em dashes and AI writing patterns in prose, comments, commit messages, and replies; denies the tool call, or blocks the reply on Stop, with a reason so the agent revises before the text lands. Works in Claude Code and Codex.",
     "hooks": {
         "PreToolUse": [
             {
@@ -28,6 +28,17 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
+                        "timeout": 15
+                    }
+                ]
+            }
+        ],
+        "Stop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.mjs\"",
                         "timeout": 15
                     }
                 ]

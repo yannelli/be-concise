@@ -39,3 +39,29 @@ export function resetAttempt(sessionId, key) {
     delete state[key];
     writeState(sessionId, state);
 }
+
+const pendingKey = (key) => `pending:${key}`;
+
+/** Records the hash the agent has to send again to confirm the text it just wrote. */
+export function setPending(sessionId, key, hash) {
+  const state = readState(sessionId);
+  state[pendingKey(key)] = hash;
+  writeState(sessionId, state);
+}
+
+/** Returns the recorded hash and deletes it, so one deny buys one confirmation. */
+export function takePending(sessionId, key) {
+  const state = readState(sessionId);
+  const stored = state[pendingKey(key)];
+  if (stored === undefined) return null;
+  delete state[pendingKey(key)];
+  writeState(sessionId, state);
+  return stored;
+}
+
+export function clearPending(sessionId, key) {
+  const state = readState(sessionId);
+  if (!(pendingKey(key) in state)) return;
+  delete state[pendingKey(key)];
+  writeState(sessionId, state);
+}

@@ -4,5 +4,22 @@
   "maxPrBodyParagraphs": 1,
   "maxPrBodySentences": 3,
   "maxRetries": 2,
-  "ignoreGlobs": ["**/node_modules/**", "**/*.generated.*", "**/vendor/**"]
+  "ignoreGlobs": ["**/node_modules/**", "**/*.generated.*", "**/vendor/**"],
+  "features": {
+    "emDash": {
+      "enabled": false,
+      "enDash": true,
+      "doubleHyphen": false,
+      "mode": "confirm",
+      "replies": true
+    },
+    "aiWriting": {
+      "enabled": false,
+      "preset": "default",
+      "categories": null,
+      "allow": [],
+      "mode": "confirm",
+      "replies": true
+    }
+  }
 }

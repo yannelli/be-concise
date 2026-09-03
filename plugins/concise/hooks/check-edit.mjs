@@ -5,6 +5,8 @@ import { loadConfig, isIgnored } from "./lib/config.mjs";
 import { scanComments } from "./lib/comment-scan.mjs";
 import { extractPatch, parseApplyPatch } from "./lib/apply-patch.mjs";
 import { bumpAttempt, resetAttempt } from "./lib/state.mjs";
+import { deny, mergeFlag } from "./lib/respond.mjs";
+import { styleDecision } from "./lib/style-check.mjs";
 
 function readStdin() {
   return new Promise((resolve) => {
@@ -60,12 +62,16 @@ function firstLineOf(text) {
   return text.split("\n")[0].trim().slice(0, 60);
 }
 
-function checkTarget({ path, chunks, wholeFile }, config) {
-  if (isIgnored(path, config.ignoreGlobs)) return [];
+// A whole-file write replaces the file, so its new content is the only authority on the marker.
+function isExempt({ path, chunks, wholeFile }) {
+  if (chunks.some((chunk) => chunk.includes("concise-ignore-file"))) return true;
+  return !wholeFile && hasFileMarker(path);
+}
 
-  const exempt = chunks.some((chunk) => chunk.includes("concise-ignore-file"));
-  // A whole-file write replaces the file, so its new content is the only authority on the marker.
-  if (exempt || (!wholeFile && hasFileMarker(path))) return [];
+function checkTarget(target, config) {
+  const { path, chunks, wholeFile } = target;
+  if (isIgnored(path, config.ignoreGlobs)) return [];
+  if (isExempt(target)) return [];
 
   const violations = [];
 
@@ -93,20 +99,12 @@ function checkTarget({ path, chunks, wholeFile }, config) {
   return violations;
 }
 
-// Claude Code shows systemMessage to the user; Codex drops it, so the same text also
-// goes to the model as additionalContext.
-function flagged(text) {
-  return {
-    systemMessage: text,
-    hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text },
-  };
-}
-
 function decide(input) {
   const targets = targetsOf(input);
   if (targets.length === 0) return {};
 
   const config = loadConfig(input.cwd);
+  const styled = targets.filter((target) => !isExempt(target));
   const violations = [];
   let key = null;
 
@@ -120,24 +118,17 @@ function decide(input) {
     violations.push(...found);
   }
 
-  if (violations.length === 0) return {};
+  if (violations.length === 0) return styleDecision(styled, input, config);
 
   const attempt = bumpAttempt(input.session_id, key);
   const message = `[concise] ${violations.join(" ")}`;
+  // A deny stops here: the style state stays untouched so its own counter starts clean.
+  if (attempt <= config.maxRetries) return deny(message);
 
-  if (attempt > config.maxRetries) {
-    // Reset on the way out, so the next episode nudges again instead of being exempt.
-    resetAttempt(input.session_id, key);
-    return flagged(`${message}\n\n(Allowed through after ${config.maxRetries} nudges, flagging for manual review.)`);
-  }
-
-  return {
-    hookSpecificOutput: {
-      hookEventName: "PreToolUse",
-      permissionDecision: "deny",
-      permissionDecisionReason: message,
-    },
-  };
+  // Reset on the way out, so the next episode nudges again instead of being exempt.
+  resetAttempt(input.session_id, key);
+  const flagText = `${message}\n\n(Allowed through after ${config.maxRetries} nudges, flagging for manual review.)`;
+  return mergeFlag(flagText, styleDecision(styled, input, config));
 }
 
 const raw = await readStdin();

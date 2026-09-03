@@ -1,7 +1,7 @@
 {
     "name": "concise",
-    "version": "0.3.0",
-    "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions, and nudges Codex to trim them before you see the bloated version.",
+    "version": "0.4.0",
+    "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions, plus optional em dash and AI writing pattern checks, and nudges Codex to trim them before you see the bloated version.",
     "author": {
         "name": "Ryan Yannelli",
         "email": "ryanyannelli@gmail.com",

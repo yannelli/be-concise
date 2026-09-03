@@ -1,6 +1,11 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
+const FEATURES = {
+  emDash: { enabled: false, enDash: true, doubleHyphen: false, mode: "confirm", replies: true },
+  aiWriting: { enabled: false, preset: "default", categories: null, allow: [], mode: "confirm", replies: true },
+};
+
 const DEFAULTS = {
   maxCommentLines: 2,
   maxFileLines: 300,
@@ -18,7 +23,21 @@ const DEFAULTS = {
     "**/package-lock.json",
     "**/*.lock",
   ],
+  features: FEATURES,
 };
+
+function mergeFeatures(userConfig) {
+  const given = userConfig.features || {};
+  return {
+    ...DEFAULTS,
+    ...userConfig,
+    features: {
+      ...given,
+      emDash: { ...FEATURES.emDash, ...(given.emDash || {}) },
+      aiWriting: { ...FEATURES.aiWriting, ...(given.aiWriting || {}) },
+    },
+  };
+}
 
 // Codex projects keep config under .codex/; Claude Code under .claude/. First hit wins.
 const CONFIG_DIRS = [".claude", ".codex"];
@@ -28,8 +47,7 @@ export function loadConfig(cwd) {
     const configPath = join(cwd || ".", dir, "concise.json");
     if (!existsSync(configPath)) continue;
     try {
-      const userConfig = JSON.parse(readFileSync(configPath, "utf8"));
-      return { ...DEFAULTS, ...userConfig };
+      return mergeFeatures(JSON.parse(readFileSync(configPath, "utf8")));
     } catch {
       return DEFAULTS;
     }
