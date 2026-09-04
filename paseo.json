@@ -1,0 +1,27 @@
+{
+  "scripts": {
+    "check": {
+      "command": "node scripts/check.mjs"
+    },
+    "test": {
+      "command": "node --test test/*.test.mjs && node plugins/concise/test/run-tests.mjs"
+    },
+    "release-preview": {
+      "command": "node scripts/release.mjs --dry-run"
+    }
+  },
+  "metadataGeneration": {
+    "title": {
+      "instructions": "Use a concise Conventional Commit style task title: <type>(<optional-scope>)[!]: <imperative description>. Types: feat, fix, perf, revert, docs, chore, ci, build, refactor, style, test. Use ! for a breaking change. Preserve identifiers needed to distinguish the task. Keep it within 72 characters."
+    },
+    "branchName": {
+      "instructions": "Generate <type>/<short-description> directly from the task, using feat, fix, perf, revert, docs, chore, ci, build, refactor, style, or test. Use lowercase letters, numbers, hyphens, and slashes. Keep explicit task identifiers when useful. Feature branches start from dev; ordinary PRs target dev. main is the default branch and publishes stable releases."
+    },
+    "commitMessage": {
+      "instructions": "Use Conventional Commits: <type>(<optional-scope>)[!]: <imperative description>. Keep the subject within 72 characters without a trailing period. feat means minor; fix, perf, and revert mean patch; ! means major, including before 1.0. Use docs, chore, ci, build, refactor, style, or test for changes with no release unless breaking. Mark every breaking change with !. Do not invent version numbers."
+    },
+    "pullRequest": {
+      "instructions": "Use a Conventional Commit title within 72 characters: <type>(<optional-scope>)[!]: <imperative description>. feat means minor; fix, perf, and revert mean patch; ! or a BREAKING CHANGE: footer means major, including before 1.0. docs, chore, ci, build, refactor, style, and test have no release without a breaking marker. For breaking changes, use ! in the title and explain the migration in the body. Describe changed behavior and checks actually run. Ordinary PRs target dev and squash merge using the PR title. A dev-to-main promotion uses chore(release): promote dev to main and a merge commit to preserve Conventional Commits. main is the default branch and publishes stable releases automatically; dev has no releases. Release automation owns versions and tags and merges main back into dev after releases."
+    }
+  }
+}

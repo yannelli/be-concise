@@ -80,6 +80,8 @@ Persistent defaults can live in `~/.claude/test-filter.conf` or `~/.codex/test-f
 
 ## Development
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the `dev` → `main` workflow, Conventional Commits, and automated semantic releases.
+
 ```sh
 node plugins/concise/test/run-tests.mjs
 ```
