@@ -38,7 +38,7 @@ The plugin's compatibility surface includes configuration keys, environment vari
 ```sh
 node scripts/check.mjs
 node --test test/*.test.mjs
-node plugins/concise/test/run-tests.mjs
+env -u HOME -u USERPROFILE -u XDG_CONFIG_HOME node plugins/concise/test/run-tests.mjs
 ```
 
 Checks validate JavaScript syntax, JSON, matching plugin versions, PR titles and branch targets, and the test suite. The repository has no separate type checker.

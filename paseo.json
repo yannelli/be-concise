@@ -4,7 +4,7 @@
       "command": "node scripts/check.mjs"
     },
     "test": {
-      "command": "node --test test/*.test.mjs && node plugins/concise/test/run-tests.mjs"
+      "command": "node --test test/*.test.mjs && env -u HOME -u USERPROFILE -u XDG_CONFIG_HOME node plugins/concise/test/run-tests.mjs"
     },
     "release-preview": {
       "command": "node scripts/release.mjs --dry-run"
