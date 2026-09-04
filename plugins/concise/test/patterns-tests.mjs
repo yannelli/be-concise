@@ -1,9 +1,17 @@
 #!/usr/bin/env node
+import { readdirSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { ok, bad, summary } from "./lib.mjs";
 import { PROSE_EXTENSIONS, stripCode, proseSpans, gitCommitMessages } from "../hooks/lib/prose.mjs";
 import { findDashes } from "../hooks/lib/em-dash.mjs";
-import { CATEGORIES, PRESETS, resolveCategories, scanAiWriting } from "../hooks/lib/ai-patterns.mjs";
+import { resolveCategories, scanAiWriting } from "../hooks/lib/ai-patterns.mjs";
+import { loadPacks } from "../hooks/lib/packs.mjs";
+
+const loaded = await loadPacks({ cwd: "/nonexistent-concise-cwd" });
+const CATEGORIES = loaded.categories;
+const PRESETS = loaded.presets;
+const AI_PACKS = loaded.packs.filter((pack) => pack.feature === "aiWriting");
+const scan = (text, options = {}) => scanAiWriting(text, { packs: AI_PACKS, ...options });
 
 const show = (v) => JSON.stringify(v);
 
@@ -17,8 +25,8 @@ function yes(name, condition, detail) {
   bad(name, detail || "expected true");
 }
 
-const ids = (text, options) => [...new Set(scanAiWriting(text, options).map((h) => h.category))];
-const matchesOnly = (text, id) => scanAiWriting(text, { categories: [id] }).map((h) => h.match);
+const ids = (text, options) => [...new Set(scan(text, options).map((h) => h.category))];
+const matchesOnly = (text, id) => scan(text, { categories: [id] }).map((h) => h.match);
 
 console.log("prose.mjs stripCode");
 
@@ -132,44 +140,23 @@ console.log("\nem-dash.mjs findDashes");
 
 console.log("\nai-patterns.mjs categories");
 
-const POSITIVE = {
-  vocabulary: "We delve into the parser.",
-  wordiness: "Utilize the helper.",
-  transitions: "Moreover, the cache is warm.",
-  filler: "Here's the thing about retries.",
-  hedging: "This could potentially fail.",
-  chatbot: "Feel free to reach out.",
-  sycophancy: "You're absolutely right.",
-  contrast: "It's not just a parser, it's a compiler.",
-  copula: "The module serves as a wrapper.",
-  inflation: "This marks a significant milestone.",
-  closers: "In conclusion, the parser works.",
-  structure: "Ever wondered how the parser works?",
-  formatting: "# \u{1F680} Release notes",
-  ste: "Ensure the file exists.",
-};
-
-const NEAR_MISS = {
-  vocabulary: "showcase.tsx renders the list",
-  wordiness: "the utility module exports a helper",
-  transitions: "See the note about moreover in the style guide.",
-  filler: "unpack the tuple",
-  hedging: "Retries may fail on Windows.",
-  chatbot: "Log the good questions from users.",
-  sycophancy: "Thanks for the patch.",
-  contrast: "It is not a parser.",
-  copula: "The service acts on the queue.",
-  inflation: "Reset the value of the counter.",
-  closers: "The summary line is 50 chars.",
-  structure: "Enter the password when prompted.",
-  formatting: "# Release notes",
-  ste: 'require("fs")',
-};
+const CASES_DIR = new URL("./patterns-cases/", import.meta.url);
+const POSITIVE = {};
+const NEAR_MISS = {};
+const PRESET_IDS = {};
+for (const file of readdirSync(CASES_DIR).filter((name) => name.endsWith(".json")).sort()) {
+  const data = JSON.parse(readFileSync(new URL(file, CASES_DIR), "utf8"));
+  Object.assign(POSITIVE, data.positive);
+  Object.assign(NEAR_MISS, data.nearMiss);
+  for (const [preset, cats] of Object.entries(data.presets || {})) PRESET_IDS[preset] = [...(PRESET_IDS[preset] || []), ...cats];
+}
+PRESET_IDS.all = CATEGORIES.map((c) => c.id);
 
 eq("every category is covered by a positive case", CATEGORIES.map((c) => c.id).filter((id) => !POSITIVE[id]), []);
+eq("every case names a loaded category", Object.keys(POSITIVE).filter((id) => !CATEGORIES.some((c) => c.id === id)), []);
 
 for (const cat of CATEGORIES) {
-  const hits = scanAiWriting(POSITIVE[cat.id], { categories: [cat.id] });
+  const hits = scan(POSITIVE[cat.id], { categories: [cat.id] });
   yes(`${cat.id} flags its example`, hits.length > 0, POSITIVE[cat.id]);
   yes(`${cat.id} reports a fix`, hits.every((h) => h.fix && h.label === cat.label));
   eq(`${cat.id} passes its near miss`, matchesOnly(NEAR_MISS[cat.id], cat.id), []);
@@ -179,52 +166,47 @@ for (const cat of CATEGORIES) {
 console.log("\nai-patterns.mjs near misses in real text");
 
 eq("a URL with delve is stripped before the scan", ids(proseSpans("See https://ai.dev/delve for docs.\n", "n.md")[0].text), []);
-eq("the initial value passes under default", ids("the initial value", { categories: [...resolveCategories({ preset: "default" }).ids] }), []);
+eq("the initial value passes under default", ids("the initial value", { categories: [...resolveCategories({ preset: "default" }, loaded).ids] }), []);
 eq("the initial value fails under ste", ids("the initial value", { categories: ["ste"] }), ["ste"]);
 eq("--flag is not a dash finding", findDashes("pass --flag to the CLI", { doubleHyphen: true }), []);
 eq("delve inside an identifier is skipped", ids("const delveX = 1; // delveIntoTree()"), []);
 
 console.log("\nai-patterns.mjs presets");
 
-const PRESET_IDS = {
-  default: ["vocabulary", "transitions", "filler", "chatbot", "sycophancy", "contrast", "inflation", "closers", "structure", "formatting"],
-  ryan: ["vocabulary", "wordiness", "transitions", "filler", "hedging", "chatbot", "sycophancy", "contrast", "copula", "inflation", "closers", "structure", "formatting"],
-  technical: ["vocabulary", "transitions", "filler", "chatbot", "sycophancy", "contrast", "inflation", "closers", "structure"],
-  ste: ["wordiness", "hedging", "copula", "ste"],
-  minimal: ["chatbot", "sycophancy"],
-  all: CATEGORIES.map((c) => c.id),
-};
-
 for (const [preset, expected] of Object.entries(PRESET_IDS)) {
-  const resolved = resolveCategories({ preset });
+  const resolved = resolveCategories({ preset }, loaded);
   eq(`preset ${preset} resolves to its category list`, [...resolved.ids].sort(), [...expected].sort());
 }
 
-eq("every preset in PRESETS is tested", Object.keys(PRESETS).sort(), Object.keys(PRESET_IDS).sort());
-eq("technical carries its allow list", resolveCategories({ preset: "technical" }).allow.includes("robust"), true);
-eq("technical allows robust in a scan", ids("A robust parser.", { categories: [...resolveCategories({ preset: "technical" }).ids] }).length > 0, true);
+eq(
+  "presets.json lists every preset name",
+  Object.keys(PRESETS).sort(),
+  ["all", "default", "git", "minimal", "ryan", "statistical", "ste", "technical"],
+);
+eq("technical carries its allow list", resolveCategories({ preset: "technical" }, loaded).allow.includes("robust"), true);
+eq("technical allows robust in a scan", ids("A robust parser.", { categories: [...resolveCategories({ preset: "technical" }, loaded).ids] }).length > 0, true);
 eq(
   "technical preset allow drops robust",
   (() => {
-    const { ids: on, allow } = resolveCategories({ preset: "technical" });
-    return scanAiWriting("A robust parser.", { categories: on, allow });
+    const { ids: on, allow } = resolveCategories({ preset: "technical" }, loaded);
+    return scan("A robust parser.", { categories: on, allow });
   })(),
   [],
 );
-eq("config allow merges with the preset allow", resolveCategories({ preset: "technical", allow: ["parser"] }).allow.slice(-1), ["parser"]);
-eq("unknown preset falls back to default", [...resolveCategories({ preset: "nope" }).ids].sort(), [...PRESET_IDS.default].sort());
-eq("no preset falls back to default", [...resolveCategories({}).ids].sort(), [...PRESET_IDS.default].sort());
-eq("categories override the preset", [...resolveCategories({ preset: "all", categories: ["chatbot"] }).ids], ["chatbot"]);
-eq("unknown category ids are dropped", [...resolveCategories({ categories: ["chatbot", "nope"] }).ids], ["chatbot"]);
+eq("config allow merges with the preset allow", resolveCategories({ preset: "technical", allow: ["parser"] }, loaded).allow.slice(-1), ["parser"]);
+eq("unknown preset falls back to default", [...resolveCategories({ preset: "nope" }, loaded).ids].sort(), [...PRESET_IDS.default].sort());
+eq("no preset falls back to default", [...resolveCategories({}, loaded).ids].sort(), [...PRESET_IDS.default].sort());
+eq("categories override the preset", [...resolveCategories({ preset: "all", categories: ["chatbot"] }, loaded).ids], ["chatbot"]);
+eq("unknown category ids are dropped", [...resolveCategories({ categories: ["chatbot", "nope"] }, loaded).ids], ["chatbot"]);
 eq(
   "a categories override ignores delve",
-  scanAiWriting("We delve into it.", { categories: resolveCategories({ categories: ["chatbot"] }).ids }),
+  scan("We delve into it.", { categories: resolveCategories({ categories: ["chatbot"] }, loaded).ids }),
   [],
 );
 
 console.log("\nai-patterns.mjs formatting");
 
-const formatting = (text) => scanAiWriting(text, { categories: ["formatting"] });
+const formatting = (text) => scan(text, { categories: ["formatting"] });
 
 eq("emoji in a heading", formatting("## Ship it \u{1F680}\n").length > 0, true);
 eq("emoji ending a line", formatting("All tests pass \u{1F389}\nnext line\n").map((h) => h.line), [1]);
@@ -260,18 +242,18 @@ eq("Enter mid-sentence passes", matchesOnly("Then press Enter Now.", "structure"
   const para = "It is not just a robust parser, it is a comprehensive toolkit we leverage across the landscape.\n\n";
   const text = para.repeat(Math.ceil((300 * 1024) / para.length));
   const started = process.hrtime.bigint();
-  scanAiWriting(text, { categories: [...resolveCategories({ preset: "all" }).ids] });
+  scan(text, { categories: [...resolveCategories({ preset: "all" }, loaded).ids] });
   yes("300 KB scans in under 500 ms", Number(process.hrtime.bigint() - started) / 1e6 < 500);
 }
 
 console.log("\nai-patterns.mjs reported shape");
 
 {
-  const [hit] = scanAiWriting("ok\n\nWe delve into it.", { categories: ["vocabulary"] });
+  const [hit] = scan("ok\n\nWe delve into it.", { categories: ["vocabulary"] });
   eq("finding line is 1-based inside the text", hit.line, 3);
   eq("finding keys", Object.keys(hit).sort(), ["category", "fix", "label", "line", "match"]);
-  eq("findings are ordered by position", scanAiWriting("Moreover, we delve in.", {}).map((h) => h.match), ["Moreover", "delve"]);
-  eq("empty text scans clean", scanAiWriting("", {}), []);
+  eq("findings are ordered by position", scan("Moreover, we delve in.").map((h) => h.match), ["Moreover", "delve"]);
+  eq("empty text scans clean", scan(""), []);
 }
 
 const entry = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";

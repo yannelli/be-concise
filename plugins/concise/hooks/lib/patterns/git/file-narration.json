@@ -1,0 +1,20 @@
+{
+  "id": "file-narration",
+  "feature": "aiWriting",
+  "category": { "id": "file-narration", "label": "file narration", "description": "Text narrates a trivial file operation instead of stating the change.", "tags": ["git", "review"] },
+  "source": "Group G research: git commit-message conventions and conventional commits",
+  "presets": ["ryan", "technical", "git", "all"],
+  "scope": ["commit", "gh", "reply", "comments"],
+  "notes": "The past-tense form has to open the line, so a conventional-commit subject such as `docs: update README` stays clean.",
+  "patterns": [
+    { "phrase": "This commit adds", "fix": "state the change, cut the frame" },
+    { "phrase": "This commit introduces", "fix": "state the change, cut the frame" },
+    { "phrase": "This PR introduces", "fix": "state the change, cut the frame" },
+    { "phrase": "This PR adds", "fix": "state the change, cut the frame" },
+    { "phrase": "Here's what changed", "fix": "list the changes directly" },
+    { "phrase": "The file now contains", "fix": "state the content directly" },
+    { "phrase": "Added a new file called", "fix": "name the file, cut the frame" },
+    { "regex": "\\bI['\u2019]ve (?:updated|added|created|modified|changed|fixed) (?:the|a)\\b", "fix": "state the change, cut the frame", "show": "`I've updated the`, `I've added a`" },
+    { "regex": "^(?:Updated|Added|Created|Modified|Removed|Deleted) (?:a (?:new )?file (?:called |named )?)?[\\w./-]+\\.\\w+\\b", "flags": "gim", "fix": "use the imperative mood", "show": "a line opening with `Updated`, `Added`, or `Deleted` plus a file name" }
+  ]
+}

@@ -1,9 +1,20 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { lineIndexer } from "./prose.mjs";
 
-const EM = "—";
-const EN = "–";
-const DOUBLE_HYPHEN = "(?<=\\w)--(?=\\w)|(?<=\\s)--(?=\\s)";
+const PACK_PATH = join(dirname(fileURLToPath(import.meta.url)), "patterns", "prose", "em-dash.json");
 const SNIPPET_WIDTH = 40;
+
+function packPatterns() {
+  try {
+    return JSON.parse(readFileSync(PACK_PATH, "utf8")).patterns || [];
+  } catch {
+    return [];
+  }
+}
+
+const PATTERNS = packPatterns();
 
 function snippetAround(text, index, length) {
   const pad = Math.max(0, Math.floor((SNIPPET_WIDTH - length) / 2));
@@ -13,11 +24,11 @@ function snippetAround(text, index, length) {
 
 export function findDashes(text, { enDash = true, doubleHyphen = false } = {}) {
   if (typeof text !== "string" || text === "") return [];
-  const alternatives = [EM];
-  if (enDash) alternatives.push(EN);
-  if (doubleHyphen) alternatives.push(DOUBLE_HYPHEN);
+  const on = { enDash, doubleHyphen };
+  const sources = PATTERNS.filter((p) => !p.option || on[p.option]).map((p) => p.regex);
+  if (sources.length === 0) return [];
 
-  const re = new RegExp(alternatives.join("|"), "g");
+  const re = new RegExp(sources.join("|"), "g");
   const at = lineIndexer(text);
   const found = [];
   for (const m of text.matchAll(re)) {

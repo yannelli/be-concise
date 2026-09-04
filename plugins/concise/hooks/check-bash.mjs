@@ -5,16 +5,8 @@ import { extractBody, isVerbose } from "./lib/pr-body.mjs";
 import { gitCommitMessages } from "./lib/prose.mjs";
 import { bumpAttempt, resetAttempt } from "./lib/state.mjs";
 import { deny, mergeFlag } from "./lib/respond.mjs";
-import { styleDecisionForText } from "./lib/style-check.mjs";
-
-function readStdin() {
-  return new Promise((resolve) => {
-    let data = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (c) => (data += c));
-    process.stdin.on("end", () => resolve(data));
-  });
-}
+import { styleDecisionForText, prepareStyle, withPackWarnings } from "./lib/style-check.mjs";
+import { runHook, bypassResult } from "./lib/hook-main.mjs";
 
 const GH_PATTERN = /\bgh\s+(pr|issue)\s+(create|comment|edit)\b/;
 
@@ -31,12 +23,12 @@ function ghDecision(command, input, config) {
   const digest = scaffoldHash(command, [body]);
   const key = `pr-body:${digest}`;
   const label = /\bgh\s+issue\b/.test(command) ? "issue body" : "PR body";
-  const styled = () => styleDecisionForText(body, `style:gh:${digest}`, label, input, config);
+  const styled = () => styleDecisionForText(body, `style:gh:${digest}`, label, input, config, "PreToolUse", "gh");
 
-  const result = isVerbose(body, {
-    maxParagraphs: config.maxPrBodyParagraphs,
-    maxSentences: config.maxPrBodySentences,
-  });
+  const off = (config.checks || {}).prBody === false;
+  const result = off
+    ? { verbose: false }
+    : isVerbose(body, { maxParagraphs: config.maxPrBodyParagraphs, maxSentences: config.maxPrBodySentences });
   if (!result.verbose) {
     resetAttempt(input.session_id, key);
     return styled();
@@ -55,25 +47,36 @@ function ghDecision(command, input, config) {
 function commitDecision(command, messages, input, config) {
   const text = messages.join("\n\n");
   if (text.includes("concise-ignore")) return {};
-  return styleDecisionForText(text, `style:commit:${scaffoldHash(command, messages)}`, "commit message", input, config);
+  const key = `style:commit:${scaffoldHash(command, messages)}`;
+  return styleDecisionForText(text, key, "commit message", input, config, "PreToolUse", "commit");
 }
 
-function decide(input) {
+// Packs scoped to `command` also see the flags and trailers around the message.
+function commandDecision(command, input, config) {
+  if (command.includes("concise-ignore")) return {};
+  const key = `style:command:${shortHash(command)}`;
+  return styleDecisionForText(command, key, "command", input, config, "PreToolUse", "command");
+}
+
+function combine(...results) {
+  const decided = results.find((r) => r.hookSpecificOutput?.permissionDecision || r.decision);
+  return decided || results.find((r) => Object.keys(r).length > 0) || {};
+}
+
+async function decide(input, ctx) {
   if (input.tool_name !== "Bash") return {};
   const command = (input.tool_input || {}).command || "";
-  if (GH_PATTERN.test(command)) return ghDecision(command, input, loadConfig(input.cwd));
+  const isGh = GH_PATTERN.test(command);
+  const messages = isGh ? [] : gitCommitMessages(command);
+  if (!isGh && messages.length === 0) return {};
 
-  const messages = gitCommitMessages(command);
-  if (messages.length === 0) return {};
-  return commitDecision(command, messages, input, loadConfig(input.cwd));
+  const config = loadConfig(input.cwd);
+  ctx.config = config;
+  const bypassed = bypassResult(command, config, ctx);
+  if (bypassed) return bypassed;
+  await prepareStyle(input.cwd, config);
+  const main = isGh ? ghDecision(command, input, config) : commitDecision(command, messages, input, config);
+  return withPackWarnings(combine(main, commandDecision(command, input, config)), input.session_id);
 }
 
-const raw = await readStdin();
-let result = {};
-try {
-  result = decide(JSON.parse(raw || "{}"));
-} catch (err) {
-  result = { systemMessage: `[concise] internal error, allowing: ${err.message}` };
-}
-// No process.exit: a piped stdout writes asynchronously on macOS and would truncate.
-process.stdout.write(JSON.stringify(result));
+await runHook({ hook: "check-bash", event: "PreToolUse" }, decide);

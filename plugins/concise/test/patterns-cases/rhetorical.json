@@ -1,0 +1,57 @@
+{
+  "positive": {
+    "negative-parallelism": "No retries, no fallback, just a raw fetch call that fails silently.",
+    "overgeneralization": "Everyone knows that global state makes testing harder.",
+    "false-ranges": "The refactor touches anything from the router to the database layer.",
+    "superficial-analysis": "This result speaks volumes about the quality of the test suite.",
+    "promotional": "The new SDK is a turnkey solution for auth.",
+    "vague-attribution": "Studies show that caching reduces load on the database.",
+    "elegant-variation": "The aforementioned config file controls all of this.",
+    "undue-emphasis": "You must NEVER call this function from a signal handler.",
+    "parallel-bullets": "- Improved caching\n- Improved logging\n- Improved error handling\n",
+    "rule-of-three": "The API is simple, consistent, and well-documented, and the SDK is lightweight, typed, and dependency-free.\n\nThe parser reads one token at a time from the input buffer. The parser reads one token at a time from the input buffer. The parser reads one token at a time from the input buffer. The parser reads one token at a time from the input buffer. The parser reads one token at a time from the input buffer. The parser reads one token at a time from the input buffer. The parser reads one token at a time from the input buffer. The parser reads one token at a time from the input buffer. The parser reads one token at a time from the input buffer.\n",
+    "outline-conclusion": "## Setup\n\nInstall the package with npm, then copy the sample token into a local env file. Most teams keep that file out of version control. If you already run a proxy, point the base URL at it before the first call. A wrong port here shows up later as a timeout, which wastes an afternoon. Windows users should set the cache directory by hand.\n\n## Usage\n\nCall run() with a path. It returns a promise that resolves to a report object; the report carries counts, offsets, and any warnings the reader produced. Streaming mode exists for very large inputs, though most callers never need it. Prefer the sync helper when your input fits in memory, because backpressure handling adds real complexity for no gain. The CLI wraps the same entry point.\n\n## Troubleshooting\n\nRead the log first. Almost every failure prints a stack trace with the offending line number, and the trace names the rule that rejected the input. Turn on verbose output when the trace looks empty. Corrupted caches cause the strangest reports, so clearing the cache directory is worth trying early. Network errors retry three times before they surface, which can make a fast failure look slow.\n\n## Limits\n\nTwo gigabytes is the practical ceiling for a single document. Beyond that, split the input by chapter and merge the reports afterwards. Nested archives are skipped rather than expanded, and symlinks outside the project root raise an error instead of following quietly. Nothing here is configurable yet, though a flag is planned for the next minor release.\n\n## Reporting a bug\n\nOpen an issue with the failing input attached, or a reduced case if the file is private. Version numbers matter more than stack traces here, since the parser changed shape twice last year. Maintainers usually reply within two working days.\n\n## Conclusion\n\nAs we've seen, setup takes one command, usage is a single function call, and troubleshooting just means reading the log file.\n"
+  },
+  "nearMiss": {
+    "negative-parallelism": "No config file was found, so the defaults apply.",
+    "overgeneralization": "Every request is logged with a trace ID.",
+    "false-ranges": "Latency dropped from 800ms to 60ms after the fix.",
+    "superficial-analysis": "The migration touches 12 tables and 3 services.",
+    "promotional": "This change unlocks a mutex held by the previous request.",
+    "vague-attribution": "The team decided to use trunk-based development here.",
+    "elegant-variation": "The bug was easy to reproduce. It only appeared under load.",
+    "undue-emphasis": "WARNING: this command deletes all local branches.",
+    "parallel-bullets": "- Fixed the login timeout\n- Added a retry with backoff\n- Removed the dependency\n",
+    "rule-of-three": "The server exposes CPU, memory, and disk metrics on one dashboard.",
+    "outline-conclusion": "In conclusion, the fix was a one-line null check."
+  },
+  "presets": {
+    "default": [
+      "negative-parallelism",
+      "overgeneralization",
+      "false-ranges",
+      "promotional",
+      "vague-attribution"
+    ],
+    "ryan": [
+      "negative-parallelism",
+      "overgeneralization",
+      "false-ranges",
+      "promotional",
+      "vague-attribution",
+      "outline-conclusion",
+      "elegant-variation",
+      "undue-emphasis",
+      "superficial-analysis",
+      "rule-of-three",
+      "parallel-bullets"
+    ],
+    "technical": [
+      "negative-parallelism",
+      "overgeneralization",
+      "false-ranges",
+      "promotional",
+      "vague-attribution"
+    ]
+  }
+}

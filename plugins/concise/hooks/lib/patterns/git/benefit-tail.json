@@ -1,0 +1,16 @@
+{
+  "id": "benefit-tail",
+  "feature": "aiWriting",
+  "category": { "id": "benefit-tail", "label": "benefit tail", "description": "A sentence ends in a justification clause tacked on after a comma.", "tags": ["git", "review"] },
+  "source": "Group G research: AI-generated PR summary and commit body conventions",
+  "presets": ["ryan", "technical", "git", "all"],
+  "scope": ["commit", "gh", "comments", "reply"],
+  "notes": "The noun list stays abstract on purpose. A tail that names a measured effect, such as `cuts p99 latency to 90ms`, does not match.",
+  "patterns": [
+    { "regex": ",\\s*(?:which|thereby|thus|to|for|ensuring|so that it's) [^.!?\\n]{0,40}?\\b(?:improves?|increases?|reduces?|ensures?|enhances?|makes?)\\b[^.!?\\n]{0,30}?\\b(?:readability|maintainability|reliability|performance|consistency|robustness|clarity|scalability|efficiency|usability|stability|testability|extensibility|security|quality|correctness)\\b", "fix": "cut the justification clause", "show": "`, which improves readability` and the like" },
+    { "regex": ",\\s*making it (?:easier|simpler|harder|more \\w+) to \\w+", "fix": "cut the justification clause", "show": "`, making it easier to maintain`" },
+    { "regex": ",\\s*for (?:better|improved|increased|cleaner) \\w+", "fix": "cut the justification clause", "show": "`, for better performance`" },
+    { "regex": ",\\s*ensuring [^.!?\\n]{0,30}?\\b(?:readability|maintainability|reliability|performance|consistency|robustness|clarity|scalability|efficiency|usability|stability|testability|extensibility|security|quality|correctness)\\b", "fix": "cut the justification clause", "show": "`, ensuring consistency`" },
+    { "regex": ",\\s*so that it['\u2019]s (?:more|less) \\w+", "fix": "cut the justification clause", "show": "`, so that it's more robust`" }
+  ]
+}

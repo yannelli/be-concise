@@ -1,0 +1,15 @@
+{
+  "id": "smart-punctuation",
+  "feature": "aiWriting",
+  "category": { "id": "smart-punctuation", "label": "smart punctuation", "description": "Curly quotes and the ellipsis character typical of text pasted from a chat UI.", "tags": ["punctuation"] },
+  "source": "Group P research: Wikipedia, Signs of AI writing",
+  "presets": ["default", "ryan", "technical", "all"],
+  "scope": ["comments", "commit", "gh", "command", "reply"],
+  "notes": "Prose files stay out of scope on purpose: a whole-file scan re-reports typeset quotes that a person committed once. A project that wants `files` coverage overrides the pack.",
+  "patterns": [
+    { "regex": "[“”]", "flags": "gu", "fix": "use a straight double quote", "show": "a curly double quote" },
+    { "regex": "‘", "flags": "gu", "fix": "use a straight single quote", "show": "a curly opening single quote" },
+    { "regex": "’", "flags": "gu", "fix": "use a straight apostrophe", "show": "a curly apostrophe" },
+    { "regex": "…", "flags": "gu", "fix": "use three periods", "show": "an ellipsis character" }
+  ]
+}

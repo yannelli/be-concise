@@ -1,10 +1,56 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { readEnv } from "./env.mjs";
+import { applyLayer, envBaselineLayer, envOverrideLayer } from "./config-layers.mjs";
 
 const FEATURES = {
   emDash: { enabled: false, enDash: true, doubleHyphen: false, mode: "confirm", replies: true },
-  aiWriting: { enabled: false, preset: "default", categories: null, allow: [], mode: "confirm", replies: true },
+  aiWriting: {
+    enabled: false,
+    preset: "default",
+    categories: null,
+    allow: [],
+    mode: "confirm",
+    replies: true,
+    packs: [],
+    excludePacks: [],
+    enablePatterns: [],
+    disablePatterns: [],
+    options: {},
+  },
 };
+
+// Agent instruction files: the style features skip them, the core checks still apply.
+const STYLE_IGNORE_GLOBS = [
+  "**/.claude/**",
+  "**/.codex/**",
+  "**/.agent/**",
+  "**/.agents/**",
+  "**/.cursor/**",
+  "**/.cursorrules",
+  "**/.windsurf/**",
+  "**/.windsurfrules",
+  "**/.gemini/**",
+  "**/.roo/**",
+  "**/.clinerules",
+  "**/.clinerules/**",
+  "**/.kiro/**",
+  "**/.continue/**",
+  "**/.aider*",
+  "**/.opencode/**",
+  "**/.amazonq/**",
+  "**/.junie/**",
+  "**/.trae/**",
+  "**/.augment/**",
+  "**/.github/copilot-instructions.md",
+  "**/.github/instructions/**",
+  "**/.github/prompts/**",
+  "**/.github/agents/**",
+  "**/CLAUDE.md",
+  "**/CLAUDE.local.md",
+  "**/AGENTS.md",
+  "**/GEMINI.md",
+];
 
 const DEFAULTS = {
   maxCommentLines: 2,
@@ -23,36 +69,64 @@ const DEFAULTS = {
     "**/package-lock.json",
     "**/*.lock",
   ],
+  checks: { comments: true, fileSize: true, prBody: true },
+  stopHook: true,
+  softFail: false,
+  styleIgnoreGlobs: STYLE_IGNORE_GLOBS,
+  allowList: { phrases: [], patterns: [] },
+  bypass: { phrases: [], patterns: [] },
+  log: { enabled: false, path: null, maxSize: "5m", maxFiles: 5, rotate: "size", format: "json" },
   features: FEATURES,
+  problems: [],
 };
 
-function mergeFeatures(userConfig) {
-  const given = userConfig.features || {};
-  return {
-    ...DEFAULTS,
-    ...userConfig,
-    features: {
-      ...given,
-      emDash: { ...FEATURES.emDash, ...(given.emDash || {}) },
-      aiWriting: { ...FEATURES.aiWriting, ...(given.aiWriting || {}) },
-    },
-  };
+export function defaultConfig() {
+  return structuredClone(DEFAULTS);
 }
 
 // Codex projects keep config under .codex/; Claude Code under .claude/. First hit wins.
 const CONFIG_DIRS = [".claude", ".codex"];
 
-export function loadConfig(cwd) {
-  for (const dir of CONFIG_DIRS) {
-    const configPath = join(cwd || ".", dir, "concise.json");
-    if (!existsSync(configPath)) continue;
-    try {
-      return mergeFeatures(JSON.parse(readFileSync(configPath, "utf8")));
-    } catch {
-      return DEFAULTS;
-    }
+function readLayer(path, problems) {
+  if (!path || !existsSync(path)) return null;
+  try {
+    const parsed = JSON.parse(readFileSync(path, "utf8"));
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+    problems.push({ source: path, reason: "file is not a JSON object" });
+  } catch (err) {
+    problems.push({ source: path, reason: err.message });
   }
-  return DEFAULTS;
+  return null;
+}
+
+function userConfigPath(env) {
+  const candidates = [];
+  if (env.XDG_CONFIG_HOME) candidates.push(join(env.XDG_CONFIG_HOME, "concise", "concise.json"));
+  const home = env.HOME || env.USERPROFILE;
+  if (home) {
+    candidates.push(join(home, ".config", "concise", "concise.json"));
+    candidates.push(join(home, ".claude", "concise.json"));
+    candidates.push(join(home, ".codex", "concise.json"));
+  }
+  return candidates.find((path) => existsSync(path)) || null;
+}
+
+function projectConfigPath(cwd, vars) {
+  if (vars.configPath) return vars.configPath;
+  const base = cwd || ".";
+  return CONFIG_DIRS.map((dir) => join(base, dir, "concise.json")).find((path) => existsSync(path)) || null;
+}
+
+export function loadConfig(cwd, env = process.env) {
+  const vars = readEnv(env || {});
+  const problems = [...vars.problems];
+  let config = applyLayer(defaultConfig(), vars.configJson);
+  config = applyLayer(config, envBaselineLayer(vars));
+  config = applyLayer(config, readLayer(userConfigPath(env || {}), problems));
+  config = applyLayer(config, readLayer(projectConfigPath(cwd, vars), problems));
+  config = applyLayer(config, envOverrideLayer(vars));
+  config.problems = problems;
+  return config;
 }
 
 // One pass, one callback: chained .replace() calls would let later steps

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { writeFileSync, mkdtempSync, mkdirSync, rmSync } from "node:fs";
+import { writeFileSync, mkdtempSync, mkdirSync, rmSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { CHECK_EDIT, CHECK_BASH, run, assertDenied, assertAllowed, assertFlagged, summary } from "./lib.mjs";
@@ -242,9 +242,8 @@ console.log("\ncheck-bash.mjs (retry counter)");
 
 rmSync(workDir, { recursive: true, force: true });
 
-await import("./codex-tests.mjs");
-await import("./patterns-tests.mjs");
-await import("./vocabulary-tests.mjs");
-await import("./features-tests.mjs");
+const here = new URL(".", import.meta.url);
+const suites = readdirSync(here).filter((name) => name.endsWith("-tests.mjs") && name !== "run-tests.mjs");
+for (const name of suites.sort()) await import(new URL(name, here).href);
 
 process.exit(summary());

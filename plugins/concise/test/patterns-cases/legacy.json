@@ -1,0 +1,84 @@
+{
+  "positive": {
+    "vocabulary": "We delve into the parser.",
+    "wordiness": "Utilize the helper.",
+    "transitions": "Moreover, the cache is warm.",
+    "filler": "Here's the thing about retries.",
+    "hedging": "This could potentially fail.",
+    "chatbot": "Feel free to reach out.",
+    "sycophancy": "You're absolutely right.",
+    "contrast": "It's not just a parser, it's a compiler.",
+    "copula": "The module serves as a wrapper.",
+    "inflation": "This marks a significant milestone.",
+    "closers": "In conclusion, the parser works.",
+    "structure": "Ever wondered how the parser works?",
+    "formatting": "# 🚀 Release notes",
+    "ste": "Ensure the file exists."
+  },
+  "nearMiss": {
+    "vocabulary": "showcase.tsx renders the list",
+    "wordiness": "the utility module exports a helper",
+    "transitions": "See the note about moreover in the style guide.",
+    "filler": "unpack the tuple",
+    "hedging": "Retries may fail on Windows.",
+    "chatbot": "Log the good questions from users.",
+    "sycophancy": "Thanks for the patch.",
+    "contrast": "It is not a parser.",
+    "copula": "The service acts on the queue.",
+    "inflation": "Reset the value of the counter.",
+    "closers": "The summary line is 50 chars.",
+    "structure": "Enter the password when prompted.",
+    "formatting": "# Release notes",
+    "ste": "require(\"fs\")"
+  },
+  "presets": {
+    "default": [
+      "vocabulary",
+      "transitions",
+      "filler",
+      "chatbot",
+      "sycophancy",
+      "contrast",
+      "inflation",
+      "closers",
+      "structure",
+      "formatting"
+    ],
+    "ryan": [
+      "vocabulary",
+      "wordiness",
+      "transitions",
+      "filler",
+      "hedging",
+      "chatbot",
+      "sycophancy",
+      "contrast",
+      "copula",
+      "inflation",
+      "closers",
+      "structure",
+      "formatting"
+    ],
+    "technical": [
+      "vocabulary",
+      "transitions",
+      "filler",
+      "chatbot",
+      "sycophancy",
+      "contrast",
+      "inflation",
+      "closers",
+      "structure"
+    ],
+    "ste": [
+      "wordiness",
+      "hedging",
+      "copula",
+      "ste"
+    ],
+    "minimal": [
+      "chatbot",
+      "sycophancy"
+    ]
+  }
+}

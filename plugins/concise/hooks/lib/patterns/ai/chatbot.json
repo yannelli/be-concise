@@ -1,0 +1,29 @@
+{
+  "id": "chatbot",
+  "feature": "aiWriting",
+  "category": { "id": "chatbot", "label": "chatbot phrases", "description": "Assistant boilerplate that belongs to a chat window.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules",
+  "presets": ["default", "ryan", "technical", "minimal", "all"],
+  "patterns": [
+    { "opening": "(?:certainly|absolutely|of course)!", "fix": "cut" },
+    { "phrase": "(?:I hope|hope) this helps", "fix": "cut" },
+    { "phrase": "(?:great|excellent|good) question", "fix": "cut" },
+    { "phrase": "feel free to (?:reach out|ask|contact|let me know)", "fix": "cut" },
+    { "phrase": "don't hesitate to", "fix": "cut" },
+    { "phrase": "let me know if (?:you|there|that|this|it)", "fix": "cut" },
+    { "phrase": "happy to help", "fix": "cut" },
+    { "phrase": "(?:I'd|I would) be happy to", "fix": "cut" },
+    { "phrase": "as an AI(?: language model)?", "fix": "cut" },
+    { "phrase": "as of my (?:last|latest) (?:update|training|knowledge)|knowledge cutoff", "fix": "cut" },
+    { "phrase": "I don't have access to real-time", "fix": "cut" },
+    { "phrase": "As a language model", "fix": "cut" },
+    { "phrase": "I am an AI", "fix": "cut" },
+    { "phrase": "I'm just an AI", "fix": "cut" },
+    { "phrase": "As an assistant", "fix": "cut" },
+    { "phrase": "I cannot browse", "fix": "cut, state the limit" },
+    { "phrase": "I don't have personal opinions", "fix": "cut" },
+    { "regex": "\\bI['\u2019]m unable to (?:browse|access real-time|verify this|guarantee|know your|recall|remember previous)\\b", "fix": "state what you can do", "show": "`I'm unable to browse`, `verify this`, and the like" },
+    { "phrase": "please note that", "fix": "state the fact" },
+    { "phrase": "kindly \\w+", "fix": "imperative without \"kindly\"", "show": "`Kindly` + verb" }
+  ]
+}

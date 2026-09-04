@@ -4,7 +4,7 @@ Agent reference for the concise plugin's em dash check and AI writing check. Hou
 
 ## When this applies
 
-Your `Write`, `Edit`, `MultiEdit`, `apply_patch`, `gh` call, `git commit`, or final reply was denied with a `[concise]` message ending in `Reference: <path>/avoid-ai-speak.md` or `Reference: <path>/ai-speak-patterns.md`. The hook scanned the text you were about to send: a prose file whole (fenced blocks, inline code, URLs, and HTML comments blanked first), a code file's comment runs, the `gh` body, the commit message, or the reply text. It found an em dash, an en dash, a double hyphen, or a phrase from one of 14 pattern categories.
+Your `Write`, `Edit`, `MultiEdit`, `apply_patch`, `gh` call, `git commit`, or final reply was denied with a `[concise]` message ending in `Reference: <path>/avoid-ai-speak.md` or `Reference: <path>/ai-speak-patterns.md`. The hook scanned the text you were about to send: a prose file whole (fenced blocks, inline code, URLs, and HTML comments blanked first), a code file's comment runs, the `gh` body, the commit message, or the reply text. It found an em dash, an en dash, a double hyphen, or a hit from one of 44 pattern categories.
 
 You have 2 options: send the identical write again to keep the text, or rewrite the flagged line and send the new text. `mode` decides how the hook responds. `confirm` (the default) denies once and accepts the identical retry. `ask` hands the decision to the user on `PreToolUse`, and behaves as `confirm` on `Stop`. `deny` denies until `maxRetries` is passed, then allows the write and flags it.
 
@@ -44,17 +44,51 @@ Keep the text only when you can name why the flagged form is the correct one for
 | `structure` | frames such as `Ever wondered`, `Picture this` | answer it, give the result | `default`, `ryan`, `technical`, `all` |
 | `formatting` | emoji in a heading, 3 bold spans in a paragraph | remove the emoji and the bold | `default`, `ryan`, `all` |
 | `ste` | words outside ASD-STE100 such as `ensure` | use the approved word | `ste`, `all` |
+| `negative-parallelism` | chains such as `not X, not Y, but Z` | state the claim | `default`, `ryan`, `technical`, `all` |
+| `overgeneralization` | universal claims such as `everyone knows` | name who, or name the case | `default`, `ryan`, `technical`, `all` |
+| `false-ranges` | spans such as `everything from X to Y` | list the items | `default`, `ryan`, `technical`, `all` |
+| `promotional` | marketing words such as `turnkey`, `supercharge` | state the measured property | `default`, `ryan`, `technical`, `all` |
+| `vague-attribution` | unnamed sources such as `studies show`, `experts say` | name the source | `default`, `ryan`, `technical`, `all` |
+| `outline-conclusion` | a closing paragraph that repeats the headings | end on the last fact | `ryan`, `all` |
+| `elegant-variation` | rotating synonyms such as `the aforementioned` | reuse the one name | `ryan`, `all` |
+| `undue-emphasis` | stress such as capitals and stacked intensifiers | state the fact once | `ryan`, `all` |
+| `superficial-analysis` | empty judgments such as `speaks volumes` | give the evidence | `ryan`, `all` |
+| `rule-of-three` | triads of adjectives, nouns, clauses, or bullets | keep the items that matter | `ryan`, `all` |
+| `parallel-bullets` | bullets sharing one shape or first word | vary or merge the items | `ryan`, `all` |
+| `ai-tool-mention` | process talk such as `as requested by the user`, tool names in commits | describe the change | `default`, `ryan`, `technical`, `git`, `all` |
+| `ai-identity` | a commit author or committer naming an AI | commit as the human author | `default`, `ryan`, `technical`, `minimal`, `git`, `all` |
+| `ai-attribution` | trailers such as `Co-authored-by: Claude` | remove the trailer | `default`, `ryan`, `technical`, `minimal`, `git`, `all` |
+| `praise-sandwich` | praise, critique, praise in a review | state the critique | `ryan`, `git`, `all` |
+| `file-narration` | narration such as `This PR introduces` | state what changed and why | `ryan`, `technical`, `git`, `all` |
+| `benefit-tail` | tails such as `, which improves readability` | cut the tail, or measure it | `ryan`, `technical`, `git`, `all` |
+| `canned-review` | review phrases such as `LGTM with minor nits` | name the finding | `default`, `ryan`, `technical`, `git`, `all` |
+| `smart-punctuation` | curly quotes and the ellipsis character outside prose files | use ASCII punctuation | `default`, `ryan`, `technical`, `all` |
+| `unicode-glyphs` | arrows, box drawing, check marks in commits, PR bodies, commands, and replies | use ASCII such as `->` and `[x]` | `default`, `ryan`, `technical`, `all` |
+| `readability-grade` | Flesch-Kincaid grade above 16 | shorter sentences and words | `ryan`, `statistical`, `all` |
+| `sentence-variation` | sentence lengths that hardly vary | vary the sentence length | `ryan`, `statistical`, `all` |
+| `transition-density` | more than 30% of sentences opening on a connector | cut the connectors | `ryan`, `statistical`, `all` |
+| `passive-voice` | more than 30% passive sentences | name the actor | `ryan`, `statistical`, `all` |
+| `paragraph-coherence` | uniform paragraph lengths or repeated openers | vary the paragraphs | `ryan`, `statistical`, `all` |
+| `lexical-diversity` | a low type-token ratio | vary the words | `statistical`, `all` |
+| `word-frequency` | one content word above 3.5% of the tokens | vary or cut the word | `statistical`, `all` |
+| `rare-words` | more than 25% long, rare words | use the short word | `statistical`, `all` |
+| `punctuation-patterns` | 4 of 5 formal punctuation signals | write as you would say it | `statistical`, `all` |
+| `terminal-punctuation` | every short list item ending with a period | drop the periods on fragments | `statistical`, `all` |
 
-The full phrase list and the replacement for each phrase are in [ai-speak-patterns.md](ai-speak-patterns.md) and [ai-speak-patterns-2.md](ai-speak-patterns-2.md). The `ste` rules and word tables are in [simplified-technical-english.md](simplified-technical-english.md).
+The full phrase list and the replacement for each phrase are in [ai-speak-patterns.md](ai-speak-patterns.md) and its numbered parts, generated from the pack files. The `ste` rules and word tables are in [simplified-technical-english.md](simplified-technical-english.md).
 
 ## Presets
 
-- `default`: general prose. `vocabulary`, `transitions`, `filler`, `chatbot`, `sycophancy`, `contrast`, `inflation`, `closers`, `structure`, `formatting`.
-- `ryan`: every category except `ste`. `default` plus `wordiness`, `hedging`, and `copula`. The house rules in this file.
-- `technical`: `default` minus `formatting`, with an allow list of `robust`, `comprehensive`, `seamless`, `ecosystem`, `leverage`, `facilitate`, `underpin`, and `streamline`. For docs and code comments where those words carry a measured meaning.
+- `default`: general prose. `vocabulary`, `transitions`, `filler`, `chatbot`, `sycophancy`, `contrast`, `inflation`, `closers`, `structure`, `formatting`, `negative-parallelism`, `overgeneralization`, `false-ranges`, `promotional`, `vague-attribution`, `ai-tool-mention`, `ai-identity`, `ai-attribution`, `canned-review`, `smart-punctuation`, and `unicode-glyphs`.
+- `ryan`: every category except `ste` and the five statistics-only ones (`lexical-diversity`, `word-frequency`, `rare-words`, `punctuation-patterns`, `terminal-punctuation`). The house rules in this file.
+- `technical`: `default` minus `formatting`, plus `file-narration` and `benefit-tail`, with an allow list of `robust`, `comprehensive`, `seamless`, `ecosystem`, `leverage`, `facilitate`, `underpin`, and `streamline`. For docs and code comments where those words carry a measured meaning.
 - `ste`: `wordiness`, `hedging`, `copula`, `ste`. For maintenance procedures, work instructions, and text written for translation.
-- `minimal`: `chatbot` and `sycophancy` only.
+- `minimal`: `chatbot`, `sycophancy`, `ai-identity`, `ai-attribution`.
+- `git`: the seven commit, PR, and review categories from `ai-tool-mention` to `canned-review`.
+- `statistical`: the ten text statistics categories from `readability-grade` to `terminal-punctuation`.
 - `all`: every category, `ste` included.
+
+Preset membership is declared in each pack file under `hooks/lib/patterns/`. A project adds its own packs under `.claude/concise/patterns/` and drops a built-in one with `excludePacks`; the pack format is in `docs/packs.md`.
 
 ## Editing procedure when denied
 

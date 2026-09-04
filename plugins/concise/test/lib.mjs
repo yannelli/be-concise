@@ -27,8 +27,10 @@ export function bad(name, detail) {
   fail++;
 }
 
-export function run(script, inputObj) {
-  const res = spawnSync("node", [script], { input: JSON.stringify(inputObj), encoding: "utf8" });
+export function run(script, inputObj, env) {
+  const options = { input: JSON.stringify(inputObj), encoding: "utf8" };
+  if (env) options.env = { ...process.env, ...env };
+  const res = spawnSync("node", [script], options);
   if (res.status !== 0) throw new Error(`${script} exited ${res.status}: ${res.stderr}`);
   try {
     return JSON.parse(res.stdout || "{}");

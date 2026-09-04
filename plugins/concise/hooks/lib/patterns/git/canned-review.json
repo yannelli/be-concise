@@ -1,0 +1,22 @@
+{
+  "id": "canned-review",
+  "feature": "aiWriting",
+  "category": { "id": "canned-review", "label": "canned review", "description": "Stock PR-review phrasing used regardless of what the diff actually does.", "tags": ["review"] },
+  "source": "Group G research: PR review boilerplate",
+  "presets": ["default", "ryan", "technical", "git", "all"],
+  "scope": ["gh", "reply"],
+  "notes": "`Consider adding tests` and `I'd suggest` are left out. Careful reviewers open with them before a concrete point, which held the full list under 85% precision.",
+  "patterns": [
+    { "phrase": "LGTM with minor nits", "fix": "cut, or approve plainly" },
+    { "phrase": "Looks good to me", "fix": "cut, or approve plainly" },
+    { "phrase": "Nice work", "fix": "cut" },
+    { "phrase": "Great work on this", "fix": "cut" },
+    { "phrase": "One small suggestion", "fix": "state the suggestion" },
+    { "phrase": "Minor nitpick", "fix": "state the point" },
+    { "phrase": "Overall, this looks good", "fix": "cut, or approve plainly" },
+    { "phrase": "solid implementation", "fix": "cut" },
+    { "phrase": "well-structured", "fix": "cut, or name the structure" },
+    { "phrase": "clean implementation", "fix": "cut" },
+    { "phrase": "It might be worth considering", "fix": "state the suggestion" }
+  ]
+}

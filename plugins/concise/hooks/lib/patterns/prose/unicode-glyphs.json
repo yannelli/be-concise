@@ -1,0 +1,17 @@
+{
+  "id": "unicode-glyphs",
+  "feature": "aiWriting",
+  "category": { "id": "unicode-glyphs", "label": "unicode glyphs", "description": "Arrows, box drawing, dingbats, and geometric symbols used in place of plain ASCII or words.", "tags": ["punctuation"] },
+  "source": "Group P research: Wikipedia, Signs of AI writing",
+  "presets": ["default", "ryan", "technical", "all"],
+  "scope": ["commit", "gh", "command", "reply"],
+  "notes": "Every range skips code points that are also `Extended_Pictographic`, so emoji stay with the `formatting` pack and the dash characters stay with `em-dash`. Prose files stay out of scope for the same reason as `smart-punctuation`. Code comments are out of scope too: a measured pass over 797 library files found arrows in JSDoc examples and box-drawing type diagrams in hand-written comments, and the pack cannot tell those from decoration.",
+  "patterns": [
+    { "regex": "(?!\\p{Extended_Pictographic})[←-⇿]", "flags": "gu", "fix": "use `->` or `<-`, or words", "show": "an arrow character" },
+    { "regex": "(?!\\p{Extended_Pictographic})[─-╿]", "flags": "gu", "fix": "use ASCII table characters", "show": "a box-drawing character" },
+    { "regex": "(?!\\p{Extended_Pictographic})[✀-➿]", "flags": "gu", "fix": "use `[x]`, `[ ]`, or words", "show": "a dingbat or check mark" },
+    { "regex": "(?!\\p{Extended_Pictographic})[☀-⛿]", "flags": "gu", "fix": "use plain words, drop the symbol", "show": "a miscellaneous symbol" },
+    { "regex": "[•◦‣]", "flags": "gu", "fix": "use `-` or `*` for list items", "show": "a bullet character" },
+    { "regex": "(?!\\p{Extended_Pictographic})[■-◿]", "flags": "gu", "fix": "use plain words, drop the symbol", "show": "a geometric shape character" }
+  ]
+}

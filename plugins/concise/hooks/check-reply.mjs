@@ -1,18 +1,10 @@
 #!/usr/bin/env node
 import { openSync, readSync, fstatSync, closeSync } from "node:fs";
 import { loadConfig } from "./lib/config.mjs";
-import { styleFindings, styleSummary, styleDecisionForText } from "./lib/style-check.mjs";
+import { styleFindings, styleSummary, styleDecisionForText, prepareStyle, withPackWarnings } from "./lib/style-check.mjs";
 import { sha256 } from "./lib/confirm.mjs";
 import { takePending, resetAttempt } from "./lib/state.mjs";
-
-function readStdin() {
-  return new Promise((resolve) => {
-    let data = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (c) => (data += c));
-    process.stdin.on("end", () => resolve(data));
-  });
-}
+import { runHook, bypassResult } from "./lib/hook-main.mjs";
 
 const KEY = "style:reply";
 const REPLY_PATH = "reply.md";
@@ -62,6 +54,7 @@ function replyConfig(config) {
   return {
     ...config,
     ignoreGlobs: [],
+    styleIgnoreGlobs: [],
     features: {
       emDash: { ...emDash, enabled: Boolean(emDash.enabled && emDash.replies) },
       aiWriting: { ...aiWriting, enabled: Boolean(aiWriting.enabled && aiWriting.replies) },
@@ -70,7 +63,7 @@ function replyConfig(config) {
 }
 
 function afterBlock(text, input, config) {
-  const summary = styleSummary(styleFindings(text, REPLY_PATH, config), null);
+  const summary = styleSummary(styleFindings(text, REPLY_PATH, config, "reply"), null);
   const pending = takePending(input.session_id, KEY);
   resetAttempt(input.session_id, KEY);
   if (!summary) return {};
@@ -78,8 +71,10 @@ function afterBlock(text, input, config) {
   return { systemMessage: `[concise] Reply still has ${summary}; allowed.` };
 }
 
-function decide(input) {
+async function decide(input, ctx) {
   const config = replyConfig(loadConfig(input.cwd));
+  ctx.config = config;
+  if (!config.stopHook) return {};
   if (!config.features.emDash.enabled && !config.features.aiWriting.enabled) return {};
   if (!input.transcript_path) return {};
 
@@ -91,16 +86,13 @@ function decide(input) {
   }
   if (text === null) return {};
 
-  if (input.stop_hook_active) return afterBlock(text, input, config);
-  return styleDecisionForText(text, KEY, "your reply", input, config, "Stop");
+  const bypassed = bypassResult(text, config, ctx, "Stop");
+  if (bypassed) return bypassed;
+  await prepareStyle(input.cwd, config);
+  const result = input.stop_hook_active
+    ? afterBlock(text, input, config)
+    : styleDecisionForText(text, KEY, "your reply", input, config, "Stop", "reply");
+  return withPackWarnings(result, input.session_id);
 }
 
-const raw = await readStdin();
-let result = {};
-try {
-  result = decide(JSON.parse(raw || "{}"));
-} catch (err) {
-  result = { systemMessage: `[concise] internal error, allowing: ${err.message}` };
-}
-// No process.exit: a piped stdout writes asynchronously on macOS and would truncate.
-process.stdout.write(JSON.stringify(result));
+await runHook({ hook: "check-reply", event: "Stop" }, decide);
