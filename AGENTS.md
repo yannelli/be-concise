@@ -37,7 +37,7 @@ Use Node.js 24, Bash, and `jq`. Run:
 ```sh
 node scripts/check.mjs
 node --test test/*.test.mjs
-node plugins/concise/test/run-tests.mjs
+env -u HOME -u USERPROFILE -u XDG_CONFIG_HOME node plugins/concise/test/run-tests.mjs
 ```
 
 Preview a release with `node scripts/release.mjs --dry-run` from a clean `main` checkout after fetching tags. Release automation uses Node.js and the GitHub API without package dependencies.
