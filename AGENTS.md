@@ -3,7 +3,7 @@
 ## Branches and releases
 
 - Create feature branches from `dev`, using `<type>/<short-description>`.
-- Target `dev` for ordinary PRs and squash merge with the PR title as the commit subject.
+- Target `dev` for ordinary PRs and use a merge commit with the PR title as its subject. The repository permits merge commits for PRs.
 - Promote `dev` to `main` with a PR and merge commit to preserve Conventional Commits. Use `chore(release): promote dev to main` as its title.
 - `main` is the default branch and publishes stable releases automatically. `dev` is the integration branch and does not publish releases.
 - Release automation owns version files, release notes, and tags. Do not edit versions or create release tags manually.
@@ -26,7 +26,7 @@ Keep subjects within 72 characters, without a trailing period. Choose the type f
 | Any type with `!` or a `BREAKING CHANGE:` footer | Major, including before 1.0 |
 | `docs`, `chore`, `ci`, `build`, `refactor`, `style`, `test` | No release without a breaking marker |
 
-For breaking changes, add `!` to the commit subject and PR title and explain the migration in the PR body. A commit body can also use `BREAKING CHANGE: <migration details>`. Preserve breaking markers in squash commits.
+For breaking changes, add `!` to the commit subject and PR title and explain the migration in the PR body. A commit body can also use `BREAKING CHANGE: <migration details>`.
 
 PR bodies describe the behavior changed, the checks run, and any migration. Do not claim checks that were not run.
 
