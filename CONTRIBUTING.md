@@ -4,7 +4,7 @@ Use Node.js from `.nvmrc`, Bash, and `jq`.
 
 ## Branches
 
-`main` is the default branch and contains releases. Create feature branches from `dev` and open ordinary PRs against `dev`. Squash merge using the PR title and body; GitHub is configured to use those fields for the commit.
+`main` is the default branch and contains releases. Create feature branches from `dev` and open ordinary PRs against `dev`. Merge using the PR title and body; GitHub is configured to use those fields for the merge commit. Squash and rebase merges are disabled to preserve release history.
 
 To release, open a PR from `dev` to `main`, titled `chore(release): promote dev to main`. Merge it with a **merge commit** to preserve the individual changes used for version calculation. A squash merge discards those commit messages.
 
