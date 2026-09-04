@@ -1,0 +1,68 @@
+{
+  "positive": {
+    "ai-tool-mention": "Fix the login bug as requested by the user.",
+    "ai-identity": "git commit --author=\"Claude <noreply@anthropic.com>\" -m \"x\"",
+    "ai-attribution": "Co-authored-by: Codex <noreply@openai.com>",
+    "praise-sandwich": "Impressive test coverage here.\n\nOne concern: the cache never gets invalidated on delete.\n\nReally nice PR overall, kudos.",
+    "file-narration": "This PR introduces a caching layer for the search endpoint.",
+    "benefit-tail": "Extract validation into a helper, which improves readability.",
+    "canned-review": "LGTM with minor nits, ship it.",
+    "smart-punctuation": "It doesn’t retry the request.",
+    "unicode-glyphs": "Flow: request → validate."
+  },
+  "nearMiss": {
+    "ai-tool-mention": "Rename claude-code-router config keys.",
+    "ai-identity": "git commit --author=\"Devin Patel <devin.patel@company.com>\" -m \"x\"",
+    "ai-attribution": "Co-authored-by: Priya Shah <priya@company.com>",
+    "praise-sandwich": "LGTM.",
+    "file-narration": "docs: update README",
+    "benefit-tail": "Extract validation into a helper used by both endpoints.",
+    "canned-review": "Approved.",
+    "smart-punctuation": "Rename \"getUser\" to \"fetchUser\".",
+    "unicode-glyphs": "Flow: request -> validate."
+  },
+  "presets": {
+    "default": [
+      "ai-tool-mention",
+      "ai-identity",
+      "ai-attribution",
+      "canned-review",
+      "smart-punctuation",
+      "unicode-glyphs"
+    ],
+    "ryan": [
+      "ai-tool-mention",
+      "ai-identity",
+      "ai-attribution",
+      "praise-sandwich",
+      "file-narration",
+      "benefit-tail",
+      "canned-review",
+      "smart-punctuation",
+      "unicode-glyphs"
+    ],
+    "technical": [
+      "ai-tool-mention",
+      "ai-identity",
+      "ai-attribution",
+      "file-narration",
+      "benefit-tail",
+      "canned-review",
+      "smart-punctuation",
+      "unicode-glyphs"
+    ],
+    "minimal": [
+      "ai-identity",
+      "ai-attribution"
+    ],
+    "git": [
+      "ai-tool-mention",
+      "ai-identity",
+      "ai-attribution",
+      "praise-sandwich",
+      "file-narration",
+      "benefit-tail",
+      "canned-review"
+    ]
+  }
+}

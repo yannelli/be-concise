@@ -1,0 +1,17 @@
+{
+  "id": "contrast",
+  "feature": "aiWriting",
+  "category": { "id": "contrast", "label": "contrast frames", "description": "Frames that define the subject by what it is not.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT), Ryan Yannelli's house rules, and Wikipedia:Signs of AI writing",
+  "presets": ["default", "ryan", "technical", "all"],
+  "notes": "A bare `rather than` is not flagged: it is ordinary technical English. The cross-sentence form stops at a second negation, which the negative-parallelism pack owns.",
+  "patterns": [
+    { "regex": "\\b(it|this|that)(['’]s| is) not (just |only |about |merely |simply )?[^.!?\\n]{1,60}?[,;—–-]\\s*(it|this|that)(['’]s| is)\\b", "fix": "state the positive claim", "show": "`it's not X, it's Y` (also `it is not`, `this is not`, `that's not`, with `just`, `only`, `about`, `merely`, or `simply` inside)" },
+    { "regex": "\\bisn['’]t (just |only |about )?[^.!?\\n]{1,60}?[,;—–-]\\s*(it|this|that)(['’]s| is)\\b", "fix": "state the positive claim", "show": "`isn't about X, it's about Y`" },
+    { "regex": "\\bnot (just|only|merely|simply) [^.!?\\n]{1,60}?\\b(but|it['’]s|it is)\\b", "fix": "state Y", "show": "`not just X but Y` (also `not only`, `not merely`, `not simply`)" },
+    { "regex": ",\\s*not\\s+(?:a|an|the|just|only|merely)?\\s*[\\w'’-]+(?:\\s+[\\w'’-]+){0,2}[.!?]\\s*$", "fix": "write the claim as \"X does Y\"", "flags": "gim", "show": "`X, not Y` as the tail of a sentence, up to 3 words after `not`" },
+    { "regex": "\\bless (?:about|around) [^.!?\\n]{1,50}?,?\\s*(?:and )?more (?:about|around) [^.!?\\n]{1,50}[.!?]", "fix": "state the positive claim", "show": "`less about X, more about Y`" },
+    { "regex": "\\binstead of\\s+[^.!?\\n]{1,50}?,\\s*(?:it['’]?s|this is|we (?:get|have|see))\\s+[^.!?\\n]{1,60}[.!?]", "fix": "state the claim directly", "show": "`instead of X, it's Y`" },
+    { "regex": "\\bisn['’]?t\\s+[^.!?\\n]{1,50}\\.\\s+(?:It['’]?s|This is|That['’]?s)\\s+(?!not\\b)[^.!?\\n]{1,60}[.!?]", "fix": "combine into one claim", "show": "`isn't X. It's Y.`" }
+  ]
+}

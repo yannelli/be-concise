@@ -6,16 +6,8 @@ import { scanComments } from "./lib/comment-scan.mjs";
 import { extractPatch, parseApplyPatch } from "./lib/apply-patch.mjs";
 import { bumpAttempt, resetAttempt } from "./lib/state.mjs";
 import { deny, mergeFlag } from "./lib/respond.mjs";
-import { styleDecision } from "./lib/style-check.mjs";
-
-function readStdin() {
-  return new Promise((resolve) => {
-    let data = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (c) => (data += c));
-    process.stdin.on("end", () => resolve(data));
-  });
-}
+import { styleDecision, prepareStyle, withPackWarnings } from "./lib/style-check.mjs";
+import { runHook, bypassResult } from "./lib/hook-main.mjs";
 
 const EDIT_TOOLS = ["Write", "Edit", "MultiEdit"];
 
@@ -74,8 +66,9 @@ function checkTarget(target, config) {
   if (isExempt(target)) return [];
 
   const violations = [];
+  const checks = config.checks || {};
 
-  for (const chunk of chunks) {
+  for (const chunk of checks.comments === false ? [] : chunks) {
     const longRun = scanComments(chunk, path).find(
       (run) => run.length > config.maxCommentLines && !run.text.includes("concise-ignore"),
     );
@@ -87,7 +80,7 @@ function checkTarget(target, config) {
     break;
   }
 
-  if (wholeFile) {
+  if (wholeFile && checks.fileSize !== false) {
     const lineCount = chunks[0].split("\n").length;
     if (lineCount > config.maxFileLines) {
       violations.push(
@@ -99,11 +92,18 @@ function checkTarget(target, config) {
   return violations;
 }
 
-function decide(input) {
+async function decide(input, ctx) {
   const targets = targetsOf(input);
   if (targets.length === 0) return {};
-
   const config = loadConfig(input.cwd);
+  ctx.config = config;
+  const bypassed = bypassResult(targets.flatMap((target) => target.chunks), config, ctx);
+  if (bypassed) return bypassed;
+  await prepareStyle(input.cwd, config);
+  return withPackWarnings(check(targets, input, config, ctx), input.session_id);
+}
+
+function check(targets, input, config, ctx) {
   const styled = targets.filter((target) => !isExempt(target));
   const violations = [];
   let key = null;
@@ -120,6 +120,7 @@ function decide(input) {
 
   if (violations.length === 0) return styleDecision(styled, input, config);
 
+  ctx.key = key;
   const attempt = bumpAttempt(input.session_id, key);
   const message = `[concise] ${violations.join(" ")}`;
   // A deny stops here: the style state stays untouched so its own counter starts clean.
@@ -131,13 +132,5 @@ function decide(input) {
   return mergeFlag(flagText, styleDecision(styled, input, config));
 }
 
-const raw = await readStdin();
-let result = {};
-try {
-  result = decide(JSON.parse(raw || "{}"));
-} catch (err) {
-  // A hook bug must never block real work.
-  result = { systemMessage: `[concise] internal error, allowing: ${err.message}` };
-}
-// No process.exit: a piped stdout writes asynchronously on macOS and would truncate.
-process.stdout.write(JSON.stringify(result));
+// A hook bug must never block real work: runHook turns a throw into an allow.
+await runHook({ hook: "check-edit", event: "PreToolUse" }, decide);

@@ -8,7 +8,7 @@ const STOP_HINT = "\n\nRewrite the reply, or send the same reply again to confir
 const keepHint = (reference) =>
   `\n\nTo keep it, send the identical write again to confirm. To fix it, read ${reference}.`;
 
-const STOP_BLOCK_MESSAGE = "[concise] reply held for style review";
+export const STOP_BLOCK_MESSAGE = "[concise] reply held for style review";
 
 function held(event, text) {
   if (event !== "Stop") return deny(text);

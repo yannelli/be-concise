@@ -1,0 +1,20 @@
+{
+  "id": "hedging",
+  "feature": "aiWriting",
+  "category": { "id": "hedging", "label": "hedging", "description": "Qualifiers that leave the claim unowned.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules",
+  "presets": ["ryan", "ste", "all"],
+  "patterns": [
+    { "opening": "note that", "fix": "cut, state the fact", "show": "`Note that` (sentence-initial)" },
+    { "phrase": "perhaps|arguably", "fix": "cut, or commit" },
+    { "phrase": "(?:may|could) eventually", "fix": "say when" },
+    { "phrase": "(?:could|may|might) potentially|(?:might|could) possibly", "fix": "can, or cut" },
+    { "phrase": "to be clear|in general", "fix": "cut" },
+    { "phrase": "keep in mind", "fix": "cut, state the fact" },
+    { "phrase": "generally|typically", "fix": "cut, or name the exception" },
+    { "phrase": "in (?:some|many|most) cases", "fix": "name the case" },
+    { "phrase": "somewhat|to some extent", "fix": "cut, or measure" },
+    { "phrase": "it (?:could|may|might) be (?:argued|said)", "fix": "state the claim" },
+    { "regex": "(?<!(?:could|may|might) )\\bpotentially\\b", "fix": "cut", "show": "`potentially` (bare)" }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "vague-attribution",
+  "feature": "aiWriting",
+  "category": { "id": "vague-attribution", "label": "vague attribution", "description": "A claim attributed to an unnamed authority.", "tags": ["rhetorical"] },
+  "source": "Wikipedia:Manual of Style/Words to watch, Wikipedia:Weasel word, Simple Wikipedia avoid-weasel-words",
+  "presets": ["default", "ryan", "technical", "all"],
+  "scope": ["files", "gh", "reply"],
+  "notes": "A correctly sourced sentence is flagged the same as an unsourced one: the pattern cannot see a citation that follows.",
+  "patterns": [
+    { "phrase": "experts (?:say|agree|argue|believe)", "fix": "name the expert" },
+    { "phrase": "studies (?:show|suggest|indicate)", "fix": "cite the study" },
+    { "phrase": "research (?:has shown|shows|suggests)", "fix": "cite the source" },
+    { "phrase": "it is widely (?:believed|known|accepted|held)", "fix": "name who believes it" },
+    { "phrase": "many (?:argue|believe|say|feel)", "fix": "name who" },
+    { "phrase": "some (?:observers|analysts) (?:argue|say|note|suggest)", "fix": "name the observer" },
+    { "phrase": "industry (?:reports|observers) (?:suggest|indicate|say)", "fix": "cite the report" },
+    { "phrase": "it (?:has been|is) (?:said|reported|observed) that", "fix": "name the source" },
+    { "phrase": "critics (?:argue|say|contend)", "fix": "name the critic" },
+    { "phrase": "sources (?:say|indicate|suggest)", "fix": "name the source" }
+  ]
+}

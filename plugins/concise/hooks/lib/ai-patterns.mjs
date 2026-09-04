@@ -1,34 +1,20 @@
-import { CATEGORIES, PRESETS } from "./ai-patterns-data.mjs";
 import { lineIndexer } from "./prose.mjs";
+import { paragraphs, makeStats } from "./text-stats.mjs";
+import { resolveActive } from "./packs.mjs";
 
-export { CATEGORIES, PRESETS };
-
-const BY_ID = new Map(CATEGORIES.map((c) => [c.id, c]));
 const BOLD_SPAN = /\*\*(?=\S)[^\n]*?\*\*/g;
 const BOLD_LIMIT = 3;
 const BOLD_FIX = "restructure so the sentence leads with the point";
 const LIST_ITEM = /^[ \t]*(?:[-*+]|\d+\.)[ \t]+/;
 
-export function resolveCategories({ preset, categories, allow } = {}) {
-  const base = PRESETS[preset] || PRESETS.default;
-  const wanted = Array.isArray(categories) ? categories : base.categories;
-  return {
-    ids: new Set(wanted.filter((id) => BY_ID.has(id))),
-    allow: [...base.allow, ...(Array.isArray(allow) ? allow : [])],
-  };
-}
-
-function paragraphs(text) {
-  const ranges = [];
-  const gap = /\n[ \t]*\n/g;
-  let start = 0;
-  let m;
-  while ((m = gap.exec(text))) {
-    ranges.push({ start, end: m.index, text: text.slice(start, m.index) });
-    start = gap.lastIndex;
-  }
-  ranges.push({ start, end: text.length, text: text.slice(start) });
-  return ranges;
+/** Wraps resolveActive for the aiWriting config block. `loaded` comes from loadPacks. */
+export function resolveCategories(ai = {}, loaded = {}) {
+  const active = resolveActive({
+    packs: loaded.packs || [],
+    presets: loaded.presets || {},
+    config: { features: { aiWriting: ai } },
+  });
+  return { ids: active.categoryIds, allow: active.allow, packs: active.packs };
 }
 
 function matchesOf(text, pattern) {
@@ -86,27 +72,50 @@ function clusteredTier2(text, records) {
   return keep;
 }
 
-function collect(text, ids) {
+function detected(text, pack, ctx, problems) {
+  let found = [];
+  try {
+    found = pack.detect(text, ctx) || [];
+  } catch (err) {
+    problems.push({ path: pack.path, reason: `detect failed: ${err.message}` });
+    return [];
+  }
+  return found
+    .filter((f) => f && Number.isInteger(f.index) && f.match)
+    .map((f, i) => ({
+      pack,
+      key: `${pack.id}:detect:${i}`,
+      tier: f.tier === 2 ? 2 : 1,
+      hit: String(f.match),
+      index: f.index,
+      fix: f.fix || "rewrite",
+    }));
+}
+
+function collect(text, packs, ctx, problems) {
   const records = [];
-  for (const cat of CATEGORIES) {
-    if (!ids.has(cat.id)) continue;
-    cat.patterns.forEach((pattern, i) => {
+  for (const pack of packs) {
+    pack.patterns.forEach((pattern, i) => {
       for (const hit of matchesOf(text, pattern)) {
-        records.push({ cat, key: `${cat.id}:${i}`, tier: pattern.tier, ...hit });
+        records.push({ pack, key: `${pack.id}:${i}`, tier: pattern.tier, ...hit });
       }
     });
-    if (cat.id === "formatting") {
-      for (const hit of boldOveruse(text)) records.push({ cat, key: "formatting:bold", tier: 1, ...hit });
+    if (pack.detect) records.push(...detected(text, pack, { ...ctx, options: pack.options }, problems));
+    if (pack.categoryId === "formatting") {
+      for (const hit of boldOveruse(text)) records.push({ pack, key: `${pack.id}:bold`, tier: 1, ...hit });
     }
   }
   return records;
 }
 
-export function scanAiWriting(text, { categories, allow } = {}) {
+export function scanAiWriting(text, { packs = [], categories, allow, ctx = {}, problems = [] } = {}) {
   if (typeof text !== "string" || text === "") return [];
-  const ids = categories instanceof Set ? categories : new Set(categories || BY_ID.keys());
+  const ids = categories == null ? null : categories instanceof Set ? categories : new Set(categories);
+  const active = ids ? packs.filter((p) => ids.has(p.categoryId)) : packs;
+  if (active.length === 0) return [];
+
   const skip = (Array.isArray(allow) ? allow : []).map((a) => String(a).toLowerCase()).filter(Boolean);
-  const records = collect(text, ids);
+  const records = collect(text, active, { path: null, scope: null, ...ctx, stats: makeStats(text) }, problems);
   const cluster = clusteredTier2(text, records);
   const lineAt = lineIndexer(text);
   const seen = new Set();
@@ -116,14 +125,14 @@ export function scanAiWriting(text, { categories, allow } = {}) {
     .filter((r) => !skip.some((s) => r.hit.toLowerCase().includes(s)))
     .sort((a, b) => a.index - b.index)
     .filter((r) => {
-      const id = `${r.cat.id}:${r.index}:${r.hit}`;
+      const id = `${r.pack.categoryId}:${r.index}:${r.hit}`;
       if (seen.has(id)) return false;
       seen.add(id);
       return true;
     })
     .map((r) => ({
-      category: r.cat.id,
-      label: r.cat.label,
+      category: r.pack.categoryId,
+      label: r.pack.category.label,
       match: r.hit,
       line: lineAt(r.index).line,
       fix: r.fix,

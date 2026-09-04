@@ -1,0 +1,20 @@
+{
+  "id": "overgeneralization",
+  "feature": "aiWriting",
+  "category": { "id": "overgeneralization", "label": "overgeneralization", "description": "A universal claim about people or the industry with no source.", "tags": ["rhetorical"] },
+  "source": "Wikipedia:Signs of AI writing and WikiProject AI Cleanup catchphrases",
+  "presets": ["default", "ryan", "technical", "all"],
+  "scope": ["files", "comments", "gh", "reply"],
+  "notes": "Bare always, never, and all stay unflagged: they are correct in API docs and code comments. Only a universal claim about a human population is reported.",
+  "patterns": [
+    { "phrase": "everyone (?:agrees|knows|understands)", "fix": "name who agrees" },
+    { "phrase": "everybody (?:agrees|knows)", "fix": "name who agrees" },
+    { "phrase": "no one (?:can )?den(?:y|ies)", "fix": "name the source" },
+    { "regex": "\\bin every (?:case|instance|scenario|situation)\\b", "fix": "name the case", "show": "`in every case`, `instance`, `scenario`, `situation`" },
+    { "phrase": "the industry (?:agrees|is unanimous)", "fix": "name who agrees" },
+    { "phrase": "universally (?:acknowledged|accepted|recognized|true)", "fix": "name who accepts it" },
+    { "phrase": "without exception", "fix": "name the exception, or cut" },
+    { "regex": "\\ball (?:developers|users|teams|companies|engineers) (?:agree|know|want|need)\\b", "fix": "name who", "show": "`all developers agree`, and the same verbs after `users`, `teams`, `companies`, `engineers`" },
+    { "phrase": "every single (?:one|time|user|developer|case)", "fix": "cut single, or count" }
+  ]
+}

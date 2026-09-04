@@ -1,0 +1,18 @@
+{
+  "id": "copula",
+  "feature": "aiWriting",
+  "category": { "id": "copula", "label": "interpreting verbs", "description": "Verbs that interpret the subject instead of naming what it does.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules",
+  "presets": ["ryan", "ste", "all"],
+  "notes": "State the fact instead of interpreting it.",
+  "patterns": [
+    { "phrase": "serves as|acts as|stands as|functions as", "fix": "is, or the literal action" },
+    { "phrase": "boasts", "fix": "has" },
+    { "phrase": "the source of truth", "fix": "say what reads it" },
+    { "phrase": "the key constraint", "fix": "name the constraint" },
+    { "phrase": "the path forward", "fix": "the next step, named" },
+    { "phrase": "this ensures", "fix": "say what happens" },
+    { "phrase": "plays an? (?:key|vital|critical|central|significant|important) role", "fix": "say what it does", "show": "`plays a key role`, `plays a vital role`, `plays a critical role`, `plays a central role`, `plays a significant role`, `plays an important role`" },
+    { "phrase": "designed to (?:help|ensure|provide|enable|make)", "fix": "say what it does" }
+  ]
+}

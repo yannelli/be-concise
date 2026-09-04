@@ -1,0 +1,19 @@
+{
+  "id": "transitions",
+  "feature": "aiWriting",
+  "category": { "id": "transitions", "label": "transitions", "description": "Connectors and scene setters that add length without adding a fact.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules",
+  "presets": ["default", "ryan", "technical", "all"],
+  "patterns": [
+    { "opening": "moreover|furthermore|additionally", "fix": "cut, or \"and\", \"also\"", "show": "`Moreover`, `Furthermore`, `Additionally` (sentence-initial)" },
+    { "opening": "notably|importantly|interestingly|surprisingly", "fix": "cut", "show": "`Notably`, `Importantly`, `Interestingly`, `Surprisingly` (sentence-initial)" },
+    { "phrase": "in today's", "fix": "name the context or cut" },
+    { "phrase": "in an era (?:where|of)", "fix": "cut" },
+    { "phrase": "in the (?:rapidly )?(?:evolving|changing) (?:world|field) of", "fix": "lead with the point" },
+    { "phrase": "(?:it's |it is )?worth noting", "fix": "state the fact" },
+    { "phrase": "when it comes to", "fix": "name the thing" },
+    { "phrase": "here's (?:what's interesting|what caught my eye|what stood out|the interesting part)", "fix": "state the fact" },
+    { "phrase": "that (?:being )?said", "fix": "cut, or \"but\"" },
+    { "phrase": "certainly(?!\\s*!)|undoubtedly|without a doubt", "fix": "cut", "show": "`Certainly`, `Undoubtedly`, `Without a doubt`" }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "wordiness",
+  "feature": "aiWriting",
+  "category": { "id": "wordiness", "label": "wordiness", "description": "Long forms of short words.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules",
+  "presets": ["ryan", "ste", "all"],
+  "notes": "A hit here is a writing fix and says nothing about who wrote the text.",
+  "patterns": [
+    { "phrase": "utili[sz](?:e|es|ed|ing)", "fix": "use", "show": "`utilize`, `utilise`, `utilizes`, `utilized`, `utilizing`, `utilising`" },
+    { "phrase": "in order to", "fix": "to" },
+    { "phrase": "due to the fact that", "fix": "because" },
+    { "phrase": "commence(?:s|d)?", "fix": "start" },
+    { "phrase": "ascertain", "fix": "find out" },
+    { "phrase": "endeavou?r(?:s|ed|ing)?", "fix": "try, effort" },
+    { "phrase": "prior to", "fix": "before" },
+    { "phrase": "subsequent to", "fix": "after" },
+    { "phrase": "in the event that", "fix": "if" },
+    { "phrase": "at this time|at this point in time", "fix": "now" },
+    { "phrase": "for the purpose of", "fix": "to, for" },
+    { "phrase": "with regard to", "fix": "about" },
+    { "phrase": "in conjunction with", "fix": "with" },
+    { "phrase": "in accordance with", "fix": "as in, follow" },
+    { "phrase": "(?:is|are) capable of|(?:has|have) the ability to", "fix": "can" },
+    { "phrase": "a number of", "fix": "some, or the number" },
+    { "phrase": "a large number of", "fix": "many, or the number" },
+    { "phrase": "it is necessary to", "fix": "you must" },
+    { "phrase": "in the vicinity of|in close proximity", "fix": "near" },
+    { "phrase": "the majority of", "fix": "most" },
+    { "phrase": "in spite of the fact that", "fix": "although" }
+  ]
+}

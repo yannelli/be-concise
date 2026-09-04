@@ -4,7 +4,70 @@
   "maxPrBodyParagraphs": 1,
   "maxPrBodySentences": 3,
   "maxRetries": 2,
-  "ignoreGlobs": ["**/node_modules/**", "**/*.generated.*", "**/vendor/**"],
+  "ignoreGlobs": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/*.generated.*",
+    "**/*.min.js",
+    "**/package-lock.json",
+    "**/*.lock"
+  ],
+  "checks": {
+    "comments": true,
+    "fileSize": true,
+    "prBody": true
+  },
+  "stopHook": true,
+  "softFail": false,
+  "styleIgnoreGlobs": [
+    "**/.claude/**",
+    "**/.codex/**",
+    "**/.agent/**",
+    "**/.agents/**",
+    "**/.cursor/**",
+    "**/.cursorrules",
+    "**/.windsurf/**",
+    "**/.windsurfrules",
+    "**/.gemini/**",
+    "**/.roo/**",
+    "**/.clinerules",
+    "**/.clinerules/**",
+    "**/.kiro/**",
+    "**/.continue/**",
+    "**/.aider*",
+    "**/.opencode/**",
+    "**/.amazonq/**",
+    "**/.junie/**",
+    "**/.trae/**",
+    "**/.augment/**",
+    "**/.github/copilot-instructions.md",
+    "**/.github/instructions/**",
+    "**/.github/prompts/**",
+    "**/.github/agents/**",
+    "**/CLAUDE.md",
+    "**/CLAUDE.local.md",
+    "**/AGENTS.md",
+    "**/GEMINI.md"
+  ],
+  "allowList": {
+    "phrases": [],
+    "patterns": []
+  },
+  "bypass": {
+    "phrases": [],
+    "patterns": []
+  },
+  "log": {
+    "enabled": false,
+    "path": null,
+    "maxSize": "5m",
+    "maxFiles": 5,
+    "rotate": "size",
+    "format": "json"
+  },
   "features": {
     "emDash": {
       "enabled": false,
@@ -19,7 +82,12 @@
       "categories": null,
       "allow": [],
       "mode": "confirm",
-      "replies": true
+      "replies": true,
+      "packs": [],
+      "excludePacks": [],
+      "enablePatterns": [],
+      "disablePatterns": [],
+      "options": {}
     }
   }
 }

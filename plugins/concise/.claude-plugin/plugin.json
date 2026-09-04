@@ -1,8 +1,8 @@
 {
     "$schema": "https://www.schemastore.org/claude-code-plugin-manifest.json",
     "name": "concise",
-  "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions, plus optional em dash and AI writing pattern checks, and nudges Claude to trim them before you see the bloated version.",
-    "version": "0.4.0",
+  "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions, plus optional em dash and AI writing pattern packs (pluggable, env-controlled), and nudges Claude to trim them before you see the bloated version.",
+    "version": "0.5.0",
   "author": {
         "name": "Ryan Yannelli",
         "email": "ryanyannelli@gmail.com",

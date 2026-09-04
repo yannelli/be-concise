@@ -1,0 +1,19 @@
+{
+  "id": "sycophancy",
+  "feature": "aiWriting",
+  "category": { "id": "sycophancy", "label": "sycophancy", "description": "Praise aimed at the reader instead of the work.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules",
+  "presets": ["default", "ryan", "technical", "minimal", "all"],
+  "patterns": [
+    { "opening": "you're right", "fix": "cut, state the fix", "show": "`You're right` (sentence-initial)" },
+    { "phrase": "you're absolutely right", "fix": "cut" },
+    { "phrase": "what a (?:great|fantastic|wonderful)", "fix": "cut" },
+    { "phrase": "(?<!an? )(?:great|excellent) (?:point|idea|catch|observation|suggestion)", "fix": "cut", "show": "`Great point`, `Great idea`, `Great catch`, `Excellent observation`, `Excellent suggestion`" },
+    { "phrase": "that's an? (?:great|excellent|fantastic|wonderful|really good|insightful) (?:point|idea|observation)", "fix": "cut", "show": "`That's a great point`, `That's an excellent point`, `That's a fantastic idea`, `That's a really good observation`, `That's an insightful observation`" },
+    { "phrase": "I (?:completely|totally) (?:understand|agree)", "fix": "cut" },
+    { "phrase": "thank you for (?:sharing|bringing this|pointing|the clarification|your patience)", "fix": "cut" },
+    { "phrase": "thanks for (?:sharing|pointing|flagging)", "fix": "cut" },
+    { "phrase": "you raise an? (?:great|excellent|good|valid|important) point", "fix": "cut", "show": "`You raise a great point`, `You raise an excellent point`, `You raise a good point`, `You raise a valid point`, `You raise an important point`" },
+    { "phrase": "I apologize for (?:the|any) (?:confusion|oversight|inconvenience)|apologies for the confusion|my apologies", "fix": "state the correction" }
+  ]
+}

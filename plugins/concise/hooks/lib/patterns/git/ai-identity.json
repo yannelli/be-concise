@@ -1,0 +1,21 @@
+{
+  "id": "ai-identity",
+  "feature": "aiWriting",
+  "category": { "id": "ai-identity", "label": "AI author identity", "description": "The commit author or committer field names an AI tool instead of a person.", "tags": ["git"] },
+  "source": "Group G research: claude-code#72477, VS Code #314311, Cursor forum #168258, gemini-cli #11447",
+  "presets": ["default", "ryan", "technical", "minimal", "git", "all"],
+  "scope": ["command"],
+  "notes": "Bare first names such as `Claude`, `Devin`, and `Gemini` sit at tier 2, so a person who sets their own identity with a personal email produces one hit and stays quiet. A repo that commits as a bot on purpose lists `ai-identity` in `excludePacks`.",
+  "patterns": [
+    { "regex": "--author=(['\"])[^'\"]*(?:Claude Code|OpenAI Codex|GitHub Copilot|Cursor Agent|OpenHands)[^'\"]*\\1", "fix": "use a human author name", "show": "`--author=` naming an AI tool" },
+    { "regex": "--author=(['\"])[^'\"]*(?:noreply@anthropic\\.com|noreply@openai\\.com|codex@openai\\.com|copilot@github\\.com|cursoragent@cursor\\.com|openhands@all-hands\\.dev)[^'\"]*\\1", "fix": "use a human email address", "show": "`--author=` holding an AI tool email" },
+    { "regex": "\\bGIT_AUTHOR_NAME=(['\"]?)(?:Claude Code|OpenAI Codex|GitHub Copilot|Cursor Agent|OpenHands|github-actions\\[bot\\])\\1", "fix": "use a human author name", "show": "`GIT_AUTHOR_NAME` set to an AI tool" },
+    { "regex": "\\bGIT_COMMITTER_NAME=(['\"]?)(?:Claude Code|OpenAI Codex|GitHub Copilot|Cursor Agent|OpenHands|github-actions\\[bot\\])\\1", "fix": "use a human committer name", "show": "`GIT_COMMITTER_NAME` set to an AI tool" },
+    { "regex": "\\bGIT_AUTHOR_EMAIL=(['\"]?)[^\\s'\"]*(?:anthropic\\.com|openai\\.com|cursor\\.com|all-hands\\.dev)[^\\s'\"]*\\1", "fix": "use a human email address", "show": "`GIT_AUTHOR_EMAIL` on an AI tool domain" },
+    { "regex": "\\bGIT_COMMITTER_EMAIL=(['\"]?)[^\\s'\"]*(?:anthropic\\.com|openai\\.com|cursor\\.com|all-hands\\.dev)[^\\s'\"]*\\1", "fix": "use a human email address", "show": "`GIT_COMMITTER_EMAIL` on an AI tool domain" },
+    { "regex": "\\bgit\\s+config\\s+(?:--\\S+\\s+)*user\\.(?:name|email)\\s+(['\"]?)(?:Claude Code|OpenAI Codex|GitHub Copilot|Cursor Agent|OpenHands|[^'\"\\s]*(?:anthropic\\.com|openai\\.com|cursor\\.com|all-hands\\.dev))", "fix": "set a human name or email", "show": "`git config user.name` or `user.email` set to an AI tool" },
+    { "regex": "\\d+\\+(?:Copilot(?:\\[bot\\])?|github-actions\\[bot\\]|dependabot(?:-preview)?\\[bot\\]|gemini-code-assist\\[bot\\]|devin-ai-integration\\[bot\\])@users\\.noreply\\.github\\.com", "fix": "use a human email address", "show": "a numeric-id GitHub bot address" },
+    { "regex": "--author=(['\"])[^'\"]*\\b(?:Claude|Codex|Copilot|Cursor|Gemini|Devin|Aider|ChatGPT)\\b[^'\"]*\\1", "fix": "use a human author name", "tier": 2, "show": "`--author=` naming a bare AI tool name" },
+    { "regex": "\\bGIT_(?:AUTHOR|COMMITTER)_NAME=(['\"]?)(?:Claude|Codex|Copilot|Cursor|Gemini|Devin|Aider|ChatGPT)\\1", "fix": "use a human author name", "tier": 2, "show": "`GIT_AUTHOR_NAME` or `GIT_COMMITTER_NAME` set to a bare AI tool name" }
+  ]
+}

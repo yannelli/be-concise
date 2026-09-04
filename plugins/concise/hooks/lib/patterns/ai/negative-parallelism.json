@@ -1,0 +1,16 @@
+{
+  "id": "negative-parallelism",
+  "feature": "aiWriting",
+  "category": { "id": "negative-parallelism", "label": "negative parallelism", "description": "A chain of two or more negated clauses resolved by one affirmation.", "tags": ["rhetorical"] },
+  "source": "Wikipedia:Signs of AI writing, WikiProject AI Cleanup catchphrases, tropes.fyi, refine.so",
+  "presets": ["default", "ryan", "technical", "all"],
+  "scope": ["files", "comments", "gh", "reply"],
+  "notes": "The contrast pack owns the single \"not X, it's Y\" pair. This pack fires only on two or more stacked negations before the resolution.",
+  "patterns": [
+    { "regex": "(?:^|[.!?]\\s+)Not\\s+[^.!?\\n]{1,60}\\.\\s+Not\\s+[^.!?\\n]{1,60}\\.\\s+(?:But|Just)\\s+[^.!?\\n]{1,60}[.!?]", "fix": "state the one claim", "flags": "gm", "show": "`Not X. Not Y. Just Z.`" },
+    { "regex": "\\bno\\s+[\\w'’ -]{1,30},\\s*no\\s+[\\w'’ -]{1,30},\\s*just\\s+[\\w'’ -]{1,40}[.!?]", "fix": "state the one claim", "show": "`no X, no Y, just Z`" },
+    { "regex": "\\bnot\\s+[\\w'’ -]{1,30},\\s*not\\s+[\\w'’ -]{1,30},\\s*(?:but|just)\\s+[\\w'’ -]{1,40}", "fix": "state the one claim", "show": "`not X, not Y, but Z`" },
+    { "regex": "\\bno\\s+\\w+,\\s*no\\s+\\w+\\.\\s*(?:Just|Only)\\s+[^.!?\\n]{1,40}[.!?]", "fix": "state the one claim", "show": "`no X, no Y. Just Z.`" },
+    { "regex": "\\bisn['’]?t\\s+[^.!?\\n]{1,60}\\.\\s+(?:It['’]?s|This is|That['’]?s) not\\s+[^.!?\\n]{1,60}\\.\\s+(?:It['’]?s|This is|That['’]?s)\\s+[^.!?\\n]{1,60}", "fix": "state the one claim", "show": "`isn't X. It's not Y. It's Z.`" }
+  ]
+}

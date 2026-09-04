@@ -40,6 +40,15 @@ export function resetAttempt(sessionId, key) {
     writeState(sessionId, state);
 }
 
+/** True the first time this (session, key) pair is seen, false after that. */
+export function once(sessionId, key) {
+  const state = readState(sessionId);
+  if (state[key]) return false;
+  state[key] = 1;
+  writeState(sessionId, state);
+  return true;
+}
+
 const pendingKey = (key) => `pending:${key}`;
 
 /** Records the hash the agent has to send again to confirm the text it just wrote. */
