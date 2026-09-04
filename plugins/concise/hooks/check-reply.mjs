@@ -24,9 +24,9 @@ function readTail(path) {
 }
 
 function textOf(entry) {
-  const message = entry?.message || entry;
+  const message = entry?.message || entry?.payload || entry;
   if ((message?.role || entry?.role) !== "assistant") return null;
-  const block = (message?.content || []).find((part) => part?.type === "text" && typeof part.text === "string");
+  const block = (message?.content || []).find((part) => (part?.type === "text" || part?.type === "output_text") && typeof part.text === "string");
   return block ? block.text : null;
 }
 
