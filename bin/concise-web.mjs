@@ -36,7 +36,7 @@ try {
   if (args.help) process.stdout.write(help);
   else {
     const consoleServer = await startServer(args.options);
-    const address = `${consoleServer.url}/#token=${consoleServer.token}`;
+    const address = `${consoleServer.browserUrl}/#token=${consoleServer.token}`;
     process.stdout.write(`Concise console: ${address}\nProject: ${consoleServer.cwd}\nPress Ctrl+C to stop.\n`);
     let closing = false;
     const close = async () => {

@@ -1,5 +1,9 @@
 {
   "scripts": {
+    "web": {
+      "command": "node bin/concise-web.mjs --port \"$PASEO_PORT\" --no-open",
+      "type": "service"
+    },
     "check": {
       "command": "node scripts/check.mjs"
     },
