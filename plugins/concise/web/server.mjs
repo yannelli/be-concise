@@ -67,6 +67,8 @@ export async function startServer({ cwd = process.cwd(), port = 0, env = process
   cwd = await realpath(cwd);
   env = { ...env };
   if (env.BEC_CONFIG_PATH) env.BEC_CONFIG_PATH = resolve(cwd, env.BEC_CONFIG_PATH);
+  const proxyOrigin = env.PASEO_URL ? new URL(env.PASEO_URL).origin : null;
+  const allowedOrigins = new Map();
   const token = randomBytes(32).toString("hex");
   const records = [];
   const streams = new Set();
@@ -103,8 +105,9 @@ export async function startServer({ cwd = process.cwd(), port = 0, env = process
     response.setHeader("Referrer-Policy", "no-referrer");
     response.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
     try {
-      if (request.headers.host !== new URL(url).host) throw problem("Invalid Host", 403);
-      if (request.headers.origin && request.headers.origin !== url) throw problem("Invalid Origin", 403);
+      const requestOrigin = allowedOrigins.get(request.headers.host);
+      if (!requestOrigin) throw problem("Invalid Host", 403);
+      if (request.headers.origin && request.headers.origin !== requestOrigin) throw problem("Invalid Origin", 403);
       const route = new URL(request.url, url);
       if (!route.pathname.startsWith("/api/")) {
         if (request.method !== "GET") throw problem("Method not allowed", 405);
@@ -171,11 +174,13 @@ export async function startServer({ cwd = process.cwd(), port = 0, env = process
   server.requestTimeout = 20000;
   await new Promise((resolveReady, reject) => { server.once("error", reject); server.listen(port, "127.0.0.1", resolveReady); });
   url = `http://127.0.0.1:${server.address().port}`;
+  allowedOrigins.set(new URL(url).host, url);
+  if (proxyOrigin) allowedOrigins.set(new URL(proxyOrigin).host, proxyOrigin);
   const registryPath = monitorPath(cwd, env);
   try { register(registryPath, { url, token, pid: process.pid }); }
   catch (err) { server.close(); throw err; }
   return {
-    url, token, cwd, registryPath,
+    url, browserUrl: proxyOrigin || url, token, cwd, registryPath,
     async close() {
       try { if (JSON.parse(readFileSync(registryPath, "utf8")).token === token) rmSync(registryPath, { force: true }); } catch {}
       for (const stream of streams) stream.end();

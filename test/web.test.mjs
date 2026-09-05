@@ -8,13 +8,13 @@ import { startServer } from "../plugins/concise/web/server.mjs";
 import { validateConfig } from "../plugins/concise/web/configuration.mjs";
 import { publishMonitor } from "../plugins/concise/hooks/lib/monitor.mjs";
 
-async function fixture(t) {
+async function fixture(t, overrides = {}) {
   const root = await mkdtemp(join(tmpdir(), "concise-web-test-"));
   const cwd = join(root, "project");
   const home = join(root, "home");
   await mkdir(cwd);
   await mkdir(home);
-  const env = { PATH: process.env.PATH, HOME: home, XDG_CACHE_HOME: join(root, "cache") };
+  const env = { PATH: process.env.PATH, HOME: home, XDG_CACHE_HOME: join(root, "cache"), ...overrides };
   const server = await startServer({ cwd, env });
   t.after(async () => { await server.close(); await rm(root, { recursive: true, force: true }); });
   const api = (path, options = {}) => fetch(`${server.url}${path}`, {
@@ -25,6 +25,7 @@ async function fixture(t) {
 
 test("console authenticates APIs and rejects cross-origin requests", async (t) => {
   const app = await fixture(t);
+  assert.equal(app.browserUrl, app.url);
   assert.equal((await fetch(`${app.url}/api/history`)).status, 401);
   assert.equal((await app.api("/api/history", { headers: { Origin: "https://example.com" } })).status, 403);
   const invalidHost = await new Promise((resolve, reject) => {
@@ -51,6 +52,31 @@ test("console authenticates APIs and rejects cross-origin requests", async (t) =
   assert.match(darkSvg, /fill="#FF4A24"/);
   assert.doesNotMatch(darkSvg, /fill="#18191D"/);
   assert.equal((await app.api("/api/configuration.mjs")).status, 404);
+});
+
+test("Paseo proxy accepts its configured origin and preserves authentication", async (t) => {
+  const origin = "http://web--concise.localhost:6767";
+  const app = await fixture(t, { PASEO_URL: origin });
+  const proxy = (path, headers = {}) => new Promise((resolve, reject) => {
+    const req = request(`${app.url}${path}`, { headers: { Host: new URL(origin).host, ...headers } }, (response) => {
+      response.resume();
+      resolve(response.statusCode);
+    });
+    req.on("error", reject);
+    req.end();
+  });
+  const authorized = { Authorization: `Bearer ${app.token}`, Origin: origin };
+  assert.equal(app.browserUrl, origin);
+  assert.equal(JSON.parse(await readFile(app.registryPath, "utf8")).url, app.url);
+  assert.equal(await proxy("/"), 200);
+  assert.equal(await proxy("/api/history"), 401);
+  assert.equal(await proxy("/api/history", { Authorization: "Bearer invalid" }), 401);
+  assert.equal(await proxy("/api/history", authorized), 200);
+  assert.equal(await proxy("/api/history", { ...authorized, Origin: "https://example.com" }), 403);
+  assert.equal(await proxy("/api/history", { ...authorized, Host: "example.com" }), 403);
+  assert.equal(await proxy("/api/history", { ...authorized, Host: "web--concise.localhost:6768" }), 403);
+  assert.equal(await proxy("/api/history", { ...authorized, Origin: app.url }), 403);
+  assert.equal((await app.api("/api/history", { headers: { Origin: app.url } })).status, 200);
 });
 
 test("config edits preserve layers and detect stale writes", async (t) => {
