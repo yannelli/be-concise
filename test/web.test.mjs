@@ -8,14 +8,14 @@ import { startServer } from "../plugins/concise/web/server.mjs";
 import { validateConfig } from "../plugins/concise/web/configuration.mjs";
 import { publishMonitor } from "../plugins/concise/hooks/lib/monitor.mjs";
 
-async function fixture(t, overrides = {}) {
+async function fixture(t, overrides = {}, options = {}) {
   const root = await mkdtemp(join(tmpdir(), "concise-web-test-"));
   const cwd = join(root, "project");
   const home = join(root, "home");
   await mkdir(cwd);
   await mkdir(home);
   const env = { PATH: process.env.PATH, HOME: home, XDG_CACHE_HOME: join(root, "cache"), ...overrides };
-  const server = await startServer({ cwd, env });
+  const server = await startServer({ cwd, env, ...options });
   t.after(async () => { await server.close(); await rm(root, { recursive: true, force: true }); });
   const api = (path, options = {}) => fetch(`${server.url}${path}`, {
     ...options, headers: { Authorization: `Bearer ${server.token}`, "Content-Type": "application/json", ...options.headers },
@@ -26,6 +26,7 @@ async function fixture(t, overrides = {}) {
 test("console authenticates APIs and rejects cross-origin requests", async (t) => {
   const app = await fixture(t);
   assert.equal(app.browserUrl, app.url);
+  assert.deepEqual(app.networkUrls, []);
   assert.equal((await fetch(`${app.url}/api/history`)).status, 401);
   assert.equal((await app.api("/api/history", { headers: { Origin: "https://example.com" } })).status, 403);
   const invalidHost = await new Promise((resolve, reject) => {
@@ -77,6 +78,32 @@ test("Paseo proxy accepts its configured origin and preserves authentication", a
   assert.equal(await proxy("/api/history", { ...authorized, Host: "web--concise.localhost:6768" }), 403);
   assert.equal(await proxy("/api/history", { ...authorized, Origin: app.url }), 403);
   assert.equal((await app.api("/api/history", { headers: { Origin: app.url } })).status, 200);
+});
+
+test("remote console serves network addresses with token and origin checks", async (t) => {
+  const app = await fixture(t, {}, { remote: true });
+  assert.equal(JSON.parse(await readFile(app.registryPath, "utf8")).url, app.url);
+  const aliasStatus = await new Promise((resolve, reject) => {
+    const target = app.url.replace("127.0.0.1", "127.0.0.2");
+    const req = request(target, { headers: { Host: new URL(app.url).host } }, (response) => {
+      response.resume();
+      resolve(response.statusCode);
+    });
+    req.on("error", reject);
+    req.end();
+  });
+  assert.equal(aliasStatus, 200);
+  for (const url of app.networkUrls) {
+    assert.equal((await fetch(url)).status, 200);
+    assert.equal((await fetch(`${url}/api/history`)).status, 401);
+    const headers = { Authorization: `Bearer ${app.token}`, Origin: url };
+    assert.equal((await fetch(`${url}/api/history`, { headers })).status, 200);
+    headers.Origin = "https://example.com";
+    assert.equal((await fetch(`${url}/api/history`, { headers })).status, 403);
+  }
+  const record = { cwd: app.cwd, hook: "remote-test", request: {}, response: {} };
+  await publishMonitor(record, { env: app.env });
+  assert.equal((await (await app.api("/api/history")).json()).records.length, 1);
 });
 
 test("config edits preserve layers and detect stale writes", async (t) => {

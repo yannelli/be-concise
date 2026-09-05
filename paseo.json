@@ -1,7 +1,7 @@
 {
   "scripts": {
     "web": {
-      "command": "node bin/concise-web.mjs --port \"$PASEO_PORT\" --no-open",
+      "command": "node bin/concise-web.mjs --port \"$PASEO_PORT\" --remote --no-open",
       "type": "service"
     },
     "check": {
