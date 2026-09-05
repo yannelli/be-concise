@@ -81,7 +81,7 @@ test("Paseo proxy accepts its configured origin and preserves authentication", a
 });
 
 test("remote console serves network addresses with token and origin checks", async (t) => {
-  const app = await fixture(t, {}, { remote: true });
+  const app = await fixture(t, { PATH: "" }, { remote: true });
   assert.equal(JSON.parse(await readFile(app.registryPath, "utf8")).url, app.url);
   const aliasStatus = await new Promise((resolve, reject) => {
     const target = app.url.replace("127.0.0.1", "127.0.0.2");
@@ -104,6 +104,35 @@ test("remote console serves network addresses with token and origin checks", asy
   const record = { cwd: app.cwd, hook: "remote-test", request: {}, response: {} };
   await publishMonitor(record, { env: app.env });
   assert.equal((await (await app.api("/api/history")).json()).records.length, 1);
+});
+
+test("remote console accepts this node's full and short Tailscale hostnames", async (t) => {
+  const bin = await mkdtemp(join(tmpdir(), "concise-tailscale-test-"));
+  t.after(() => rm(bin, { recursive: true, force: true }));
+  const status = { Self: { DNSName: "console.example.ts.net." }, Peer: { other: { DNSName: "other.example.ts.net." } } };
+  await writeFile(join(bin, "tailscale"), `#!${process.execPath}\nprocess.stdout.write(${JSON.stringify(JSON.stringify(status))});\n`, { mode: 0o755 });
+  const app = await fixture(t, { PATH: bin }, { remote: true });
+  const port = new URL(app.url).port;
+  const responseStatus = (host, headers = {}) => new Promise((resolve, reject) => {
+    const req = request(`${app.url}/api/history`, { headers: { Host: `${host}:${port}`, ...headers } }, (response) => {
+      response.resume();
+      resolve(response.statusCode);
+    });
+    req.on("error", reject);
+    req.end();
+  });
+  for (const host of ["console.example.ts.net", "console"]) {
+    const origin = `http://${host}:${port}`;
+    assert.ok(app.networkUrls.includes(origin));
+    assert.equal(await responseStatus(host), 401);
+    const headers = { Authorization: `Bearer ${app.token}`, Origin: origin };
+    assert.equal(await responseStatus(host, headers), 200);
+    assert.equal(await responseStatus(host, { ...headers, Origin: "https://example.com" }), 403);
+    assert.equal(await responseStatus(host, { ...headers, Host: `${host}:${Number(port) + 1}` }), 403);
+  }
+  assert.equal(await responseStatus("other.example.ts.net", { Authorization: `Bearer ${app.token}` }), 403);
+  const local = await fixture(t, { PATH: bin });
+  assert.deepEqual(local.networkUrls, []);
 });
 
 test("config edits preserve layers and detect stale writes", async (t) => {

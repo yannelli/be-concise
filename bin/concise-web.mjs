@@ -6,7 +6,7 @@ const help = `Usage: concise-web [--cwd PATH] [--port PORT] [--remote] [--no-ope
 
 Starts the Concise configuration, playground, and live hook console.
 Defaults: current directory, available localhost port, open browser.
-Use --remote to accept connections on this machine's IPv4 network addresses.
+Use --remote to accept this machine's IPv4 addresses and Tailscale hostnames.
 
 From the repository: node bin/concise-web.mjs
 Install locally as a global command: npm install -g .
