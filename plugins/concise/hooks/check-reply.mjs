@@ -26,8 +26,10 @@ function readTail(path) {
 function textOf(entry) {
   const message = entry?.message || entry?.payload || entry;
   if ((message?.role || entry?.role) !== "assistant") return null;
-  const block = (message?.content || []).find((part) => (part?.type === "text" || part?.type === "output_text") && typeof part.text === "string");
-  return block ? block.text : null;
+  if (message.channel && message.channel !== "final") return null;
+  if (typeof message.content === "string") return message.content;
+  const blocks = (message?.content || []).filter((part) => (part?.type === "text" || part?.type === "output_text") && typeof part.text === "string");
+  return blocks.length ? blocks.map((part) => part.text).join("\n") : null;
 }
 
 function lastAssistantText(path) {
@@ -76,13 +78,13 @@ async function decide(input, ctx) {
   ctx.config = config;
   if (!config.stopHook) return {};
   if (!config.features.emDash.enabled && !config.features.aiWriting.enabled) return {};
-  if (!input.transcript_path) return {};
-
-  let text = null;
-  try {
-    text = lastAssistantText(input.transcript_path);
-  } catch {
-    return {};
+  let text = typeof input.last_assistant_message === "string" ? input.last_assistant_message : null;
+  if (text === null && input.transcript_path) {
+    try {
+      text = lastAssistantText(input.transcript_path);
+    } catch {
+      return {};
+    }
   }
   if (text === null) return {};
 

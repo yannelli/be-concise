@@ -57,7 +57,7 @@ export function assertAllowed(name, result) {
   ok(name);
 }
 
-// Codex ignores systemMessage on PreToolUse, so the flag must also ride in additionalContext.
+// Both hosts deliver model-visible PreToolUse flags through additionalContext.
 export function assertFlagged(name, result) {
   const sys = result.systemMessage || "";
   const ctx = result.hookSpecificOutput?.additionalContext || "";

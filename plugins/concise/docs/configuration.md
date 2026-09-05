@@ -93,7 +93,7 @@ Each core check has its own switch under `checks`: `comments`, `fileSize`, and `
 3. To fix the text, send different text. The hook checks the new text from the start.
 4. A third identical write starts a new episode and is denied again.
 
-`ask` returns `permissionDecision: "ask"` on `PreToolUse`, so you approve or reject the call yourself. On `Stop` it behaves as `confirm`.
+`ask` uses Claude Code's native permission prompt and also sends the finding to the agent. Codex does not support that hook decision, so Concise denies the call and tells the agent to revise or request your approval. After approval, the agent retries with `concise-ignore`; repeating the unchanged call stays denied. On `Stop`, `ask` behaves as `confirm`.
 
 `deny` denies until `maxRetries` is passed, then allows the write and flags it, the same as the 3 core checks.
 

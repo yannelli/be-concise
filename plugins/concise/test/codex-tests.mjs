@@ -14,7 +14,7 @@ function patch(...hunks) {
 }
 
 function patchEvent(body, sid, cwd = workDir) {
-  return { tool_name: "apply_patch", tool_input: { command: body }, cwd, session_id: sid };
+  return { hook_event_name: "PreToolUse", turn_id: "turn-1", tool_name: "apply_patch", tool_input: { command: body }, cwd, session_id: sid };
 }
 
 function bashEvent(command, sid) {

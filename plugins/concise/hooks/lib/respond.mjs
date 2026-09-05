@@ -1,19 +1,36 @@
 const preTool = (fields) => ({ hookSpecificOutput: { hookEventName: "PreToolUse", ...fields } });
 
-// Claude Code shows systemMessage to the user; Codex drops it, so the same text also
-// goes to the model as additionalContext.
+// systemMessage is a UI notice; additionalContext reaches the model in both hosts.
 export function flagged(text) {
   return { systemMessage: text, ...preTool({ additionalContext: text }) };
 }
 
 export const deny = (reason) => preTool({ permissionDecision: "deny", permissionDecisionReason: reason });
 
-export const ask = (reason) => preTool({ permissionDecision: "ask", permissionDecisionReason: reason });
+export function ask(reason, input = {}) {
+  // turn_id is a Codex extension; Codex rejects ask and continues the tool call.
+  if (typeof input.turn_id === "string") {
+    return deny(`${reason}\n\nCodex does not support hook approval prompts. Revise the flagged text, or ask the user to approve keeping it. After approval, retry with concise-ignore.`);
+  }
+  return preTool({ permissionDecision: "ask", permissionDecisionReason: reason, additionalContext: reason });
+}
+
+export function modelNotices(result, event) {
+  const text = result.systemMessage;
+  if (!text || event !== "PreToolUse") return result;
+  const output = result.hookSpecificOutput || {};
+  const context = output.additionalContext || "";
+  return {
+    ...result,
+    ...preTool({ ...output, additionalContext: context && !text.includes(context) ? `${context}\n\n${text}` : text }),
+  };
+}
 
 /** Keeps an allowed-with-flag text visible when a later check decided the call. */
 export function mergeFlag(flagText, result) {
   if (!flagText) return result;
-  if (result.systemMessage) return flagged(`${flagText}\n\n${result.systemMessage}`);
-  if (result.hookSpecificOutput) return { ...result, systemMessage: flagText };
-  return flagged(flagText);
+  return modelNotices({
+    ...result,
+    systemMessage: result.systemMessage ? `${flagText}\n\n${result.systemMessage}` : flagText,
+  }, "PreToolUse");
 }

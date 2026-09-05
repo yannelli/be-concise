@@ -223,6 +223,7 @@ const referenceFor = (fired) => (fired.emDash ? DASH_REFERENCE : AI_REFERENCE);
 
 function decide({ input, config, key, hash, fired, texts, summaries, event, scope }) {
   return resolveStyle({
+    input,
     sessionId: input.session_id,
     key,
     hash,
