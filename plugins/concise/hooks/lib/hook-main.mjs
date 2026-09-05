@@ -1,4 +1,4 @@
-import { flagged } from "./respond.mjs";
+import { flagged, modelNotices } from "./respond.mjs";
 import { loadConfig } from "./config.mjs";
 import { createLogger, softFailResult } from "./log.mjs";
 import { once } from "./state.mjs";
@@ -130,6 +130,7 @@ export async function runHook({ hook, event }, decide) {
   result = withSoftFail(result, ctx.config);
   const config = ctx.config || fallbackConfig(input.cwd);
   result = withMessage(result, configWarnings(config, input.session_id));
+  result = modelNotices(result, event);
   logRun({ hook, event, input, ctx, config, result, error, started });
   const style = styleLog();
   await publishMonitor({

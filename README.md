@@ -42,7 +42,7 @@ codex plugin marketplace add yannelli/be-concise
 codex plugin add concise@be-concise
 ```
 
-Start a new Codex session, run `/hooks`, open `PreToolUse`, and review and trust each `concise` hook. Codex asks for review again when a hook definition changes.
+Start a new Codex session, run `/hooks`, and review and trust each `concise` hook under both `PreToolUse` and `Stop`. Codex asks for review again when a hook definition changes.
 
 For automation that already validates its hook sources:
 
