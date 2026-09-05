@@ -3,7 +3,7 @@ import { loadPacks, resolveActive } from "../hooks/lib/packs.mjs";
 let input = "";
 for await (const chunk of process.stdin) input += chunk;
 const { cwd, config } = JSON.parse(input);
-const loaded = await loadPacks({ cwd, config });
+const loaded = await loadPacks({ cwd, config, env: process.env });
 const active = new Map(resolveActive({ ...loaded, config }).packs.map((pack) => [pack.id, pack]));
 const packs = loaded.packs.map((pack) => ({
   id: pack.id, feature: pack.feature, categoryId: pack.categoryId, category: pack.category,

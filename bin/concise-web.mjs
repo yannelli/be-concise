@@ -2,10 +2,11 @@
 import { spawn } from "node:child_process";
 import { startServer } from "../plugins/concise/web/server.mjs";
 
-const help = `Usage: concise-web [--cwd PATH] [--port PORT] [--remote] [--no-open]
+const help = `Usage: concise-web [--cwd PATH | --all] [--port PORT] [--remote] [--no-open]
 
 Starts the Concise configuration, playground, and live hook console.
 Defaults: current directory, available localhost port, open browser.
+Use --all to serve every project the hooks have registered under ~/.config/concise/projects.
 Use --remote to accept this machine's IPv4 addresses and Tailscale hostnames.
 
 From the repository: node bin/concise-web.mjs
@@ -20,6 +21,7 @@ function parse(args) {
     if (arg === "--help" || arg === "-h") return { help: true };
     if (arg === "--no-open") open = false;
     else if (arg === "--remote") options.remote = true;
+    else if (arg === "--all") options.all = true;
     else if (arg === "--cwd" || arg === "--port") {
       const value = args[++i];
       if (!value || value.startsWith("--")) throw new Error(`Missing value for ${arg}`);
@@ -30,6 +32,7 @@ function parse(args) {
       }
     } else throw new Error(`Unknown option: ${arg}`);
   }
+  if (options.all && options.cwd) throw new Error("--all and --cwd are exclusive");
   return { options, open };
 }
 
@@ -40,7 +43,8 @@ try {
     const consoleServer = await startServer(args.options);
     const address = `${consoleServer.browserUrl}/#token=${consoleServer.token}`;
     const network = consoleServer.networkUrls.map((url) => `Network console: ${url}/#token=${consoleServer.token}\n`).join("");
-    process.stdout.write(`Concise console: ${address}\n${network}Project: ${consoleServer.cwd}\nPress Ctrl+C to stop.\n`);
+    const scope = consoleServer.hub ? `Projects: ${consoleServer.projectsDir}` : `Project: ${consoleServer.cwd}`;
+    process.stdout.write(`Concise console: ${address}\n${network}${scope}\nPress Ctrl+C to stop.\n`);
     let closing = false;
     const close = async () => {
       if (closing) return;

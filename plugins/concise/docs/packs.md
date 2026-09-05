@@ -7,9 +7,10 @@ A `.mjs` pack executes code from the checkout. The hook imports it, so its top-l
 ## Where packs load from, in order
 
 1. `hooks/lib/patterns/` (the built-in packs).
-2. `<cwd>/.claude/concise/patterns/`.
-3. `<cwd>/.codex/concise/patterns/`.
-4. Each entry in `features.aiWriting.packs`, in list order. `BEC_LOAD_LIB_PATHS` is appended to that list.
+2. `$XDG_CONFIG_HOME/concise/patterns/`, else `~/.config/concise/patterns/` (the user packs, loaded for every project).
+3. `<cwd>/.claude/concise/patterns/`.
+4. `<cwd>/.codex/concise/patterns/`.
+5. Each entry in `features.aiWriting.packs`, in list order. `BEC_LOAD_LIB_PATHS` is appended to that list.
 
 Each source is walked recursively, sorted by name, and only `.json` and `.mjs` files are read. `presets.json` is skipped. A later source with the same pack id replaces the earlier pack. Two files with the same id inside one source is an error, and so is a pack whose `id` does not match its file name. An invalid pack is skipped and reported once per session.
 
@@ -176,6 +177,23 @@ export default {
 | `ctx.stats.syllables(word)` | The syllable count for one word. |
 
 Each `ctx.stats` helper is memoized per scan.
+
+## Manage packs from the console
+
+The Rules page of `concise-web` lists every loaded pack with a switch, an add form, and an update check. Each write goes to the target picked under "Save changes to": `Project` edits `<cwd>/.claude/concise.json` and the `<cwd>/.claude/concise/patterns/` directory, `User` edits the user config file and `~/.config/concise/patterns/`.
+
+| Action | What it writes |
+|---|---|
+| Switch a pack off | Adds the id to `features.aiWriting.excludePacks` and drops it from `enablePatterns`. An `emDash` pack sets `features.emDash.enabled`. |
+| Switch a pack on | Drops the id from `excludePacks` and `disablePatterns`, sets `features.aiWriting.enabled` when the feature is off, and adds the id to `enablePatterns` when the preset leaves its category out. The response names any other layer that still excludes it. |
+| Add an https URL | Downloads the `.json` pack into the pack directory as `<id>.json` and records the URL and a hash in `packs.json` next to that directory. A `.mjs` URL is refused, because it runs code inside the hook. `http` is accepted for `localhost` only. |
+| Add a path | Appends the file or directory to `features.aiWriting.packs` in the target's config file. |
+| Paste JSON | Validates the pack and saves it as `<id>.json` in the pack directory. |
+| Check for updates | Refetches every URL in the `packs.json` files, reports which packs changed, and compares the plugin version with the latest GitHub release. |
+| Update | Refetches one changed pack and rewrites its file and hash. |
+| Remove | Deletes a pack file under a pack directory and its `packs.json` entry. Built-in packs and path entries stay. |
+
+The API behind the page is `POST /api/packs/toggle`, `POST /api/packs/add`, `POST /api/packs/remove`, `GET /api/packs/updates`, and `POST /api/packs/update`, each scoped to the selected project.
 
 ## Validate and render
 

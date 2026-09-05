@@ -33,6 +33,8 @@ The layer column refers to the 5 config layers in [configuration.md](configurati
 | `BEC_LOG_ROTATE` | `size`, `daily`, or `both` | `log.rotate` | 5 |
 | `BEC_LOG_USE_JSON` | boolean | `log.format` as `json` | 5 |
 | `BEC_LOG_USE_PLAINTEXT` | boolean | `log.format` as `plaintext`, which wins over `BEC_LOG_USE_JSON` | 5 |
+| `BEC_MONITOR_PERSIST` | boolean | `monitor.persist` | 5 |
+| `BEC_MONITOR_DISABLED` | `1` | skips the project registry, the record file, and the console feed | none |
 | `BEC_ALLOW_PHRASES` | phrase list | `allowList.phrases` | 5 |
 | `BEC_ALLOW_PATTERNS` | regex list | `allowList.patterns` | 5 |
 | `BEC_BYPASS_PHRASES` | phrase list | `bypass.phrases` | 5 |

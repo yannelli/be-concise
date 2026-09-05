@@ -3,10 +3,12 @@ import test from "node:test";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { request } from "node:http";
+import { createServer, request } from "node:http";
 import { startServer } from "../plugins/concise/web/server.mjs";
 import { validateConfig } from "../plugins/concise/web/configuration.mjs";
 import { publishMonitor } from "../plugins/concise/hooks/lib/monitor.mjs";
+import { projectKey, recordsPath } from "../plugins/concise/hooks/lib/projects.mjs";
+import { loadPacks } from "../plugins/concise/hooks/lib/packs.mjs";
 
 async function fixture(t, overrides = {}, options = {}) {
   const root = await mkdtemp(join(tmpdir(), "concise-web-test-"));
@@ -217,8 +219,179 @@ test("one console per project preserves the first registry", async (t) => {
   assert.equal(JSON.parse(await readFile(app.registryPath, "utf8")).token, app.token);
 });
 
+test("hub console lists registered projects and follows their record files", async (t) => {
+  const root = await mkdtemp(join(tmpdir(), "concise-hub-test-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const home = join(root, "home");
+  const alpha = join(root, "alpha");
+  const beta = join(root, "beta");
+  await Promise.all([home, alpha, beta].map((dir) => mkdir(dir)));
+  const env = { PATH: process.env.PATH, HOME: home, XDG_CACHE_HOME: join(root, "cache") };
+  const record = (cwd, hook) => ({ cwd, hook, decision: "allow", request: {}, response: {} });
+  await publishMonitor(record(alpha, "check-edit"), { env });
+  await publishMonitor(record(beta, "check-bash"), { env });
+  const server = await startServer({ all: true, env });
+  t.after(() => server.close());
+  const api = (path, options = {}) => fetch(`${server.url}${path}`, {
+    ...options, headers: { Authorization: `Bearer ${server.token}`, "Content-Type": "application/json" },
+  });
+  assert.equal(server.hub, true);
+  assert.equal(server.cwd, null);
+  assert.equal(server.projectsDir, join(home, ".config", "concise", "projects"));
+  const { projects } = await (await api("/api/projects")).json();
+  assert.deepEqual(projects.map((project) => project.name).sort(), ["alpha", "beta"]);
+  const alphaKey = projects.find((project) => project.name === "alpha").key;
+  const history = await (await api("/api/history")).json();
+  assert.equal(history.records.length, 2);
+  assert.ok(history.records.every((item) => item.project && item.projectName));
+  assert.equal((await (await api(`/api/history?project=${alphaKey}`)).json()).records.length, 1);
+  assert.equal((await api("/api/ingest", { method: "POST", body: "{}" })).status, 405);
+  const abort = new AbortController();
+  t.after(() => abort.abort());
+  const response = await fetch(`${server.url}/api/events?token=${server.token}`, { signal: abort.signal });
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const readUntil = async (needle) => {
+    let text = "";
+    while (!text.includes(needle)) text += decoder.decode((await reader.read()).value);
+    return text;
+  };
+  await readUntil("check-bash");
+  await publishMonitor(record(beta, "check-reply"), { env });
+  assert.match(await readUntil("check-reply"), /"projectName":"beta"/);
+  const state = await (await api(`/api/state?project=${alphaKey}`)).json();
+  assert.equal(state.hub, true);
+  assert.equal(state.project, alphaKey);
+  assert.equal(state.cwd, projectKey(alpha).cwd);
+  assert.equal(state.projects.length, 2);
+  assert.equal((await api("/api/state?project=nope")).status, 404);
+  const payload = { id: "project-claude", revision: null, text: '{"maxCommentLines":9}' };
+  assert.equal((await api(`/api/config?project=${alphaKey}`, { method: "PATCH", body: JSON.stringify(payload) })).status, 200);
+  assert.equal(JSON.parse(await readFile(join(alpha, ".claude", "concise.json"), "utf8")).maxCommentLines, 9);
+  assert.equal((await api(`/api/clear?project=${alphaKey}`, { method: "POST", body: "{}" })).status, 200);
+  const remaining = await (await api("/api/history")).json();
+  assert.equal(remaining.records.length, 2);
+  assert.ok(remaining.records.every((item) => item.projectName === "beta"));
+  assert.equal(await readFile(recordsPath(alpha, env), "utf8"), "");
+  await assert.rejects(startServer({ all: true, env }), /already registered/);
+});
+
 test("validation supports nullable categories, sizes, and custom pack thresholds", () => {
   assert.doesNotThrow(() => validateConfig({ features: { aiWriting: { categories: null, options: { custom: { minimum: 2 } } } }, log: { maxSize: 1024 } }));
+  assert.doesNotThrow(() => validateConfig({ monitor: { persist: false } }));
+  assert.throws(() => validateConfig({ monitor: { persist: "no" } }), /must be boolean/);
   assert.throws(() => validateConfig({ bypass: { patterns: ["["] } }), /Invalid regex/);
   assert.throws(() => validateConfig({ features: { emDash: { mode: "off" } } }), /must be confirm/);
+});
+
+async function packServer(t, initial) {
+  let pack = initial;
+  let release = { tag_name: "v0.0.1", html_url: "https://github.com/yannelli/be-concise/releases/tag/v0.0.1" };
+  const server = createServer((req, response) => {
+    if (req.url === "/release") return response.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify(release));
+    if (req.url === "/team-words.json") return response.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify(pack));
+    if (req.url === "/broken.json") return response.end("{");
+    response.writeHead(404).end();
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise((resolve) => { server.closeAllConnections(); server.close(resolve); }));
+  return { url: `http://127.0.0.1:${server.address().port}`, set: (next) => { pack = next; }, setRelease: (next) => { release = next; } };
+}
+
+test("console toggles, installs, removes, and updates packs", async (t) => {
+  const teamWords = { id: "team-words", feature: "aiWriting", category: { id: "team-words", label: "team words" }, patterns: [{ phrase: "synerg(?:y|ies)", fix: "name the shared part" }] };
+  const remote = await packServer(t, teamWords);
+  const app = await fixture(t, {}, { releasesUrl: `${remote.url}/release` });
+  const post = async (path, body) => {
+    const response = await app.api(path, { method: "POST", body: JSON.stringify(body) });
+    return { status: response.status, ...(await response.json()) };
+  };
+  const updates = async () => (await app.api("/api/packs/updates")).json();
+  const packOf = (state, id) => state.packs.find((pack) => pack.id === id);
+  const projectConfig = async () => JSON.parse(await readFile(join(app.cwd, ".claude", "concise.json"), "utf8"));
+
+  let result = await post("/api/packs/add", { source: `${remote.url}/team-words.json`, target: "project" });
+  assert.equal(result.status, 200, result.error);
+  assert.equal(result.path, join(app.cwd, ".claude", "concise", "patterns", "team-words.json"));
+  assert.equal(packOf(result.state, "team-words").builtin, false);
+  assert.equal(packOf(result.state, "team-words").active, false);
+  assert.equal(result.state.packSources["team-words"].target, "project");
+  assert.deepEqual(result.state.packTargets.map((target) => target.id), ["project", "user"]);
+  assert.equal(JSON.parse(await readFile(join(app.cwd, ".claude", "concise", "packs.json"), "utf8"))["team-words"].url, `${remote.url}/team-words.json`);
+
+  result = await post("/api/packs/toggle", { id: "team-words", enabled: true, target: "project" });
+  assert.equal(result.status, 200, result.error);
+  assert.equal(result.active, true);
+  assert.equal(result.warning, null);
+  let config = await projectConfig();
+  assert.equal(config.features.aiWriting.enabled, true);
+  assert.equal(config.features.aiWriting.enablePatterns, undefined);
+  result = await post("/api/packs/toggle", { id: "ste", enabled: true, target: "project" });
+  assert.equal(result.active, true);
+  assert.deepEqual((await projectConfig()).features.aiWriting.enablePatterns, ["ste"]);
+  result = await post("/api/packs/toggle", { id: "ste", enabled: false, target: "project" });
+  assert.equal(result.active, false);
+  config = await projectConfig();
+  assert.deepEqual(config.features.aiWriting.excludePacks, ["ste"]);
+  assert.equal(config.features.aiWriting.enablePatterns, undefined);
+  result = await post("/api/packs/toggle", { id: "vocabulary", enabled: false, target: "project" });
+  assert.equal(packOf(result.state, "vocabulary").active, false);
+  result = await post("/api/packs/toggle", { id: "vocabulary", enabled: true, target: "project" });
+  assert.equal(packOf(result.state, "vocabulary").active, true);
+  config = await projectConfig();
+  assert.deepEqual(config.features.aiWriting.excludePacks, ["ste"]);
+  assert.equal(config.features.aiWriting.enablePatterns, undefined);
+  result = await post("/api/packs/toggle", { id: "em-dash", enabled: true, target: "project" });
+  assert.equal(packOf(result.state, "em-dash").active, true);
+  assert.equal((await projectConfig()).features.emDash.enabled, true);
+  await mkdir(join(app.home, ".config", "concise"), { recursive: true });
+  await writeFile(join(app.home, ".config", "concise", "concise.json"), JSON.stringify({ features: { aiWriting: { excludePacks: ["hedging"] } } }));
+  result = await post("/api/packs/toggle", { id: "hedging", enabled: true, target: "project" });
+  assert.equal(result.active, false);
+  assert.match(result.warning, /Check User\./);
+  assert.equal((await post("/api/packs/toggle", { id: "missing", enabled: true, target: "project" })).status, 404);
+
+  const custom = { id: "house-words", feature: "aiWriting", category: "house-words", patterns: [{ phrase: "frobnicate", fix: "say what it does" }] };
+  result = await post("/api/packs/add", { text: JSON.stringify(custom), target: "user" });
+  assert.equal(result.status, 200, result.error);
+  assert.equal(result.path, join(app.home, ".config", "concise", "patterns", "house-words.json"));
+  assert.equal(packOf(result.state, "house-words").active, true);
+  assert.ok((await loadPacks({ cwd: app.cwd, env: app.env })).packs.some((pack) => pack.id === "house-words" && !pack.builtin));
+  assert.ok(!(await loadPacks({ cwd: app.cwd })).packs.some((pack) => pack.id === "house-words"));
+  assert.equal((await post("/api/packs/add", { text: JSON.stringify(custom), target: "user" })).status, 409);
+  const extra = join(app.root, "extra");
+  await mkdir(extra);
+  await writeFile(join(extra, "extra-words.json"), JSON.stringify({ ...custom, id: "extra-words", category: "extra-words" }));
+  result = await post("/api/packs/add", { source: extra, target: "project" });
+  assert.equal(result.status, 200, result.error);
+  assert.deepEqual((await projectConfig()).features.aiWriting.packs, [extra]);
+  assert.equal(packOf(result.state, "extra-words").active, true);
+  for (const body of [{ source: "http://example.com/pack.json" }, { source: `${remote.url}/pack.mjs` }, { source: `${remote.url}/broken.json` }, { source: join(app.root, "missing") }, { text: '{"id":"x"}' }, { target: "elsewhere" }, {}]) {
+    assert.equal((await post("/api/packs/add", { target: "project", ...body })).status, 400, JSON.stringify(body));
+  }
+  assert.equal((await post("/api/packs/add", { source: `${remote.url}/missing.json`, target: "project" })).status, 502);
+
+  let report = await updates();
+  assert.equal(report.plugin.latest, "0.0.1");
+  assert.equal(report.plugin.updateAvailable, false);
+  assert.deepEqual(report.packs.map((pack) => [pack.id, pack.target, pack.changed, pack.error]), [["team-words", "project", false, null]]);
+  remote.set({ ...teamWords, patterns: [...teamWords.patterns, { phrase: "circle back", fix: "return to" }] });
+  remote.setRelease({ tag_name: "v99.0.0", html_url: "https://example.com/release" });
+  report = await updates();
+  assert.equal(report.plugin.updateAvailable, true);
+  assert.equal(report.plugin.url, "https://example.com/release");
+  assert.equal(report.packs[0].changed, true);
+  result = await post("/api/packs/update", { id: "team-words", target: "project" });
+  assert.equal(result.status, 200, result.error);
+  assert.equal(JSON.parse(await readFile(result.path, "utf8")).patterns.length, 2);
+  assert.equal(packOf(result.state, "team-words").patterns.length, 2);
+  assert.equal((await updates()).packs[0].changed, false);
+  assert.equal((await post("/api/packs/update", { id: "house-words", target: "user" })).status, 404);
+
+  result = await post("/api/packs/remove", { id: "team-words" });
+  assert.equal(result.status, 200, result.error);
+  assert.equal(packOf(result.state, "team-words"), undefined);
+  assert.deepEqual((await updates()).packs, []);
+  assert.equal((await post("/api/packs/remove", { id: "vocabulary" })).status, 400);
+  assert.equal((await post("/api/packs/remove", { id: "extra-words" })).status, 400);
 });

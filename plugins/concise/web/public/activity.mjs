@@ -1,21 +1,22 @@
 import { el, button, badge, heading, panel, field, select, empty, recordCard, download } from "./ui.mjs";
 
 export function activityView(ctx) {
-  const filters = ctx.activityFilters ||= { source: "all", decision: "all", hook: "all", session: "", search: "" };
+  const filters = ctx.activityFilters ||= { project: "selected", source: "all", decision: "all", hook: "all", session: "", search: "" };
   let paused = false;
-  let snapshot = ctx.records.slice();
+  const pool = () => (ctx.state?.hub && filters.project === "all" ? ctx.records : ctx.visible());
+  let snapshot = pool().slice();
   const records = el("div", { class: "record-list" });
   const count = el("span", { class: "muted mono" });
   const status = el("span", { class: "muted", role: "status" });
   const pause = button("Pause display", () => {
     paused = !paused;
-    if (paused) snapshot = ctx.records.slice();
+    if (paused) snapshot = pool().slice();
     pause.textContent = paused ? "Resume display" : "Pause display";
     status.textContent = paused ? "Display paused. Incoming events are still retained." : "";
     update();
   });
   function visible() {
-    return (paused ? snapshot : ctx.records).filter((record) => (filters.source === "all" || record.source === filters.source)
+    return (paused ? snapshot : pool()).filter((record) => (filters.source === "all" || record.source === filters.source)
       && (filters.decision === "all" || record.decision === filters.decision)
       && (filters.hook === "all" || record.hook === filters.hook)
       && (!filters.session || String(record.session || "").includes(filters.session))
@@ -24,7 +25,7 @@ export function activityView(ctx) {
   function update() {
     const opened = new Set([...records.querySelectorAll("details.record[open]")].map((node) => node.dataset.record));
     const items = visible();
-    count.textContent = `${items.length} / ${(paused ? snapshot : ctx.records).length} events`;
+    count.textContent = `${items.length} / ${(paused ? snapshot : pool()).length} events`;
     records.replaceChildren(...(items.length ? [...items].reverse().map((record) => {
       const node = recordCard(record, opened.has(String(record.id)));
       node.dataset.record = record.id;
@@ -34,11 +35,11 @@ export function activityView(ctx) {
   const choice = (key, options) => select(options, filters[key], (event) => { filters[key] = event.target.value; update(); });
   const textFilter = (key, placeholder) => el("input", { type: "search", value: filters[key], placeholder, oninput: (event) => { filters[key] = event.target.value; update(); } });
   const hooks = [...new Set(["check-edit", "check-bash", "check-reply", "test-filter", ...ctx.records.map((record) => record.hook).filter(Boolean)])];
-  const clear = button("Clear history", async () => {
+  const clear = button(ctx.state?.hub ? "Clear project history" : "Clear history", async () => {
     try {
       await ctx.api("/api/clear", { method: "POST", body: {} });
-      ctx.records = [];
-      snapshot = [];
+      ctx.records = ctx.state?.hub ? ctx.records.filter((record) => record.project !== ctx.project) : [];
+      snapshot = pool().slice();
       status.textContent = "Retained history cleared.";
       update();
       ctx.updateCounts();
@@ -47,6 +48,7 @@ export function activityView(ctx) {
   const root = el("div", {}, heading("FOLLOW EACH CALL", "Live activity", "Requests, decisions, and responses from the playground and this workspace.",
     el("div", { class: "row" }, button("Export JSON", () => download("concise-activity.json", visible())), pause)),
     panel("Event stream", el("div", {}, el("div", { class: "activity-filters" },
+      ctx.state?.hub ? field("Project", choice("project", [["selected", "Selected project"], ["all", "All projects"]])) : null,
       field("Source", choice("source", [["all", "All sources"], ["live", "Live hooks"], ["test", "Playground"]])),
       field("Decision", choice("decision", [["all", "All decisions"], ...["allow", "flag", "deny", "ask", "block", "bypass", "rewrite", "error"]])),
       field("Hook", choice("hook", [["all", "All hooks"], ...hooks])),
