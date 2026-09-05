@@ -4,6 +4,7 @@ import { createLogger, softFailResult } from "./log.mjs";
 import { once } from "./state.mjs";
 import { styleLog } from "./style-check.mjs";
 import { STOP_BLOCK_MESSAGE } from "./confirm.mjs";
+import { publishMonitor } from "./monitor.mjs";
 
 export function readStdin() {
   return new Promise((resolve) => {
@@ -130,6 +131,23 @@ export async function runHook({ hook, event }, decide) {
   const config = ctx.config || fallbackConfig(input.cwd);
   result = withMessage(result, configWarnings(config, input.session_id));
   logRun({ hook, event, input, ctx, config, result, error, started });
+  const style = styleLog();
+  await publishMonitor({
+    ts: new Date().toISOString(),
+    hook,
+    event: input.hook_event_name || event || null,
+    tool: input.tool_name ?? null,
+    session: input.session_id ?? null,
+    cwd: input.cwd || process.cwd(),
+    decision: error ? "error" : ctx.decision || decisionOf(result),
+    durationMs: Date.now() - started,
+    findings: style.findings,
+    counts: style.counts,
+    error,
+    request: input,
+    response: result,
+    source: "live",
+  });
   // No process.exit: a piped stdout writes asynchronously on macOS and would truncate.
   process.stdout.write(JSON.stringify(result));
 }

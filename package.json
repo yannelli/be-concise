@@ -1,0 +1,10 @@
+{
+  "name": "be-concise",
+  "private": true,
+  "description": "Local configuration and hook console for Concise",
+  "license": "MIT",
+  "bin": { "concise-web": "bin/concise-web.mjs" },
+  "scripts": { "web": "node bin/concise-web.mjs", "start": "node bin/concise-web.mjs" },
+  "engines": { "node": ">=24" },
+  "files": ["bin/", "plugins/concise/", "LICENSE", "README.md"]
+}
