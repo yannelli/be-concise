@@ -75,6 +75,7 @@ export function applyLayer(base, layer) {
   next.styleIgnoreGlobs = unionList(base.styleIgnoreGlobs, layer.styleIgnoreGlobs);
   next.checks = { ...base.checks, ...(isObject(layer.checks) ? layer.checks : {}) };
   next.log = { ...base.log, ...(isObject(layer.log) ? layer.log : {}) };
+  next.monitor = { ...base.monitor, ...(isObject(layer.monitor) ? layer.monitor : {}) };
   next.allowList = mergeStringSets(base.allowList, layer.allowList);
   next.bypass = mergeStringSets(base.bypass, layer.bypass);
   next.features = mergeFeatures(base.features, layer.features);
@@ -132,6 +133,7 @@ export function envOverrideLayer(vars) {
   if (vars.disableStopHook !== null) layer.stopHook = !vars.disableStopHook;
   const log = logLayer(vars.log);
   if (Object.keys(log).length) layer.log = log;
+  if (vars.monitorPersist !== null) layer.monitor = { persist: vars.monitorPersist };
   const allowList = { phrases: vars.allowPhrases, patterns: vars.allowPatterns };
   const bypass = { phrases: vars.bypassPhrases, patterns: vars.bypassPatterns };
   if (allowList.phrases.length || allowList.patterns.length) layer.allowList = allowList;

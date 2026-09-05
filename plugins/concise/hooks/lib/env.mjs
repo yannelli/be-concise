@@ -91,6 +91,7 @@ export function readEnv(env = process.env) {
     loadLibPaths: parsePaths(raw("BEC_LOAD_LIB_PATHS")),
     softFail: bool("BEC_HOOK_SOFT_FAIL"),
     disableStopHook: bool("BEC_DISABLE_STOP_HOOK"),
+    monitorPersist: bool("BEC_MONITOR_PERSIST"),
     log: {
       enabled: bool("BEC_LOG_ENABLED"),
       path: raw("BEC_LOG_PATH")?.trim() || null,

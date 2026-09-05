@@ -192,12 +192,22 @@ function categoriesOf(packs) {
   return [...byId.values()];
 }
 
-export async function loadPacks({ cwd, config } = {}) {
+/** The user pack directory. `$XDG_CONFIG_HOME/concise/patterns`, else `~/.config/concise/patterns`. */
+export function userPatternsDir(env = process.env) {
+  if (env.XDG_CONFIG_HOME) return join(env.XDG_CONFIG_HOME, "concise", "patterns");
+  const home = env.HOME || env.USERPROFILE;
+  return home ? join(home, ".config", "concise", "patterns") : null;
+}
+
+/** User packs load only when `env` is given, so the scripts and tests that pass no env see the built-ins alone. */
+export async function loadPacks({ cwd, config, env } = {}) {
   const base = cwd || ".";
   const ai = aiConfig(config);
   const byId = new Map();
   const problems = [];
   await addSource(filesIn(BUILTIN_DIR), true, byId, problems);
+  const user = env ? userPatternsDir(env) : null;
+  if (user) await addSource(filesIn(user), false, byId, problems);
   await addSource(filesIn(join(base, ".claude", "concise", "patterns")), false, byId, problems);
   await addSource(filesIn(join(base, ".codex", "concise", "patterns")), false, byId, problems);
   for (const entry of ai.packs) await addSource(sourceFiles(String(entry), base), false, byId, problems);

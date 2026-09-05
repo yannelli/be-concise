@@ -79,11 +79,13 @@ concise-web --cwd /path/to/project
 
 The command starts a localhost server on an available port and opens the browser. Use `--port 4317` to select a port or `--no-open` to print the URL without opening it. `npm run web` also starts the console from the repository.
 
-The console edits user and project configuration, shows the effective settings and environment overrides, lists pattern packs, and tests pasted text through the hooks. It shows matches, hook decisions, timings, and full JSON responses. Repeat an attempt to test confirmation and retry limits, or reset the playground session.
+`concise-web --all` serves every project the hooks have registered under `~/.config/concise/projects`, with a project switcher in the sidebar. Each hook call registers its project there and appends its record to `~/.local/state/concise/projects/<hash>/records.jsonl`, so the hub shows history from before it started and keeps working while it is down. Set `"monitor": { "persist": false }` or `BEC_MONITOR_PERSIST=0` to keep the registry entry without the record file.
+
+The console edits user and project configuration, shows the effective settings and environment overrides, and tests pasted text through the hooks. The Rules page switches packs on and off, adds a pack from an https URL, a local path, or pasted JSON, checks packs installed from a URL and the plugin itself for updates, and removes packs it installed. Pack management is described in [plugins/concise/docs/packs.md](plugins/concise/docs/packs.md). It shows matches, hook decisions, timings, and full JSON responses. Repeat an attempt to test confirmation and retry limits, or reset the playground session.
 
 The playground previews Bash command rewrites. It does not run the pasted command. It uses separate retry state and leaves test configuration changes unsaved until you save a configuration layer.
 
-Live activity captures hook requests and responses for the selected project while the console runs, with filtering, JSON export, and counts for the retained records. It keeps up to 500 records within 16 MiB in memory. Stop the server to discard them. Capture requires this version of the plugin in the agent host; reload the plugin and review the changed Bash hook definition after updating. Other environment overrides in the agent process still apply to its hooks.
+Live activity captures hook requests and responses for the selected project while the console runs, with filtering, JSON export, and counts for the retained records. It keeps up to 500 records per project within 16 MiB in memory. Stop the server to discard them, and clear a project's history to truncate its record file. Capture requires this version of the plugin in the agent host; reload the plugin and review the changed Bash hook definition after updating. Other environment overrides in the agent process still apply to its hooks.
 
 The URL contains a local access token. Configuration saves detect intervening file edits. `Ctrl+C` stops the server and removes its capture registration.
 

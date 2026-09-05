@@ -3,13 +3,16 @@ import { execFileSync, spawn } from "node:child_process";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { readFile, realpath } from "node:fs/promises";
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { networkInterfaces } from "node:os";
-import { monitorPath } from "../hooks/lib/monitor.mjs";
+import { hubPath, monitorPath } from "../hooks/lib/monitor.mjs";
 import { applyLayer } from "../hooks/lib/config-layers.mjs";
+import { defaultConfig } from "../hooks/lib/config.mjs";
 import { runTest, disposeTests } from "./testing/runner.mjs";
 import { configuration, saveConfiguration, validateConfig, problem } from "./configuration.mjs";
+import { createHub } from "./hub.mjs";
+import { RELEASES_URL, addPack, checkUpdates, packSources, packTargets, removePack, togglePack, updatePack } from "./packs.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const LIMIT = 2 * 1024 * 1024;
@@ -29,9 +32,9 @@ async function body(request) {
   catch { throw problem("Invalid JSON request"); }
 }
 
-function catalog(cwd, config) {
+function runCatalog(cwd, config, env) {
   return new Promise((resolveResult, reject) => {
-    const child = spawn(process.execPath, [resolve(HERE, "catalog.mjs")], { stdio: ["pipe", "pipe", "pipe"] });
+    const child = spawn(process.execPath, [resolve(HERE, "catalog.mjs")], { env, stdio: ["pipe", "pipe", "pipe"] });
     const timer = setTimeout(() => child.kill("SIGKILL"), 15000);
     let output = "";
     let error = "";
@@ -48,12 +51,12 @@ function catalog(cwd, config) {
   });
 }
 
-function register(path, registry) {
+function register(path, registry, scope) {
   mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
   try {
     const current = JSON.parse(readFileSync(path, "utf8"));
     if (Number.isInteger(current.pid) && current.pid > 0) {
-      try { process.kill(current.pid, 0); throw problem(`A console is already registered for this project at ${current.url}`, 409); }
+      try { process.kill(current.pid, 0); throw problem(`A console is already registered ${scope} at ${current.url}`, 409); }
       catch (err) { if (err.code !== "ESRCH") throw err; }
     }
     rmSync(path, { force: true });
@@ -64,10 +67,11 @@ function register(path, registry) {
   writeFileSync(path, JSON.stringify(registry), { flag: "wx", mode: 0o600 });
 }
 
-export async function startServer({ cwd = process.cwd(), port = 0, remote = false, env = process.env } = {}) {
-  cwd = await realpath(cwd);
+export async function startServer({ cwd = process.cwd(), port = 0, remote = false, env = process.env, all = false, releasesUrl = RELEASES_URL } = {}) {
+  cwd = all ? null : await realpath(cwd);
   env = { ...env };
-  if (env.BEC_CONFIG_PATH) env.BEC_CONFIG_PATH = resolve(cwd, env.BEC_CONFIG_PATH);
+  const catalog = (target, config) => runCatalog(target, config, env);
+  if (cwd && env.BEC_CONFIG_PATH) env.BEC_CONFIG_PATH = resolve(cwd, env.BEC_CONFIG_PATH);
   const hostnames = [];
   if (remote) {
     try {
@@ -87,10 +91,12 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
   let sequence = 0;
   let jobs = 0;
   let url;
+  let hub = null;
   const send = (response, value, status = 200) => {
     response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
     response.end(JSON.stringify(value));
   };
+  const capacity = () => RETAINED * (hub ? Math.max(hub.size(), 1) : 1);
   const publish = (record) => {
     const value = { ...record, id: ++sequence, ts: record.ts || new Date().toISOString() };
     const data = JSON.stringify(value);
@@ -98,17 +104,36 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
     if (size > LIMIT) return;
     records.push({ value, size });
     bytes += size;
-    while (records.length > RETAINED || bytes > HISTORY_BYTES) bytes -= records.shift().size;
+    while (records.length > capacity() || bytes > HISTORY_BYTES) bytes -= records.shift().size;
     for (const stream of streams) if (!stream.write(`event: record\ndata: ${data}\n\n`)) stream.end();
   };
-  const state = async () => {
-    const config = configuration(cwd, env);
-    let rules;
-    try { rules = await catalog(cwd, config.effective); }
-    catch (err) { rules = { packs: [], categories: [], presets: {}, problems: [{ reason: err.message }] }; }
-    return { cwd, ...config, ...rules, problems: [...config.effective.problems, ...rules.problems],
+  if (all) hub = createHub(env, { retained: RETAINED, publish });
+  const projects = () => (hub ? hub.list() : [{ key: null, name: basename(cwd), cwd, lastSeen: null }]);
+  const projectOf = (route) => {
+    if (!hub) return { cwd, key: null };
+    const key = route.searchParams.get("project");
+    const project = key ? hub.resolve(key) : hub.list()[0] || null;
+    return project ? { cwd: project.cwd, key: project.key } : { cwd: null, key: null };
+  };
+  const state = async ({ cwd: target, key }) => {
+    const base = { hub: Boolean(hub), projects: projects(), project: key, defaults: defaultConfig(),
       hooks: JSON.parse(await readFile(resolve(HERE, "../hooks/hooks.json"), "utf8")),
       monitor: { connected: true, retained: RETAINED, maxBytes: HISTORY_BYTES }, runtime: { node: process.version, platform: process.platform } };
+    if (!target) return { ...base, cwd: null };
+    const config = configuration(target, env);
+    let rules;
+    try { rules = await catalog(target, config.effective); }
+    catch (err) { rules = { packs: [], categories: [], presets: {}, problems: [{ reason: err.message }] }; }
+    return { ...base, cwd: target, ...config, ...rules, problems: [...config.effective.problems, ...rules.problems],
+      packTargets: packTargets(target, env).map(({ id, label, dir }) => ({ id, label, dir })), packSources: packSources(target, env) };
+  };
+  const clear = (key) => {
+    hub?.clear(key);
+    const kept = records.filter(({ value }) => key && value.project !== key);
+    records.length = 0;
+    records.push(...kept);
+    bytes = kept.reduce((sum, { size }) => sum + size, 0);
+    for (const stream of streams) stream.write(`event: cleared\ndata: ${JSON.stringify({ project: key })}\n\n`);
   };
   const server = createServer(async (request, response) => {
     response.setHeader("Cache-Control", "no-store");
@@ -135,7 +160,11 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
       const credential = request.headers.authorization?.replace(/^Bearer /, "") || (route.pathname === "/api/events" ? route.searchParams.get("token") : null);
       if (!equal(credential, token)) throw problem("Unauthorized", 401);
       const method = request.method;
-      if (route.pathname === "/api/history" && method === "GET") return send(response, { records: records.map(({ value }) => value) });
+      if (route.pathname === "/api/projects" && method === "GET") return send(response, { hub: Boolean(hub), projects: projects() });
+      if (route.pathname === "/api/history" && method === "GET") {
+        const key = hub ? route.searchParams.get("project") : null;
+        return send(response, { records: records.map(({ value }) => value).filter((value) => !key || value.project === key) });
+      }
       if (route.pathname === "/api/events" && method === "GET") {
         response.writeHead(200, { "Content-Type": "text/event-stream", Connection: "keep-alive", "X-Accel-Buffering": "no" });
         response.write("event: ready\ndata: {}\n\n");
@@ -146,6 +175,7 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
         return;
       }
       if (route.pathname === "/api/ingest" && method === "POST") {
+        if (hub) throw problem("The hub reads project record files and takes no direct hook records", 405);
         const record = await body(request);
         if (!record || typeof record.hook !== "string" || typeof record.request !== "object" || typeof record.response !== "object") throw problem("Invalid hook record");
         if (typeof record.cwd !== "string" || await realpath(record.cwd) !== cwd) throw problem("Hook belongs to another project", 400);
@@ -153,27 +183,46 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
         return send(response, { ok: true });
       }
       if (route.pathname === "/api/clear" && method === "POST") {
-        records.length = 0;
-        bytes = 0;
-        for (const stream of streams) stream.write("event: cleared\ndata: {}\n\n");
+        const key = hub ? route.searchParams.get("project") : null;
+        if (key) hub.resolve(key);
+        clear(key);
         return send(response, { ok: true });
       }
       if (jobs >= 4) throw problem("Console is busy. Try again after the current operation finishes.", 429);
       jobs++;
       try {
-        if (route.pathname === "/api/state" && method === "GET") return send(response, await state());
+        const project = projectOf(route);
+        if (route.pathname === "/api/state" && method === "GET") return send(response, await state(project));
+        if (!project.cwd) throw problem("No project is registered yet. Run a hook in a project first.", 404);
         if (route.pathname === "/api/config" && method === "PATCH") {
-          saveConfiguration(cwd, env, await body(request));
-          return send(response, await state());
+          saveConfiguration(project.cwd, env, await body(request));
+          return send(response, await state(project));
         }
         if (route.pathname === "/api/test" && method === "POST") {
           const input = await body(request);
           if (!input || typeof input !== "object" || Array.isArray(input)) throw problem("Test must be an object");
-          const effective = configuration(cwd, env).effective;
+          const effective = configuration(project.cwd, env).effective;
           const config = input.config ? applyLayer(effective, validateConfig(input.config)) : effective;
-          const result = await runTest({ ...input, cwd, env, config });
-          for (const hook of result.hooks) publish({ ...hook, source: "test" });
+          const result = await runTest({ ...input, cwd: project.cwd, env, config });
+          for (const hook of result.hooks) publish({ ...hook, source: "test", project: project.key });
           return send(response, result);
+        }
+        if (route.pathname === "/api/packs/toggle" && method === "POST") {
+          const result = await togglePack({ ...await body(request), cwd: project.cwd, env, catalog });
+          return send(response, { ...result, state: await state(project) });
+        }
+        if (route.pathname === "/api/packs/add" && method === "POST") {
+          const result = await addPack({ ...await body(request), cwd: project.cwd, env });
+          return send(response, { ...result, state: await state(project) });
+        }
+        if (route.pathname === "/api/packs/remove" && method === "POST") {
+          const result = await removePack({ ...await body(request), cwd: project.cwd, env, catalog });
+          return send(response, { ...result, state: await state(project) });
+        }
+        if (route.pathname === "/api/packs/updates" && method === "GET") return send(response, await checkUpdates({ cwd: project.cwd, env, releasesUrl }));
+        if (route.pathname === "/api/packs/update" && method === "POST") {
+          const result = await updatePack({ ...await body(request), cwd: project.cwd, env });
+          return send(response, { ...result, state: await state(project) });
         }
         throw problem("Not found", 404);
       } finally { jobs--; }
@@ -192,13 +241,14 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
   allowedOrigins.set(new URL(url).host, url);
   for (const origin of networkUrls) allowedOrigins.set(new URL(origin).host, origin);
   if (proxyOrigin) allowedOrigins.set(new URL(proxyOrigin).host, proxyOrigin);
-  const registryPath = monitorPath(cwd, env);
-  try { register(registryPath, { url, token, pid: process.pid }); }
-  catch (err) { server.close(); throw err; }
+  const registryPath = hub ? hubPath(env) : monitorPath(cwd, env);
+  try { register(registryPath, { url, token, pid: process.pid }, hub ? "for all projects" : "for this project"); }
+  catch (err) { hub?.close(); server.close(); throw err; }
   return {
-    url, browserUrl: proxyOrigin || url, networkUrls, token, cwd, registryPath,
+    url, browserUrl: proxyOrigin || url, networkUrls, token, cwd, registryPath, hub: Boolean(hub), projectsDir: hub?.dir ?? null,
     async close() {
       try { if (JSON.parse(readFileSync(registryPath, "utf8")).token === token) rmSync(registryPath, { force: true }); } catch {}
+      hub?.close();
       for (const stream of streams) stream.end();
       await new Promise((done) => { server.close(done); server.closeAllConnections(); });
       await disposeTests();

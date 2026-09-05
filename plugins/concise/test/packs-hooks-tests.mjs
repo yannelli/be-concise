@@ -67,7 +67,7 @@ console.log("\npacks in the hooks (user sources)");
   const c = project({}, { ".claude/concise/patterns/house.json": pack("house", HOUSE) });
   const result = run(CHECK_EDIT, writeEvent(c, "doc.md", "We frobnicate the parser.\n"));
   assertDenied("a pack in .claude/concise/patterns adds findings", result);
-  includes("the user category is named", result, "(house: say what it does)");
+  includes("the user category is named", result, "[concise:house] 1 match at line 1: \"frobnicate\" (say what it does)");
 }
 
 {
@@ -143,7 +143,7 @@ const SCRIPT = `export default {
   const result = run(CHECK_EDIT, writeEvent(c, "doc.md", "Ship it.\n\nTODO the rest.\n"));
   assertDenied("a script pack finding becomes a deny", result);
   includes("the script finding keeps its line", result, "line 3");
-  includes("the script finding keeps its fix", result, "(shouty: file an issue)");
+  includes("the script finding keeps its fix", result, "(file an issue)");
 }
 
 {
