@@ -24,7 +24,7 @@ codex plugin marketplace add yannelli/be-concise
 codex plugin add concise@be-concise
 ```
 
-Start a new Codex session, run `/hooks`, open `PreToolUse`, and review and trust each `concise` hook. Codex asks for review again when a hook definition changes. Automation that already validates its hook sources can pass `codex exec --dangerously-bypass-hook-trust "<prompt>"`. The bypass applies to that invocation and does not save trust.
+Start a new Codex session, run `/hooks`, and review and trust each `concise` hook under both `PreToolUse` and `Stop`. Codex asks for review again when a hook definition changes. Automation that already validates its hook sources can pass `codex exec --dangerously-bypass-hook-trust "<prompt>"`. The bypass applies to that invocation and does not save trust.
 
 The 3 core checks run right away. No config file is needed.
 
@@ -85,7 +85,7 @@ A bulleted `## Summary` body is never flagged as a verbose PR body. Only unstruc
 
 Every check reads the text being written, not the file on disk. An existing license header or an already-oversized file does not trip a one-line `Edit` or `*** Update File` hunk. The file length rule applies to `Write` and `*** Add File` only. In an `apply_patch`, each contiguous run of `+` lines is one chunk, and a `*** Move to:` target decides the comment syntax.
 
-After 2 denied retries on the same target, the hook allows the action and flags it instead of blocking forever: a `systemMessage` in Claude Code, `additionalContext` in Codex. A passing check resets that counter.
+After 2 denied retries on the same target, the hook allows the action and flags it: `systemMessage` reaches the user and `additionalContext` reaches the agent in both hosts. A passing check resets that counter.
 
 ## Presets
 
@@ -182,7 +182,7 @@ Every config key, the 5 config layers and their merge rules, `mode` and the conf
 
 - `gh pr create --body-file <path>` is not inspected. Only inline `--body`, `-b`, and heredoc bodies are.
 - `git commit -F <path>` and `--file` are not inspected. Only `-m`, repeated `-m`, `--message=`, and heredoc messages are.
-- `mode: "ask"` and the `Stop` reply check are tested with Claude Code payload shapes only. No live run in Claude Code or Codex was done.
+- Hook contract tests cover Claude Code and Codex notices, approval handling, reply correction, and continuation guards. Live agent sessions are not part of the suite.
 - The dash characters come from the built-in `prose/em-dash.json` file. A user pack with that id changes which scopes the dash check runs in, and `excludePacks` does not reach it. Turn `features.emDash.enabled` off instead.
 - Activation is per category. `enablePatterns` with a pack id or a tag turns on the whole category that pack belongs to, and a user pack that reuses a built-in category id runs together with the built-in patterns under every preset either one is active in.
 - A `.mjs` pack runs its top-level code and its `detect` in the hook process on every tool call, with your permissions. Read it before you add it.
@@ -197,7 +197,9 @@ Every config key, the 5 config layers and their merge rules, `mode` and the conf
 
 Both hosts expose `${CLAUDE_PLUGIN_ROOT}` to hook commands, so one `hooks/hooks.json` serves both. The Claude manifest is `.claude-plugin/plugin.json`, the Codex manifest is `.codex-plugin/plugin.json`, and the marketplaces are `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json` at the repo root.
 
-Claude Code sends `Write`, `Edit`, and `MultiEdit`. Codex sends `apply_patch` with the patch text in `tool_input.command`. Both are read the same way, and only the added lines count. Codex drops `systemMessage` on `PreToolUse`, so a flagged allow reaches the model as `additionalContext` there.
+Claude Code sends `Write`, `Edit`, and `MultiEdit`. Codex sends `apply_patch` with the patch text in `tool_input.command`. Both are read the same way, and only the added lines count. `PreToolUse` notices reach each agent through `additionalContext`; a denial delivers its reason. Codex identifies turns with `turn_id` and does not support `permissionDecision: "ask"`, so Concise denies those calls with revision and user-approval instructions. Claude keeps its native approval prompt.
+
+The reply hook reads `last_assistant_message` first, with a transcript fallback. A `Stop` block supplies the agent's correction instructions. Confirmation, bypass, and soft-fail notices remain terminal UI messages so they do not start another turn. These contracts follow the [Claude Code hook reference](https://code.claude.com/docs/en/hooks) and [Codex hook reference](https://developers.openai.com/codex/hooks/).
 
 ## Test
 

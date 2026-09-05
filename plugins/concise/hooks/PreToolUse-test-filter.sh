@@ -60,5 +60,5 @@ pattern=${FILTER_PATTERN:-$default_pattern}
 self=$(realpath "${BASH_SOURCE[0]}")
 wrapped="TF_CMD=$(printf %q "$cmd") TF_PATTERN=$(printf %q "$pattern") TF_LINES=$FILTER_LINES TF_CONTEXT=$FILTER_CONTEXT TF_TAIL=$FILTER_TAIL TF_RUNNER=$runner bash $(printf %q "$self") run"
 
-jq -cn --arg cmd "$wrapped" \
-  '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"allow",updatedInput:{command:$cmd}}}'
+jq -c --arg cmd "$wrapped" \
+  '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"allow",updatedInput:(.tool_input + {command:$cmd})}}' <<<"$input"

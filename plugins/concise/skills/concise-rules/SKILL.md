@@ -13,7 +13,7 @@ The plugin runs 3 core checks as `PreToolUse` hooks, plus 2 optional style check
 
 ## When a hook denies you
 
-The deny carries a `permissionDecisionReason` naming the exact file/line or the exact paragraph problem. Fix that and retry. After 2 denied retries on the same target, the action goes through and is flagged instead of blocking forever: the user sees a `systemMessage` in Claude Code, and you see the same text as `additionalContext` in Codex. A passing check resets that counter.
+The deny carries a `permissionDecisionReason` naming the exact file/line or the exact paragraph problem. Fix that and retry. After 2 denied retries on the same target, the action goes through and is flagged: the user sees a `systemMessage`, and you see the same text as `additionalContext` in both hosts. A passing check resets that counter.
 
 ## Escape hatches
 
@@ -52,7 +52,7 @@ Only the text being written is scanned, as with the other 3 checks.
 3. To fix the text, send different text. The hook checks the new text from the start.
 4. After `maxRetries` denials on the same target, the write goes through and is flagged.
 
-`mode: "ask"` returns `permissionDecision: "ask"` on `PreToolUse`, so the user decides. On `Stop` it behaves as `confirm`. `mode: "deny"` denies until `maxRetries` is passed, then allows and flags. When both features fire on one call, the strictest mode wins (`deny` over `ask` over `confirm`) and one message carries both parts.
+`mode: "ask"` uses Claude Code's permission prompt and sends you the finding. In Codex, the call is denied: revise the text or ask the user to approve keeping it. After approval, retry with `concise-ignore`. Repeating the unchanged call stays denied. On `Stop`, `ask` behaves as `confirm`. `mode: "deny"` denies until `maxRetries` is passed, then allows and flags. When both features fire on one call, the strictest mode wins (`deny` over `ask` over `confirm`) and one message carries both parts.
 
 ### Feature config
 

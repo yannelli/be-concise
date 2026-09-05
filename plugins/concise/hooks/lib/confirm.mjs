@@ -25,8 +25,8 @@ function overRetries(sessionId, key, event, message, maxRetries) {
   return noted(event, `${message}\n\n(Allowed through after ${maxRetries} nudges, flagging for manual review.)`);
 }
 
-export function resolveStyle({ sessionId, key, hash, mode, maxRetries, message, event, summary, reference }) {
-  if (mode === "ask" && event !== "Stop") return ask(message);
+export function resolveStyle({ sessionId, key, hash, mode, maxRetries, message, event, summary, reference, input }) {
+  if (mode === "ask" && event !== "Stop") return ask(message, input);
 
   if (mode === "deny") {
     if (bumpAttempt(sessionId, key) > maxRetries) return overRetries(sessionId, key, event, message, maxRetries);
