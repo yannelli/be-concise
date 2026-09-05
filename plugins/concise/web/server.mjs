@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { readFile, realpath } from "node:fs/promises";
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
@@ -68,6 +68,16 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
   cwd = await realpath(cwd);
   env = { ...env };
   if (env.BEC_CONFIG_PATH) env.BEC_CONFIG_PATH = resolve(cwd, env.BEC_CONFIG_PATH);
+  const hostnames = [];
+  if (remote) {
+    try {
+      const status = JSON.parse(execFileSync("tailscale", ["status", "--json", "--peers=false"], {
+        env, encoding: "utf8", timeout: 1000, stdio: ["ignore", "pipe", "ignore"],
+      }));
+      const name = status.Self?.DNSName?.replace(/\.$/, "");
+      if (name) hostnames.push(name, name.split(".")[0]);
+    } catch {}
+  }
   const proxyOrigin = env.PASEO_URL ? new URL(env.PASEO_URL).origin : null;
   const allowedOrigins = new Map();
   const token = randomBytes(32).toString("hex");
@@ -175,9 +185,10 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
   server.requestTimeout = 20000;
   await new Promise((resolveReady, reject) => { server.once("error", reject); server.listen(port, remote ? "0.0.0.0" : "127.0.0.1", resolveReady); });
   url = `http://127.0.0.1:${server.address().port}`;
-  const networkUrls = remote ? [...new Set(Object.values(networkInterfaces()).flat()
+  const networkUrls = remote ? [...new Set([...Object.values(networkInterfaces()).flat()
     .filter((address) => address?.family === "IPv4" && !address.internal)
-    .map((address) => `http://${address.address}:${server.address().port}`))] : [];
+    .map((address) => address.address), ...hostnames])]
+    .map((host) => `http://${host}:${server.address().port}`) : [];
   allowedOrigins.set(new URL(url).host, url);
   for (const origin of networkUrls) allowedOrigins.set(new URL(origin).host, origin);
   if (proxyOrigin) allowedOrigins.set(new URL(proxyOrigin).host, proxyOrigin);
