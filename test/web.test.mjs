@@ -1,0 +1,142 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { request } from "node:http";
+import { startServer } from "../plugins/concise/web/server.mjs";
+import { validateConfig } from "../plugins/concise/web/configuration.mjs";
+import { publishMonitor } from "../plugins/concise/hooks/lib/monitor.mjs";
+
+async function fixture(t) {
+  const root = await mkdtemp(join(tmpdir(), "concise-web-test-"));
+  const cwd = join(root, "project");
+  const home = join(root, "home");
+  await mkdir(cwd);
+  await mkdir(home);
+  const env = { PATH: process.env.PATH, HOME: home, XDG_CACHE_HOME: join(root, "cache") };
+  const server = await startServer({ cwd, env });
+  t.after(async () => { await server.close(); await rm(root, { recursive: true, force: true }); });
+  const api = (path, options = {}) => fetch(`${server.url}${path}`, {
+    ...options, headers: { Authorization: `Bearer ${server.token}`, "Content-Type": "application/json", ...options.headers },
+  });
+  return { ...server, root, home, env, api };
+}
+
+test("console authenticates APIs and rejects cross-origin requests", async (t) => {
+  const app = await fixture(t);
+  assert.equal((await fetch(`${app.url}/api/history`)).status, 401);
+  assert.equal((await app.api("/api/history", { headers: { Origin: "https://example.com" } })).status, 403);
+  const invalidHost = await new Promise((resolve, reject) => {
+    const req = request(`${app.url}/api/history`, { headers: { Host: "example.com" } }, (response) => {
+      response.resume();
+      resolve(response.statusCode);
+    });
+    req.on("error", reject);
+    req.end();
+  });
+  assert.equal(invalidHost, 403);
+  assert.equal((await app.api("/api/history")).status, 200);
+  const page = await fetch(app.url);
+  assert.equal(page.status, 200);
+  assert.match(page.headers.get("content-security-policy"), /frame-ancestors 'none'/);
+  const icon = await fetch(`${app.url}/icon.svg`);
+  assert.equal(icon.status, 200);
+  assert.match(icon.headers.get("content-type"), /^image\/svg\+xml/);
+  assert.equal(await icon.text(), await readFile(new URL("../plugins/concise/assets/icon.svg", import.meta.url), "utf8"));
+  const darkIcon = await fetch(`${app.url}/icon-dark.svg`);
+  assert.equal(darkIcon.status, 200);
+  const darkSvg = await darkIcon.text();
+  assert.match(darkSvg, /fill="#FAF7F2"/);
+  assert.match(darkSvg, /fill="#FF4A24"/);
+  assert.doesNotMatch(darkSvg, /fill="#18191D"/);
+  assert.equal((await app.api("/api/configuration.mjs")).status, 404);
+});
+
+test("config edits preserve layers and detect stale writes", async (t) => {
+  const app = await fixture(t);
+  await mkdir(join(app.home, ".config", "concise"), { recursive: true });
+  await writeFile(join(app.home, ".config", "concise", "concise.json"), '{"maxCommentLines":4}');
+  let state = await (await app.api("/api/state")).json();
+  assert.equal(state.effective.maxCommentLines, 4);
+  assert.ok(state.packs.length > 40);
+  assert.ok(state.presets.technical);
+  const project = state.layers.find((layer) => layer.id === "project-codex");
+  assert.equal(project.exists, false);
+  const payload = { id: project.id, revision: null, text: '{"maxCommentLines":7,"features":{"aiWriting":{"enabled":true}}}' };
+  let result = await app.api("/api/config", { method: "PATCH", body: JSON.stringify(payload) });
+  assert.equal(result.status, 200);
+  state = await result.json();
+  assert.equal(state.effective.maxCommentLines, 7);
+  assert.equal(state.effective.features.aiWriting.enabled, true);
+  assert.equal(state.layers.find((layer) => layer.id === project.id).active, true);
+  result = await app.api("/api/config", { method: "PATCH", body: JSON.stringify(payload) });
+  assert.equal(result.status, 409);
+  assert.equal(JSON.parse(await readFile(project.path, "utf8")).maxCommentLines, 7);
+  payload.revision = state.layers.find((layer) => layer.id === project.id).revision;
+  for (const text of ['{"features":{"aiWriting":false}}', '[]', '{"__proto__":{}}', '{"maxFileLines":-2}', '{"checks":{"comments":"false"}}']) {
+    result = await app.api("/api/config", { method: "PATCH", body: JSON.stringify({ ...payload, text }) });
+    assert.equal(result.status, 400, text);
+  }
+  assert.equal(JSON.parse(await readFile(project.path, "utf8")).maxCommentLines, 7);
+});
+
+test("test filter settings can be saved without evaluating shell content", async (t) => {
+  const app = await fixture(t);
+  const update = (text, revision = null) => app.api("/api/config", {
+    method: "PATCH", body: JSON.stringify({ id: "filter-claude", revision, text }),
+  });
+  assert.equal((await update("FILTER_LINES=$(touch /tmp/concise-web-unexpected)" )).status, 400);
+  const result = await update("FILTER_LINES=20\nFILTER_PATTERN='^FAIL|Error:'\n");
+  assert.equal(result.status, 200);
+  assert.match(await readFile(join(app.home, ".claude", "test-filter.conf"), "utf8"), /FILTER_LINES=20/);
+});
+
+test("live records stream with full responses and history can be cleared", async (t) => {
+  const app = await fixture(t);
+  const abort = new AbortController();
+  t.after(() => abort.abort());
+  const response = await fetch(`${app.url}/api/events?token=${app.token}`, { signal: abort.signal });
+  const reader = response.body.getReader();
+  assert.match(new TextDecoder().decode((await reader.read()).value), /event: ready/);
+  const record = { cwd: app.cwd, hook: "check-edit", decision: "deny", request: { tool_name: "Write", tool_input: { content: "private fixture text" } }, response: { hookSpecificOutput: { permissionDecision: "deny" } } };
+  await publishMonitor(record, { env: app.env });
+  const event = new TextDecoder().decode((await reader.read()).value);
+  assert.match(event, /event: record/);
+  assert.match(event, /private fixture text/);
+  const history = await (await app.api("/api/history")).json();
+  assert.equal(history.records.length, 1);
+  assert.equal(history.records[0].source, "live");
+  assert.deepEqual(history.records[0].response, record.response);
+  assert.equal((await app.api("/api/clear", { method: "POST", body: "{}" })).status, 200);
+  assert.equal((await (await app.api("/api/history")).json()).records.length, 0);
+  abort.abort();
+});
+
+test("playground previews settings without saving and emits test records", async (t) => {
+  const app = await fixture(t);
+  const response = await app.api("/api/test", { method: "POST", body: JSON.stringify({
+    kind: "Write", path: "example.md", text: "We delve into the parser.",
+    config: { features: { aiWriting: { enabled: true } } },
+  }) });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.hooks[0].response.hookSpecificOutput.permissionDecision, "deny");
+  assert.ok(result.matches.some((match) => match.category === "vocabulary"));
+  const history = await (await app.api("/api/history")).json();
+  assert.equal(history.records[0].source, "test");
+  const state = await (await app.api("/api/state")).json();
+  assert.equal(state.effective.features.aiWriting.enabled, false);
+});
+
+test("one console per project preserves the first registry", async (t) => {
+  const app = await fixture(t);
+  await assert.rejects(startServer({ cwd: app.cwd, env: app.env }), /already registered/);
+  assert.equal(JSON.parse(await readFile(app.registryPath, "utf8")).token, app.token);
+});
+
+test("validation supports nullable categories, sizes, and custom pack thresholds", () => {
+  assert.doesNotThrow(() => validateConfig({ features: { aiWriting: { categories: null, options: { custom: { minimum: 2 } } } }, log: { maxSize: 1024 } }));
+  assert.throws(() => validateConfig({ bypass: { patterns: ["["] } }), /Invalid regex/);
+  assert.throws(() => validateConfig({ features: { emDash: { mode: "off" } } }), /must be confirm/);
+});
