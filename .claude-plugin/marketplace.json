@@ -11,7 +11,7 @@
             "name": "concise",
             "source": "./plugins/concise",
             "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions, plus optional em dash and AI writing pattern packs (pluggable, env-controlled), and nudges Claude to trim them before you see the bloated version.",
-            "version": "0.6.1",
+            "version": "0.6.2",
             "author": {
                 "name": "Ryan Yannelli",
                 "email": "ryanyannelli@gmail.com",
