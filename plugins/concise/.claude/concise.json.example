@@ -68,6 +68,9 @@
     "rotate": "size",
     "format": "json"
   },
+  "monitor": {
+    "persist": true
+  },
   "features": {
     "emDash": {
       "enabled": false,

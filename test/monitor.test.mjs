@@ -8,6 +8,7 @@ import { dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { monitorPath, publishMonitor } from "../plugins/concise/hooks/lib/monitor.mjs";
+import { listProjects, projectKey } from "../plugins/concise/hooks/lib/projects.mjs";
 
 const hooks = fileURLToPath(new URL("../plugins/concise/hooks/", import.meta.url));
 
@@ -148,6 +149,29 @@ test("live hook telemetry includes final soft-fail warnings and all findings", a
   const persistent = JSON.parse((await readFile(logPath, "utf8")).trim());
   assert.equal(persistent.findings.length, 20);
   assert.equal(Object.hasOwn(persistent, "request"), false);
+});
+
+test("hooks register their project and append records unless persistence is off", async (t) => {
+  const fixtureData = await fixture(t);
+  const { cwd, env, session } = fixtureData;
+  const input = { hook_event_name: "PreToolUse", tool_name: "Write", tool_input: { file_path: join(cwd, "a.md"), content: "plain" }, cwd, session_id: session };
+  const lines = async (path) => (await readFile(path, "utf8")).trim().split("\n").filter(Boolean);
+  await run(process.execPath, [join(hooks, "check-edit.mjs")], input, fixtureData);
+  const projects = listProjects(env);
+  assert.equal(projects.length, 1);
+  assert.equal(projects[0].cwd, projectKey(cwd).cwd);
+  assert.ok(projects[0].file.startsWith(join(env.XDG_CONFIG_HOME, "concise", "projects")));
+  assert.ok(projects[0].records.startsWith(join(env.HOME, ".local", "state", "concise", "projects")));
+  const written = await lines(projects[0].records);
+  assert.equal(written.length, 1);
+  assert.deepEqual(JSON.parse(written[0]).request, input);
+  await run(process.execPath, [join(hooks, "check-edit.mjs")], input, { cwd, env: { ...env, BEC_MONITOR_PERSIST: "0" } });
+  assert.equal((await lines(projects[0].records)).length, 1);
+  const bash = { tool_name: "Bash", tool_input: { command: "ls" }, cwd, session_id: session };
+  await run(process.execPath, [join(hooks, "monitor-filter.mjs")], bash, fixtureData);
+  assert.equal((await lines(projects[0].records)).length, 2);
+  await run(process.execPath, [join(hooks, "monitor-filter.mjs")], bash, { cwd, env: { ...env, BEC_MONITOR_DISABLED: "1" } });
+  assert.equal((await lines(projects[0].records)).length, 2);
 });
 
 test("filter wrapper preserves Bash responses and reports the replacement command", async (t) => {

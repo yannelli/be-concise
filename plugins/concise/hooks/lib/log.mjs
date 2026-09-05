@@ -50,7 +50,7 @@ function pruneDaily(base, maxFiles) {
   }
 }
 
-function rotateBySize(file, maxSize, maxFiles) {
+export function rotateBySize(file, maxSize, maxFiles) {
   if (!existsSync(file) || statSync(file).size <= maxSize) return;
   rmSync(`${file}.${maxFiles}`, { force: true });
   for (let i = maxFiles - 1; i >= 1; i -= 1) {

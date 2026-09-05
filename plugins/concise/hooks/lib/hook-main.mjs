@@ -147,7 +147,7 @@ export async function runHook({ hook, event }, decide) {
     request: input,
     response: result,
     source: "live",
-  });
+  }, { persist: config?.monitor?.persist !== false });
   // No process.exit: a piped stdout writes asynchronously on macOS and would truncate.
   process.stdout.write(JSON.stringify(result));
 }

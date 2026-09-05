@@ -160,7 +160,7 @@ Each category is one pack file. Add a team phrase in 8 lines. Save this as `.cla
 }
 ```
 
-Packs under `.claude/concise/patterns/` or `.codex/concise/patterns/` load with no config, and a pack of your own with no `presets` array runs under every preset. `features.aiWriting.packs` adds more files or directories.
+Packs under `.claude/concise/patterns/` or `.codex/concise/patterns/` load with no config, and packs under `~/.config/concise/patterns/` load for every project. A pack of your own with no `presets` array runs under every preset. `features.aiWriting.packs` adds more files or directories. The `concise-web` Rules page switches packs on and off, adds packs from a URL, a path, or pasted JSON, and checks them for updates.
 
 The full field list, the 3 pattern kinds, the `.mjs` script pack format with `detect(text, ctx)`, and the validator and renderer commands are in [docs/packs.md](docs/packs.md). A `.mjs` pack executes code from the checkout inside the hook process. Read one before you add it.
 

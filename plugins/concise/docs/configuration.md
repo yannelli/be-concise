@@ -28,6 +28,7 @@ Copy `.claude/concise.json.example` to `.claude/concise.json` (Claude Code) or `
 | `log.maxFiles` | `5` | Rotated files kept. |
 | `log.rotate` | `"size"` | `size`, `daily`, or `both`. |
 | `log.format` | `"json"` | `json` or `plaintext`. |
+| `monitor.persist` | `true` | Appends each hook record, with its request and response, to the project's record file for `concise-web --all`. |
 | `features.emDash.enabled` | `false` | Runs the dash check. |
 | `features.emDash.enDash` | `true` | Flags the en dash (`U+2013`) as well. |
 | `features.emDash.doubleHyphen` | `false` | Flags `--` between word characters or between spaces. |
@@ -143,3 +144,7 @@ One record from a denied em dash write:
 ```
 
 Format `json` writes one JSON object per line. Format `plaintext` writes `ts hook tool decision key summary`, with `-` for an empty cell. Rotation `size` renames the file to `.1` through `.<maxFiles>` once it passes `maxSize` and drops the oldest. Rotation `daily` writes `concise.YYYY-MM-DD.log` beside the configured path and keeps `maxFiles` of them. Rotation `both` does both. A write failure is swallowed and the hook still answers.
+
+## monitor
+
+Every hook call registers its project in `~/.config/concise/projects/<folder>-<hash>.json` (`$XDG_CONFIG_HOME` when set) with the real path, the name, the first and last time seen, and the path of its record file. With `monitor.persist` on, the hook also appends the full record, including the tool request and the hook response, to `~/.local/state/concise/projects/<hash>/records.jsonl` (`$XDG_STATE_HOME` when set). The file rotates at 5 MiB and keeps 5 copies. `concise-web --all` reads the registry and follows every record file. `"monitor": { "persist": false }`, or `BEC_MONITOR_PERSIST=0`, keeps the registry entry and skips the record. `BEC_MONITOR_DISABLED=1` skips both and the console feed. Without a home directory the hook writes neither.

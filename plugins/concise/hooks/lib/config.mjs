@@ -76,6 +76,7 @@ const DEFAULTS = {
   allowList: { phrases: [], patterns: [] },
   bypass: { phrases: [], patterns: [] },
   log: { enabled: false, path: null, maxSize: "5m", maxFiles: 5, rotate: "size", format: "json" },
+  monitor: { persist: true },
   features: FEATURES,
   problems: [],
 };

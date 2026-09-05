@@ -130,7 +130,8 @@ console.log("\nfeatures (AI writing in check-edit)");
   const c = setup(aiOn());
   const result = run(CHECK_EDIT, writeEvent(c, "doc.md", "We delve into the parser.\n"));
   assertDenied("aiWriting denied", result);
-  includes("deny names category and fix", result, "(vocabulary: look at, examine)");
+  includes("deny names the category group", result, "[concise:vocabulary] 1 match at line 1");
+  includes("deny names the fix", result, "\"delve\" (look at, examine)");
   includes("deny cites the reference", result, "references/ai-speak-patterns.md");
 }
 {
@@ -141,12 +142,31 @@ console.log("\nfeatures (AI writing in check-edit)");
   const c = setup(aiOn({ preset: "ste" }));
   const result = run(CHECK_EDIT, writeEvent(c, "a.ts", "// ensure the file exists\nconst x = 1;\n"));
   assertDenied("preset ste flags a comment", result);
-  includes("ste category is named", result, "(ste:");
+  includes("ste category is named", result, "[concise:ste]");
 }
 {
   const c = setup(aiOn({ categories: ["chatbot"] }));
   const event = writeEvent(c, "doc.md", "We delve into the parser.\n");
   assertAllowed("categories override ignores delve", run(CHECK_EDIT, event));
+}
+
+console.log("\nfeatures (grouped messages)");
+
+{
+  const c = setup(bothOn());
+  const text = `One ${EM} two.\nThree ${EM} four.\nWe delve into it.\nFive ${EM} six.\nWe delve again and leverage it.\n`;
+  const result = run(CHECK_EDIT, writeEvent(c, "doc.md", text));
+  assertDenied("grouped findings deny", result);
+  includes("the header counts both kinds", result, "[concise] 3 em dashes, 3 AI writing patterns in");
+  includes("dashes are grouped on one line", result, "[concise:emDash] 3 em dashes on lines 1, 2, 4:");
+  includes("a category lists its lines and distinct matches", result, '[concise:vocabulary] 3 matches on lines 3, 5: "delve" (look at, examine); "leverage" (use).');
+  includes("the suppress hint is present", result, "Suppress: concise-ignore on the line");
+}
+{
+  const c = setup(dashOn());
+  const text = Array.from({ length: 12 }, (_, i) => `Item ${i} ${EM} more.`).join("\n");
+  const result = run(CHECK_EDIT, writeEvent(c, "doc.md", `${text}\n`));
+  includes("long line lists are capped", result, "on lines 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 (+2 more)");
 }
 
 console.log("\nfeatures (both features, and the existing checks)");
@@ -157,7 +177,7 @@ console.log("\nfeatures (both features, and the existing checks)");
   const first = run(CHECK_EDIT, event);
   assertDenied("both features fire as one deny", first);
   includes("message keeps the em dash part", first, "1 em dash");
-  includes("message keeps the AI writing part", first, "AI writing patterns");
+  includes("message keeps the AI writing part", first, "[concise:vocabulary]");
   const second = run(CHECK_EDIT, event);
   includes("identical retry confirms both", second, "Kept after confirmation");
   includes("confirmation counts both features", second, "1 em dash, 1 AI writing pattern");

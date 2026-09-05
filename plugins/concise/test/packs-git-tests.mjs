@@ -51,7 +51,7 @@ const label = (text) => JSON.stringify(text.replace(/\s+/g, " ").slice(0, 46));
 function fires(pack, via, text) {
   const name = `${pack} flags ${label(text)} in ${via}`;
   const reason = reasonOf(HOOKS[via](project([pack]), text));
-  if (reason.includes(`(${pack}:`)) return ok(name);
+  if (reason.includes(`[concise:${pack}]`)) return ok(name);
   bad(name, `no ${pack} finding in ${JSON.stringify(reason).slice(0, 220)}`);
 }
 
