@@ -5,6 +5,7 @@ import { readFile, realpath } from "node:fs/promises";
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { networkInterfaces } from "node:os";
 import { monitorPath } from "../hooks/lib/monitor.mjs";
 import { applyLayer } from "../hooks/lib/config-layers.mjs";
 import { runTest, disposeTests } from "./testing/runner.mjs";
@@ -63,7 +64,7 @@ function register(path, registry) {
   writeFileSync(path, JSON.stringify(registry), { flag: "wx", mode: 0o600 });
 }
 
-export async function startServer({ cwd = process.cwd(), port = 0, env = process.env } = {}) {
+export async function startServer({ cwd = process.cwd(), port = 0, remote = false, env = process.env } = {}) {
   cwd = await realpath(cwd);
   env = { ...env };
   if (env.BEC_CONFIG_PATH) env.BEC_CONFIG_PATH = resolve(cwd, env.BEC_CONFIG_PATH);
@@ -172,15 +173,19 @@ export async function startServer({ cwd = process.cwd(), port = 0, env = process
     }
   });
   server.requestTimeout = 20000;
-  await new Promise((resolveReady, reject) => { server.once("error", reject); server.listen(port, "127.0.0.1", resolveReady); });
+  await new Promise((resolveReady, reject) => { server.once("error", reject); server.listen(port, remote ? "0.0.0.0" : "127.0.0.1", resolveReady); });
   url = `http://127.0.0.1:${server.address().port}`;
+  const networkUrls = remote ? [...new Set(Object.values(networkInterfaces()).flat()
+    .filter((address) => address?.family === "IPv4" && !address.internal)
+    .map((address) => `http://${address.address}:${server.address().port}`))] : [];
   allowedOrigins.set(new URL(url).host, url);
+  for (const origin of networkUrls) allowedOrigins.set(new URL(origin).host, origin);
   if (proxyOrigin) allowedOrigins.set(new URL(proxyOrigin).host, proxyOrigin);
   const registryPath = monitorPath(cwd, env);
   try { register(registryPath, { url, token, pid: process.pid }); }
   catch (err) { server.close(); throw err; }
   return {
-    url, browserUrl: proxyOrigin || url, token, cwd, registryPath,
+    url, browserUrl: proxyOrigin || url, networkUrls, token, cwd, registryPath,
     async close() {
       try { if (JSON.parse(readFileSync(registryPath, "utf8")).token === token) rmSync(registryPath, { force: true }); } catch {}
       for (const stream of streams) stream.end();

@@ -2,10 +2,11 @@
 import { spawn } from "node:child_process";
 import { startServer } from "../plugins/concise/web/server.mjs";
 
-const help = `Usage: concise-web [--cwd PATH] [--port PORT] [--no-open]
+const help = `Usage: concise-web [--cwd PATH] [--port PORT] [--remote] [--no-open]
 
 Starts the Concise configuration, playground, and live hook console.
 Defaults: current directory, available localhost port, open browser.
+Use --remote to accept connections on this machine's IPv4 network addresses.
 
 From the repository: node bin/concise-web.mjs
 Install locally as a global command: npm install -g .
@@ -18,6 +19,7 @@ function parse(args) {
     const arg = args[i];
     if (arg === "--help" || arg === "-h") return { help: true };
     if (arg === "--no-open") open = false;
+    else if (arg === "--remote") options.remote = true;
     else if (arg === "--cwd" || arg === "--port") {
       const value = args[++i];
       if (!value || value.startsWith("--")) throw new Error(`Missing value for ${arg}`);
@@ -37,7 +39,8 @@ try {
   else {
     const consoleServer = await startServer(args.options);
     const address = `${consoleServer.browserUrl}/#token=${consoleServer.token}`;
-    process.stdout.write(`Concise console: ${address}\nProject: ${consoleServer.cwd}\nPress Ctrl+C to stop.\n`);
+    const network = consoleServer.networkUrls.map((url) => `Network console: ${url}/#token=${consoleServer.token}\n`).join("");
+    process.stdout.write(`Concise console: ${address}\n${network}Project: ${consoleServer.cwd}\nPress Ctrl+C to stop.\n`);
     let closing = false;
     const close = async () => {
       if (closing) return;
