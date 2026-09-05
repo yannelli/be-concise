@@ -17,7 +17,7 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/PreToolUse-test-filter.sh\"",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/monitor-filter.mjs\"",
                         "timeout": 15
                     },
                     {

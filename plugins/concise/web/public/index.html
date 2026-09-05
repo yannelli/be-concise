@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Concise · Local console</title>
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <script src="/theme.mjs"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <script type="module" src="/app.mjs"></script>
+  </head>
+  <body>
+    <aside class="sidebar" data-slot="sidebar">
+      <a class="brand" href="#overview"><img class="brand-mark brand-light" src="/icon.svg" alt="" width="40" height="40"><img class="brand-mark brand-dark" src="/icon-dark.svg" alt="" width="40" height="40"><span>concise<span class="brand-subtitle">Plugin console</span></span></a>
+      <div class="nav-label">Workspace</div>
+      <nav aria-label="Main navigation">
+        <button type="button" data-page="overview" class="nav-item active"><span data-icon="overview"></span> Overview</button>
+        <button type="button" data-page="configuration" class="nav-item"><span data-icon="configuration"></span> Configuration</button>
+        <button type="button" data-page="playground" class="nav-item"><span data-icon="playground"></span> Playground</button>
+        <button type="button" data-page="activity" class="nav-item"><span data-icon="activity"></span> Live activity <span id="nav-count" class="nav-count">0</span></button>
+        <button type="button" data-page="rules" class="nav-item"><span data-icon="rules"></span> Rules & usage</button>
+      </nav>
+      <div class="sidebar-bottom"><span class="connection"><span id="connection-dot" class="dot pending"></span><span id="connection">Connecting</span></span><p>Configuration and hook inspection<br>on your machine.</p></div>
+    </aside>
+    <main>
+      <header class="topbar"><span class="breadcrumb">Workspace <span data-icon="chevron"></span> <strong id="breadcrumb">Overview</strong></span><div class="topbar-actions"><span class="local-label">Local environment</span><div class="native-select theme-control"><select id="theme" aria-label="Color theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></div></div></header>
+      <div class="workspace"><div id="notice" role="status" aria-live="polite" hidden></div><div id="view"><div class="empty">Loading your workspace…</div></div></div>
+      <footer><span>Concise <span class="footer-divider">/</span> Plugin console</span><span id="runtime"></span></footer>
+    </main>
+  </body>
+</html>

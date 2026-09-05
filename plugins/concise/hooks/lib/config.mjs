@@ -99,7 +99,7 @@ function readLayer(path, problems) {
   return null;
 }
 
-function userConfigPath(env) {
+export function userConfigPath(env) {
   const candidates = [];
   if (env.XDG_CONFIG_HOME) candidates.push(join(env.XDG_CONFIG_HOME, "concise", "concise.json"));
   const home = env.HOME || env.USERPROFILE;
@@ -111,7 +111,7 @@ function userConfigPath(env) {
   return candidates.find((path) => existsSync(path)) || null;
 }
 
-function projectConfigPath(cwd, vars) {
+export function projectConfigPath(cwd, vars) {
   if (vars.configPath) return vars.configPath;
   const base = cwd || ".";
   return CONFIG_DIRS.map((dir) => join(base, dir, "concise.json")).find((path) => existsSync(path)) || null;

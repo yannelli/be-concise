@@ -62,6 +62,31 @@ The bypass applies to that invocation and does not save trust.
 - [plugins/concise/docs/environment.md](plugins/concise/docs/environment.md): every `BEC_` variable and 3 worked scenarios, including a cloud agent with no config file.
 - [plugins/concise/docs/packs.md](plugins/concise/docs/packs.md): the pack file format, the 3 pattern kinds, `detect(text, ctx)`, and the validator and renderer commands.
 
+## Web console
+
+Run from this repository with Node.js 24:
+
+```sh
+node bin/concise-web.mjs
+```
+
+Or install the command globally from this checkout:
+
+```sh
+npm install -g .
+concise-web --cwd /path/to/project
+```
+
+The command starts a localhost server on an available port and opens the browser. Use `--port 4317` to select a port or `--no-open` to print the URL without opening it. `npm run web` also starts the console from the repository.
+
+The console edits user and project configuration, shows the effective settings and environment overrides, lists pattern packs, and tests pasted text through the hooks. It shows matches, hook decisions, timings, and full JSON responses. Repeat an attempt to test confirmation and retry limits, or reset the playground session.
+
+The playground previews Bash command rewrites. It does not run the pasted command. It uses separate retry state and leaves test configuration changes unsaved until you save a configuration layer.
+
+Live activity captures hook requests and responses for the selected project while the console runs, with filtering, JSON export, and counts for the retained records. It keeps up to 500 records within 16 MiB in memory. Stop the server to discard them. Capture requires this version of the plugin in the agent host; reload the plugin and review the changed Bash hook definition after updating. Other environment overrides in the agent process still apply to its hooks.
+
+The URL contains a local access token. Configuration saves detect intervening file edits. `Ctrl+C` stops the server and removes its capture registration.
+
 ## Control test output
 
 Bypass filtering for one command:
