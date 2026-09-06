@@ -74,26 +74,30 @@ function afterBlock(text, input, config) {
 }
 
 async function decide(input, ctx) {
+  const event = input.hook_event_name || "Stop";
+  if (event !== "Stop" && event !== "SubagentStop") return {};
   const config = replyConfig(loadConfig(input.cwd));
   ctx.config = config;
   if (!config.stopHook) return {};
+  if (event === "SubagentStop" && (config.subagentStop?.enabled === false || config.subagentStop?.exemptAgentTypes?.includes(input.agent_type))) return {};
   if (!config.features.emDash.enabled && !config.features.aiWriting.enabled) return {};
   let text = typeof input.last_assistant_message === "string" ? input.last_assistant_message : null;
-  if (text === null && input.transcript_path) {
+  const transcriptPath = event === "SubagentStop" ? input.agent_transcript_path : input.transcript_path;
+  if (text === null && transcriptPath) {
     try {
-      text = lastAssistantText(input.transcript_path);
+      text = lastAssistantText(transcriptPath);
     } catch {
       return {};
     }
   }
   if (text === null) return {};
 
-  const bypassed = bypassResult(text, config, ctx, "Stop");
+  const bypassed = bypassResult(text, config, ctx, event);
   if (bypassed) return bypassed;
   await prepareStyle(input.cwd, config);
   const result = input.stop_hook_active
     ? afterBlock(text, input, config)
-    : styleDecisionForText(text, KEY, "your reply", input, config, "Stop", "reply");
+    : styleDecisionForText(text, KEY, "your reply", input, config, event, "reply");
   return withPackWarnings(result, input.session_id);
 }
 

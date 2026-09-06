@@ -1,8 +1,8 @@
 const preTool = (fields) => ({ hookSpecificOutput: { hookEventName: "PreToolUse", ...fields } });
 
 // systemMessage is a UI notice; additionalContext reaches the model in both hosts.
-export function flagged(text) {
-  return { systemMessage: text, ...preTool({ additionalContext: text }) };
+export function flagged(text, event = "PreToolUse") {
+  return modelNotices({ systemMessage: text }, event);
 }
 
 export const deny = (reason) => preTool({ permissionDecision: "deny", permissionDecisionReason: reason });
@@ -17,12 +17,12 @@ export function ask(reason, input = {}) {
 
 export function modelNotices(result, event) {
   const text = result.systemMessage;
-  if (!text || event !== "PreToolUse") return result;
+  if (!text || !["PreToolUse", "PostToolUse", "SessionStart", "SubagentStart", "UserPromptSubmit"].includes(event)) return result;
   const output = result.hookSpecificOutput || {};
   const context = output.additionalContext || "";
   return {
     ...result,
-    ...preTool({ ...output, additionalContext: context && !text.includes(context) ? `${context}\n\n${text}` : text }),
+    hookSpecificOutput: { ...output, hookEventName: event, additionalContext: context && !text.includes(context) ? `${context}\n\n${text}` : text },
   };
 }
 

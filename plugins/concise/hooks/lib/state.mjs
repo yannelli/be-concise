@@ -1,30 +1,68 @@
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync, mkdirSync, renameSync, opendirSync, unlinkSync, rmdirSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
-function statePath(sessionId) {
-  return join(tmpdir(), `concise-state-${sessionId || "default"}.json`);
+const scope = new AsyncLocalStorage();
+const digest = (value) => createHash("sha256").update(String(value)).digest("hex");
+const root = join(tmpdir(), `concise-state-${process.getuid?.() ?? "user"}`);
+const sessionPath = (sessionId) => join(root, digest(sessionId || "default"));
+
+export function withStateScope(input, callback) {
+  const agent = input.agent_id ? `agent:${input.agent_id}` : input.agent_transcript_path ? `transcript:${input.agent_transcript_path}` : "main";
+  return scope.run({ agent }, callback);
+}
+
+export function statePath(sessionId, agentId) {
+  const agent = agentId === undefined ? scope.getStore()?.agent || "main" : `agent:${agentId}`;
+  return join(sessionPath(sessionId), `${digest(agent)}.json`);
 }
 
 function readState(sessionId) {
   const p = statePath(sessionId);
-  if (!existsSync(p)) return {};
   try {
-    return JSON.parse(readFileSync(p, "utf8"));
+    const state = JSON.parse(readFileSync(p, "utf8"));
+    return state && typeof state === "object" && !Array.isArray(state) ? state : {};
   } catch {
     return {};
   }
 }
 
 function writeState(sessionId, state) {
+  const path = statePath(sessionId);
+  const temporary = `${path}.${process.pid}.tmp`;
   try {
-    writeFileSync(statePath(sessionId), JSON.stringify(state));
+    mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
+    writeFileSync(temporary, JSON.stringify(state), { mode: 0o600 });
+    renameSync(temporary, path);
   } catch {
-        // Best effort: if we can't persist, every future call just looks like a fresh attempt.
+    try { unlinkSync(temporary); } catch {}
   }
 }
 
-/** Returns the attempt count after this call (1-indexed). One counter per (session, key). */
+export function cleanupSession(sessionId, timeoutMs = 550) {
+  if (typeof sessionId !== "string" || !sessionId) return false;
+  const deadline = Date.now() + timeoutMs;
+  const path = sessionPath(sessionId);
+  let directory;
+  try {
+    directory = opendirSync(path);
+    let entry;
+    while (Date.now() < deadline && (entry = directory.readSync())) {
+      if (/^[0-9a-f]{64}\.json(?:\.\d+\.tmp)?$/.test(entry.name)) unlinkSync(join(path, entry.name));
+    }
+    directory.closeSync();
+    directory = null;
+    rmdirSync(path);
+    return true;
+  } catch (error) {
+    return error.code === "ENOENT";
+  } finally {
+    try { directory?.closeSync(); } catch {}
+  }
+}
+
 export function bumpAttempt(sessionId, key) {
   const state = readState(sessionId);
   state[key] = (state[key] || 0) + 1;
