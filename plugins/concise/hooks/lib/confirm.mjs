@@ -9,14 +9,15 @@ const keepHint = (reference) =>
   `\n\nTo keep it, send the identical write again to confirm. To fix it, read ${reference}.`;
 
 export const STOP_BLOCK_MESSAGE = "[concise] reply held for style review";
+const isStop = (event) => event === "Stop" || event === "SubagentStop";
 
 function held(event, text) {
-  if (event !== "Stop") return deny(text);
+  if (!isStop(event)) return deny(text);
   return { decision: "block", reason: text, systemMessage: STOP_BLOCK_MESSAGE };
 }
 
 function noted(event, text) {
-  return event === "Stop" ? { systemMessage: text } : flagged(text);
+  return isStop(event) ? { systemMessage: text } : flagged(text, event);
 }
 
 function overRetries(sessionId, key, event, message, maxRetries) {
@@ -26,7 +27,7 @@ function overRetries(sessionId, key, event, message, maxRetries) {
 }
 
 export function resolveStyle({ sessionId, key, hash, mode, maxRetries, message, event, summary, reference, input }) {
-  if (mode === "ask" && event !== "Stop") return ask(message, input);
+  if (mode === "ask" && !isStop(event)) return ask(message, input);
 
   if (mode === "deny") {
     if (bumpAttempt(sessionId, key) > maxRetries) return overRetries(sessionId, key, event, message, maxRetries);
@@ -41,7 +42,7 @@ export function resolveStyle({ sessionId, key, hash, mode, maxRetries, message, 
   if (bumpAttempt(sessionId, key) > maxRetries) return overRetries(sessionId, key, event, message, maxRetries);
 
   setPending(sessionId, key, hash);
-  return held(event, message + (event === "Stop" ? STOP_HINT : keepHint(reference)));
+  return held(event, message + (isStop(event) ? STOP_HINT : keepHint(reference)));
 }
 
 /** A clean pass ends the episode: no counter, no hash to confirm. */

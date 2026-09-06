@@ -2,6 +2,7 @@ import { mkdtempSync, writeFileSync, rmSync, readdirSync, readFileSync, existsSy
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { withConfig, ok, bad } from "./lib.mjs";
+import { statePath } from "../hooks/lib/state.mjs";
 
 export const EM = "—";
 export const EN = "–";
@@ -116,7 +117,7 @@ export function assertNoBlock(name, result) {
 }
 
 export function assertNoPending(name, sid) {
-  const path = join(tmpdir(), `concise-state-${sid}.json`);
+  const path = statePath(sid);
   const state = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : {};
   const keys = Object.keys(state).filter((key) => key.startsWith("pending:"));
   if (keys.length === 0) return ok(name);

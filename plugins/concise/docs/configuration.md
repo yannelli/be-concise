@@ -15,7 +15,12 @@ Copy `.claude/concise.json.example` to `.claude/concise.json` (Claude Code) or `
 | `checks.comments` | `true` | Runs the comment length check. |
 | `checks.fileSize` | `true` | Runs the file length check. |
 | `checks.prBody` | `true` | Runs the `gh` body check. |
-| `stopHook` | `true` | Runs the `Stop` hook over the agent's reply. |
+| `stopHook` | `true` | Runs reply checks on `Stop` and `SubagentStop`. |
+| `context.enabled` | `true` | Sends resolved rules at startup, resume, compaction, and subagent creation. |
+| `context.perTurn` | `false` | Also sends rules on `UserPromptSubmit`. |
+| `subagentStop.enabled` | `true` | Checks subagent replies when `stopHook` is enabled. |
+| `subagentStop.exemptAgentTypes` | `[]` | Agent types exempt from subagent reply checks. |
+| `testFilter.codexPostToolUse` | `false` | Opts Codex into filtering completed test output instead of rewriting the command. |
 | `softFail` | `false` | Turns every deny, ask, and block into a flagged allow. |
 | `styleIgnoreGlobs` | 28 globs | Paths exempt from the style checks only. |
 | `allowList.phrases` | `[]` | Phrases that drop a finding on the line that holds them. |
@@ -64,7 +69,7 @@ A project file overrides `BEC_FEATURE_ENABLE`. `BEC_FEATURE_ALWAYS_ENABLE` overr
 
 - Unioned across layers, duplicates dropped, order kept: `styleIgnoreGlobs`, `allowList.phrases`, `allowList.patterns`, `bypass.phrases`, `bypass.patterns`, `features.aiWriting.allow`, `features.aiWriting.packs`, `features.aiWriting.excludePacks`.
 - Replaced by the higher layer: `ignoreGlobs`, `features.aiWriting.categories`.
-- Merged one level deep: `features`, `checks`, `log`, and `features.aiWriting.options` per pack id.
+- Merged one level deep: `features`, `checks`, `log`, `monitor`, `context`, `subagentStop`, `testFilter`, and `features.aiWriting.options` per pack id.
 - `enablePatterns` and `disablePatterns` end as two final lists. Inside one layer, an id in both goes to disable. A higher enable removes the id from a lower disable, and a higher disable removes it from a lower enable.
 
 A config file or a `BEC_CONFIG_JSON` value that does not parse as a JSON object is skipped. The other layers still apply, and the hook reports the skipped layer once per session in a `systemMessage`.
@@ -80,7 +85,30 @@ Each core check has its own switch under `checks`: `comments`, `fileSize`, and `
 }
 ```
 
-`"stopHook": false` makes the `Stop` hook write `{}` and exit before it reads the transcript.
+`"stopHook": false` skips `Stop` and `SubagentStop` reply checks before reading transcripts. `SubagentStop` uses `last_assistant_message`, then `agent_transcript_path`. Retry and confirmation state is separate for each session and agent. `SessionEnd` removes that session's state within a bounded cleanup window.
+
+## Lifecycle context and host hooks
+
+`SessionStart` sends the resolved limits, enabled style checks, and escape hatches on `startup`, `resume`, `clear`, and `compact`. `SubagentStart` sends the same rules. Set `context.perTurn` to `true` for reminders on `UserPromptSubmit`. Configuration errors are reported even when reminders are disabled.
+
+Claude reads `hooks/hooks.json`, with broad `if` filters for shell commands. Codex reads `hooks/codex.json`, which uses command hooks without Claude's `if` fields. Both hosts send lifecycle records to the existing monitor.
+
+Codex keeps the existing test command rewrite by default. Set `testFilter.codexPostToolUse` to `true` to try filtering completed results. The post hook preserves failed output, the exit status, and a path to the available raw output. It uses `continue: false` feedback so nested code-mode promises can resolve. Direct calls, code-mode calls, and completed background polls must pass live host smoke checks before changing the default. [Codex PostToolUse contract](https://learn.chatgpt.com/docs/hooks#posttooluse)
+
+Filtering requires a structured response with an exit status. Codex CLI 0.153.2 sends raw text without that status, so the post hook leaves its output unchanged. Text printed by a test is not treated as exit metadata.
+
+## Optional Claude model checks
+
+Generate one optional evaluator from the current project configuration, using the installed plugin path:
+
+```sh
+node /path/to/concise/scripts/model-check-settings.mjs --evaluator prompt --cwd "$PWD" > /tmp/concise-model-settings.json
+claude --settings /tmp/concise-model-settings.json
+```
+
+Use `--evaluator agent` for an agent evaluator. The default, `off`, generates no model hooks. Each generated settings file selects one evaluator for `Stop` and `SubagentStop`; load one file per session. Regenerate it after changing Concise configuration or environment overrides.
+
+The evaluator checks reply padding with the resolved rules, bypasses, soft-fail setting, and agent exemptions. It allows a reply when `stop_hook_active` is true. Prompt checks have a 15-second timeout; agent checks have 30 seconds. These checks use model judgment. They are absent from the shipped manifests. Codex skips `prompt` and `agent` handlers. [Claude model hooks](https://code.claude.com/docs/en/hooks#prompt-based-hooks), [Codex hook types](https://learn.chatgpt.com/docs/hooks)
 
 ## mode
 
