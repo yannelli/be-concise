@@ -16,7 +16,7 @@
         "pr-description"
     ],
     "skills": "./skills/",
-    "hooks": "./hooks/hooks.json",
+    "hooks": "./hooks/codex.json",
     "interface": {
         "displayName": "Concise",
         "shortDescription": "Catch verbose comments, oversized files, and padded PR bodies",

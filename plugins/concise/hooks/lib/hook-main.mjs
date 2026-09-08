@@ -1,7 +1,7 @@
 import { flagged, modelNotices } from "./respond.mjs";
 import { loadConfig } from "./config.mjs";
 import { createLogger, softFailResult } from "./log.mjs";
-import { once } from "./state.mjs";
+import { once, withStateScope } from "./state.mjs";
 import { styleLog } from "./style-check.mjs";
 import { STOP_BLOCK_MESSAGE } from "./confirm.mjs";
 import { publishMonitor } from "./monitor.mjs";
@@ -45,7 +45,7 @@ export function bypassResult(texts, config, ctx, event = "PreToolUse") {
   if (!match) return null;
   if (ctx) ctx.decision = "bypass";
   const text = `[concise] Allowed by bypass phrase "${match}"`;
-  return event === "Stop" ? { systemMessage: text } : flagged(text);
+  return flagged(text, event);
 }
 
 function withMessage(result, text) {
@@ -122,15 +122,25 @@ export async function runHook({ hook, event }, decide) {
   let error = null;
   try {
     input = JSON.parse(raw || "{}");
-    result = (await decide(input, ctx)) || {};
   } catch (err) {
     error = err.message;
-    result = { systemMessage: `[concise] internal error, allowing: ${error}` };
   }
-  result = withSoftFail(result, ctx.config);
-  const config = ctx.config || fallbackConfig(input.cwd);
-  result = withMessage(result, configWarnings(config, input.session_id));
-  result = modelNotices(result, event);
+  const actualEvent = input.hook_event_name || event;
+  let config;
+  await withStateScope(input, async () => {
+    try {
+      if (!error) result = (await decide(input, ctx)) || {};
+    } catch (err) {
+      error = err.message;
+    }
+    if (error) {
+      result = { systemMessage: `[concise] internal error, allowing: ${error}` };
+    }
+    result = withSoftFail(result, ctx.config);
+    config = ctx.config || fallbackConfig(input.cwd);
+    if (actualEvent !== "SessionEnd") result = withMessage(result, configWarnings(config, input.session_id));
+  });
+  result = modelNotices(result, actualEvent);
   logRun({ hook, event, input, ctx, config, result, error, started });
   const style = styleLog();
   await publishMonitor({

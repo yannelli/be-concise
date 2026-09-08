@@ -184,7 +184,9 @@ test("filter wrapper preserves Bash responses and reports the replacement comman
       run("bash", [join(hooks, "PreToolUse-test-filter.sh")], input, fixtureData),
       run(process.execPath, [join(hooks, "monitor-filter.mjs")], input, fixtureData),
     ]);
-    assert.deepEqual(wrapped, original, command);
+    assert.equal(wrapped.status, original.status, command);
+    assert.equal(wrapped.stderr, original.stderr, command);
+    assert.deepEqual(JSON.parse(wrapped.stdout), JSON.parse(original.stdout), command);
     const record = received.at(-1).record;
     assert.equal(record.hook, "test-filter");
     assert.deepEqual(record.request, input);
@@ -204,5 +206,7 @@ test("filter wrapper preserves Bash exit and stderr when HOME is unset", async (
     run("bash", [join(hooks, "PreToolUse-test-filter.sh")], input, fixtureData),
     run(process.execPath, [join(hooks, "monitor-filter.mjs")], input, fixtureData),
   ]);
-  assert.deepEqual(wrapped, original);
+  assert.equal(wrapped.status, original.status);
+  assert.equal(wrapped.stderr, original.stderr);
+  assert.deepEqual(JSON.parse(wrapped.stdout), JSON.parse(original.stdout));
 });

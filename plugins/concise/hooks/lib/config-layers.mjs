@@ -76,6 +76,9 @@ export function applyLayer(base, layer) {
   next.checks = { ...base.checks, ...(isObject(layer.checks) ? layer.checks : {}) };
   next.log = { ...base.log, ...(isObject(layer.log) ? layer.log : {}) };
   next.monitor = { ...base.monitor, ...(isObject(layer.monitor) ? layer.monitor : {}) };
+  for (const name of ["context", "subagentStop", "testFilter"]) {
+    next[name] = { ...base[name], ...(isObject(layer[name]) ? layer[name] : {}) };
+  }
   next.allowList = mergeStringSets(base.allowList, layer.allowList);
   next.bypass = mergeStringSets(base.bypass, layer.bypass);
   next.features = mergeFeatures(base.features, layer.features);

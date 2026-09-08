@@ -18,20 +18,17 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/monitor-filter.mjs\"",
-                        "timeout": 15,
-                        "if": "Bash(*t*)"
+                        "timeout": 15
                     },
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
-                        "timeout": 15,
-                        "if": "Bash(*g*)"
+                        "timeout": 15
                     },
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
-                        "timeout": 15,
-                        "if": "Bash(*Begin Patch*)"
+                        "timeout": 15
                     }
                 ]
             }
@@ -99,6 +96,18 @@
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-end.mjs\"",
                         "timeout": 1
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/post-test-filter.mjs\"",
+                        "timeout": 15
                     }
                 ]
             }

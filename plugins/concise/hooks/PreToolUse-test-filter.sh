@@ -28,7 +28,7 @@ cmd=$(jq -r '.tool_input.command // empty' <<<"$input")
 [[ "$tool" == "Bash" && -n "$cmd" ]] || { echo '{}'; exit 0; }
 
 FILTER_LINES=100 FILTER_CONTEXT=5 FILTER_TAIL=5 FILTER_PATTERN="" NOFILTER=0
-for conf in "$HOME/.claude/test-filter.conf" "$HOME/.codex/test-filter.conf"; do
+for conf in "${HOME:-}/.claude/test-filter.conf" "${HOME:-}/.codex/test-filter.conf"; do
   [[ -f "$conf" ]] && source "$conf"
 done
 
@@ -56,6 +56,13 @@ else
   echo '{}'; exit 0
 fi
 pattern=${FILTER_PATTERN:-$default_pattern}
+
+if [[ "${1:-}" == "settings" ]]; then
+  jq -cn --arg runner "$runner" --arg pattern "$pattern" --arg failurePattern "$default_pattern" \
+    --arg lines "$FILTER_LINES" --arg context "$FILTER_CONTEXT" --arg tail "$FILTER_TAIL" \
+    '{runner:$runner,pattern:$pattern,failurePattern:$failurePattern,lines:$lines,context:$context,tail:$tail}'
+  exit 0
+fi
 
 self=$(realpath "${BASH_SOURCE[0]}")
 wrapped="TF_CMD=$(printf %q "$cmd") TF_PATTERN=$(printf %q "$pattern") TF_LINES=$FILTER_LINES TF_CONTEXT=$FILTER_CONTEXT TF_TAIL=$FILTER_TAIL TF_RUNNER=$runner bash $(printf %q "$self") run"
