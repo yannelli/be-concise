@@ -2,6 +2,11 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+// A developer shell can carry BEC_ settings that change a case's decision or log path.
+for (const name of Object.keys(process.env)) {
+  if (name.startsWith("BEC_")) delete process.env[name];
+}
+
 export const ROOT = new URL("..", import.meta.url).pathname;
 export const CHECK_EDIT = join(ROOT, "hooks", "check-edit.mjs");
 export const CHECK_BASH = join(ROOT, "hooks", "check-bash.mjs");
