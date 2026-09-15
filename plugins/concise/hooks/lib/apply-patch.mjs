@@ -2,10 +2,10 @@ const PATCH_SPAN = /\*\*\* Begin Patch\r?\n[\s\S]*?\r?\n\*\*\* End Patch/;
 const HUNK_HEADER = /^\*\*\* (Add File|Update File|Delete File): (.+)$/;
 const KIND = { "Add File": "add", "Update File": "update", "Delete File": "delete" };
 
-/** Returns the `*** Begin Patch ... *** End Patch` text inside a shell command, or null. */
+/** Returns every `*** Begin Patch ... *** End Patch` span in a shell command, or null. */
 export function extractPatch(command) {
-  const m = PATCH_SPAN.exec(command || "");
-  return m ? m[0] : null;
+  const matches = [...(command || "").matchAll(new RegExp(PATCH_SPAN.source, "g"))];
+  return matches.length ? matches.map((m) => m[0]).join("\n") : null;
 }
 
 // Each file becomes { path, kind, chunks }. An added file is one chunk (its whole
@@ -20,11 +20,20 @@ export function parseApplyPatch(patch) {
     run = [];
   };
 
+  const closeFile = () => {
+    flushRun();
+    current = null;
+  };
+
   for (const rawLine of (patch || "").split("\n")) {
     const line = rawLine.replace(/\r$/, "");
+    if (line === "*** Begin Patch" || line === "*** End Patch") {
+      closeFile();
+      continue;
+    }
     const header = HUNK_HEADER.exec(line);
     if (header) {
-      flushRun();
+      closeFile();
       current = { path: header[2].trim(), kind: KIND[header[1]], chunks: [] };
       files.push(current);
       continue;
