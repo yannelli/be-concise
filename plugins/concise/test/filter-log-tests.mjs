@@ -1,5 +1,5 @@
 import { spawn, spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ROOT, bad, ok } from "./lib.mjs";
@@ -8,6 +8,7 @@ const FILTER = join(ROOT, "hooks/PreToolUse-test-filter.sh");
 const root = mkdtempSync(join(tmpdir(), "concise-filter-log-"));
 const env = { ...process.env, HOME: root, TMPDIR: root, NOFILTER: "" };
 const logBase = join(root, `concise-test-filter-${process.getuid()}`);
+const old = new Date(Date.now() - 9 * 86400 * 1000);
 
 function check(name, condition, detail) {
   if (condition) ok(name);
@@ -65,7 +66,34 @@ console.log("\nTest filter log isolation");
 }
 
 {
-  for (const command of ["npm test > out.log 2>&1", "npm test >out.log", "go test ./... >> run.txt", "npm test &> out.log", "cd app && npm test 1>out.log"]) {
+  const outside = mkdtempSync(join(tmpdir(), "concise-filter-outside-"));
+  writeFileSync(join(outside, "run.old"), "keep");
+  utimesSync(join(outside, "run.old"), old, old);
+  symlinkSync(outside, join(logBase, "session-link"));
+  const out = await execute(rewrite("jest() { echo 'FAIL linked'; return 5; }; jest", "session-link"));
+  check("a symlinked session dir runs unfiltered with its status", !out.stdout.includes("[filtered]") && out.stdout.includes("linked") && out.code === 5, out);
+  check("pruning never follows a planted symlink", readdirSync(outside).join() === "run.old", readdirSync(outside));
+  rmSync(outside, { recursive: true, force: true });
+}
+
+{
+  const dir = join(logBase, "session-prune");
+  mkdirSync(dir, { mode: 0o700 });
+  const twoDays = new Date(Date.now() - 2 * 86400 * 1000);
+  for (const [name, time] of [["run.old victim", old], ["run.stale", twoDays], ["active.inflight", twoDays]]) {
+    writeFileSync(join(dir, name), "x");
+    utimesSync(join(dir, name), time, time);
+  }
+  writeFileSync(join(root, "victim"), "keep");
+  await execute(rewrite("jest() { echo 'FAIL prune'; }; jest", "session-prune"));
+  const left = readdirSync(dir);
+  check("stale finished logs are pruned", !left.includes("run.stale") && !left.includes("run.old victim"), left);
+  check("a log still being written is not pruned", left.includes("active.inflight"), left);
+  check("a log name with spaces cannot delete another file", existsSync(join(root, "victim")));
+}
+
+{
+  for (const command of ["npm test > out.log 2>&1", "npm test >out.log", "go test ./... >> run.txt", "npm test &> out.log", "cd app && npm test 1>out.log", "npm test > \"out.log\"", "npm test >&out.log"]) {
     check(`stdout redirect skips filtering: ${command}`, rewrite(command, "session-redirect") === null);
   }
   for (const command of ["npm test 2>&1 | tail -n 20", "npm test 2>/dev/null", "npm test >&2", "npm test -- --grep 'a > b'"]) {
@@ -74,7 +102,7 @@ console.log("\nTest filter log isolation");
 }
 
 {
-  for (const command of ["NOFILTER=1 npm test", "cd app && NOFILTER=1 npm test", "export NOFILTER=1; go test ./...", "FILTER_LINES=5 NOFILTER=1 npm test", "(NOFILTER='1' npm test)"]) {
+  for (const command of ["NOFILTER=1 npm test", "cd app && NOFILTER=1 npm test", "export NOFILTER=1; go test ./...", "FILTER_LINES=5 NOFILTER=1 npm test", "(NOFILTER='1' npm test)", "env \"NOFILTER=1\" npm test", "NOFILTER=\\1 npm test"]) {
     check(`NOFILTER anywhere bypasses: ${command}`, rewrite(command, "session-bypass") === null);
   }
   for (const command of ["cd app && npm test", "NOFILTER=0 npm test", "MYNOFILTER=1 npm test"]) {

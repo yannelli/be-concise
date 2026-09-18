@@ -16,15 +16,18 @@ if [[ "${1:-}" == "run" ]]; then
   session=${TF_SESSION:-}
   [[ "$session" =~ ^[A-Za-z0-9_-][A-Za-z0-9._-]{0,127}$ ]] || session=nosession
   tmp=${TMPDIR:-/tmp}; base="${tmp%/}/concise-test-filter-$(id -u)"
-  log=""
+  dir="$base/$session" log=""
   if private_dir "$base"; then
-    find "$base" -mindepth 1 -mtime +7 -delete 2>/dev/null
-    private_dir "$base/$session" && log=$(mktemp "$base/$session/run.XXXXXX" 2>/dev/null)
+    # find never follows symlinks here; a log stays active.* until its run ends, so pruning skips it.
+    find "$base" -mindepth 2 -maxdepth 2 -type f \( -name 'run.*' -mmin +1440 -o -name 'active.*' -mtime +7 \) -delete 2>/dev/null
+    find "$base" -mindepth 1 -maxdepth 1 -type d -empty -mtime +7 -delete 2>/dev/null
+    private_dir "$dir" && log=$(mktemp "$dir/active.XXXXXX" 2>/dev/null)
   fi
-  [[ -n "$log" ]] || log=$(mktemp "${tmp%/}/concise-test-filter.XXXXXX" 2>/dev/null) || exec bash -c "$TF_CMD"
+  [[ -n "$log" ]] || exec bash -c "$TF_CMD"
   bash -c "$TF_CMD" >"$log" 2>&1
   rc=$?
-  [[ -d "$base/$session" ]] && ls -t "$base/$session"/run.* 2>/dev/null | tail -n +11 | xargs rm -f 2>/dev/null
+  done_log="$dir/run.${log##*/active.}"
+  mv -n "$log" "$done_log" 2>/dev/null && [[ ! -e "$log" ]] && log=$done_log
   if [[ ! -s "$log" ]]; then
     rm -f "$log"
     exit "$rc"
@@ -47,9 +50,10 @@ session=$(jq -r '.session_id // empty | strings' <<<"$input")
 [[ "$tool" == "Bash" && -n "$cmd" ]] || { echo '{}'; exit 0; }
 [[ "$session" =~ ^[A-Za-z0-9_-][A-Za-z0-9._-]{0,127}$ ]] || session=nosession
 
-# NOFILTER=1 counts wherever it appears (after cd, &&, export); a false match only skips filtering.
-nofilter_re="(^|[[:space:];&|(])(export[[:space:]]+)?NOFILTER=(1|'1'|\"1\")([[:space:];&|)]|$)"
-[[ "$cmd" =~ $nofilter_re ]] && { echo '{}'; exit 0; }
+# NOFILTER=1 counts wherever it appears, quoted or escaped; a false match only skips filtering.
+nofilter_re="(^|[[:space:];&|(])(export[[:space:]]+)?NOFILTER=1([[:space:];&|)]|$)"
+dequoted=${cmd//[\'\"\\]/}
+[[ "$dequoted" =~ $nofilter_re ]] && { echo '{}'; exit 0; }
 
 FILTER_LINES=100 FILTER_CONTEXT=5 FILTER_TAIL=5 FILTER_PATTERN="" NOFILTER=0
 for conf in "${HOME:-}/.claude/test-filter.conf" "${HOME:-}/.codex/test-filter.conf"; do
@@ -82,8 +86,8 @@ fi
 pattern=${FILTER_PATTERN:-$default_pattern}
 
 # Output sent to a file never reaches the agent, so filtering it would only print an empty or stranger log.
-unquoted=$(sed -E "s/'[^']*'//g; s/\"([^\"\\\\]|\\\\.)*\"//g" <<<"$cmd")
-redirect_re='(^|[^0-9<>&])(1?>>?|&>>?)[[:space:]]*[^&[:space:]]'
+unquoted=$(sed -E "s/'[^']*'/Q/g; s/\"([^\"\\\\]|\\\\.)*\"/Q/g" <<<"$cmd")
+redirect_re='(^|[^0-9<>&])((1?>>?|&>>?)[[:space:]]*[^&[:space:]]|1?>&[[:space:]]*[^0-9[:space:]-])'
 [[ "$unquoted" =~ $redirect_re ]] && { echo '{}'; exit 0; }
 
 if [[ "${1:-}" == "settings" ]]; then
