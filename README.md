@@ -12,7 +12,7 @@ New here? Start with [plugins/concise/README.md](plugins/concise/README.md).
 - New files longer than 300 lines
 - Inline `gh pr` and `gh issue` bodies with more than 1 prose paragraph or more than 3 sentences in a paragraph
 - Em dashes and 44 categories of AI writing patterns, both off until you turn them on
-- Output from pytest, `go test`, npm test, Jest, and Vitest; the full output remains available at `/tmp/claude-test-last.log`
+- Output from pytest, `go test`, npm test, Jest, and Vitest; each run's full output is kept in its own log under `$TMPDIR/concise-test-filter-<uid>/<session>/`, and the path is printed with the filtered output
 
 Structured GitHub bodies that use headings and lists are allowed. A denied call includes the exact limit and location. After 2 denied retries for the same target, Concise permits the next attempt and flags it.
 
@@ -96,6 +96,8 @@ Bypass filtering for one command:
 ```sh
 NOFILTER=1 pytest tests/
 ```
+
+`NOFILTER=1` also works later in the command, as in `cd app && NOFILTER=1 npm test`. A command that sends its standard output to a file, as in `npm test > out.log 2>&1`, is not filtered.
 
 Adjust the output cap, match pattern, context, or tail length:
 
