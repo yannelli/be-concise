@@ -204,6 +204,6 @@ clean(
   ],
   "varied openings and a two-item list",
 );
-unit("parallel-bullets", "- Improved caching\n- Improved logging\n- Improved error handling\n", "vary the openings, or use prose");
+unit("parallel-bullets", "- Improved caching\n- Improved logging\n- Improved error handling\n", "vary the openings, keep the list");
 
 for (const dir of dirs) rmSync(dir, { recursive: true, force: true });

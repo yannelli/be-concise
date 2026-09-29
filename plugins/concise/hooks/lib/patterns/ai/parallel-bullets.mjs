@@ -42,7 +42,7 @@ export default {
       const found = subTests(block.items, o);
       if (found.reduce((sum, t) => sum + t.weight, 0) < o.minScore) continue;
       const shown = `${block.items.length} bullets all ${found.map((t) => t.name).join(" and all ")}`;
-      out.push({ index: block.start, match: shown.slice(0, 79), fix: "vary the openings, or use prose" });
+      out.push({ index: block.start, match: shown.slice(0, 79), fix: "vary the openings, keep the list" });
     }
     return out;
   },
