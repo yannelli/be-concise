@@ -38,7 +38,7 @@ Scopes across this group: `files`, `comments`, `gh`, `commit`, `reply`. The scop
 | `negative-parallelism` | A chain of two or more negated clauses resolved by one affirmation. | `not X, not Y, but Z` | state the one claim | `default`, `ryan`, `technical`, `all` | `files`, `comments`, `gh`, `reply` |
 | `outline-conclusion` | A closing paragraph that re-lists the section headings instead of adding a new fact. | a closing paragraph that re-lists 3 headings | end on the last fact | `ryan`, `all` | `files`, `gh`, `reply` |
 | `overgeneralization` | A universal claim about people or the industry with no source. | `everyone knows` | name who | `default`, `ryan`, `technical`, `all` | `files`, `comments`, `gh`, `reply` |
-| `parallel-bullets` | A bulleted list where every item shares one rigid shape. | 3 bullets that open on the same word | vary or merge the items | `ryan`, `all` | `files`, `gh`, `reply` |
+| `parallel-bullets` | A bulleted list where every item shares one rigid shape. | 3 bullets that open on the same word | vary the item openings, keep the list | `ryan`, `all` | `files`, `gh`, `reply` |
 | `promotional` | Marketing language for a technical change. | `supercharge` | name the effect | `default`, `ryan`, `technical`, `all` | `files`, `gh`, `commit`, `reply` |
 | `rule-of-three` | Triads of adjectives, nouns, or clauses used past the point of restraint. | 3 triads in one text | keep the items that matter | `ryan`, `all` | `files`, `comments`, `gh`, `reply` |
 | `superficial-analysis` | A significance claim with no evidence behind it. | `cannot be overstated` | state the fact plainly | `ryan`, `all` | `files`, `gh`, `reply` |

@@ -54,7 +54,7 @@ Keep the text only when you can name why the flagged form is the correct one for
 | `undue-emphasis` | stress such as capitals and stacked intensifiers | state the fact once | `ryan`, `all` |
 | `superficial-analysis` | empty judgments such as `speaks volumes` | give the evidence | `ryan`, `all` |
 | `rule-of-three` | triads of adjectives, nouns, clauses, or bullets | keep the items that matter | `ryan`, `all` |
-| `parallel-bullets` | bullets sharing one shape or first word | vary or merge the items | `ryan`, `all` |
+| `parallel-bullets` | bullets sharing one shape or first word | vary the item openings, keep the list | `ryan`, `all` |
 | `ai-tool-mention` | process talk such as `as requested by the user`, tool names in commits | describe the change | `default`, `ryan`, `technical`, `git`, `all` |
 | `ai-identity` | a commit author or committer naming an AI | commit as the human author | `default`, `ryan`, `technical`, `minimal`, `git`, `all` |
 | `ai-attribution` | trailers such as `Co-authored-by: Claude` | remove the trailer | `default`, `ryan`, `technical`, `minimal`, `git`, `all` |
