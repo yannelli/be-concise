@@ -10,7 +10,7 @@ Use --all to serve every project the hooks have registered under ~/.config/conci
 Use --remote to accept this machine's IPv4 addresses and Tailscale hostnames.
 
 From the repository: node bin/concise-web.mjs
-Install locally as a global command: npm install -g .
+Install from npm: npm install -g @yannelli/be-concise
 `;
 
 function parse(args) {

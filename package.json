@@ -1,10 +1,30 @@
 {
-  "name": "be-concise",
-  "private": true,
-  "description": "Local configuration and hook console for Concise",
-  "license": "MIT",
-  "bin": { "concise-web": "bin/concise-web.mjs" },
-  "scripts": { "web": "node bin/concise-web.mjs", "start": "node bin/concise-web.mjs" },
-  "engines": { "node": ">=24" },
-  "files": ["bin/", "plugins/concise/", "LICENSE", "README.md"]
+    "name": "@yannelli/be-concise",
+    "version": "0.8.2",
+    "description": "Local configuration and hook console for Concise",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/yannelli/be-concise.git"
+    },
+    "bin": {
+        "concise-web": "bin/concise-web.mjs"
+    },
+    "scripts": {
+        "web": "node bin/concise-web.mjs",
+        "start": "node bin/concise-web.mjs"
+    },
+    "engines": {
+        "node": ">=24"
+    },
+    "files": [
+        "bin/",
+        "plugins/concise/",
+        "LICENSE",
+        "README.md"
+    ],
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    }
 }
