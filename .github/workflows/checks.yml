@@ -34,6 +34,8 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
+      - run: echo "NODE_V8_COVERAGE=$RUNNER_TEMP/coverage" >> "$GITHUB_ENV"
       - run: node scripts/check.mjs
       - run: node --test test/*.test.mjs
       - run: node plugins/concise/test/run-tests.mjs
+      - run: node scripts/coverage.mjs "$NODE_V8_COVERAGE"

@@ -136,6 +136,7 @@ function entryLine(entry) {
   const unit = entry.match === "regex" ? "" : ` on ${entry.on || "word"}`;
   const limits = [entry.hooks && `hooks ${entry.hooks.join(",")}`, entry.scopes && `scopes ${entry.scopes.join(",")}`].filter(Boolean);
   const state = entry.enabled === false ? " (off)" : entry.problem ? ` (skipped: ${entry.problem})` : "";
+  if (entry.match === undefined && entry.enabled === false) return `${entry.id}: from ${entry.layer}${state}`;
   return `${entry.id}: ${entry.match}${unit} ${JSON.stringify(entry.value ?? "")} -> ${entry.fix ?? ""}${limits.length ? ` [${limits.join("; ")}]` : ""} from ${entry.layer}${state}`;
 }
 

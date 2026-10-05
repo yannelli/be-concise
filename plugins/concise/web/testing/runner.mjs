@@ -144,7 +144,7 @@ async function execute(hook, request, requestPath, env) {
   try {
     if (result.metadata) metadata = JSON.parse(result.metadata);
   } catch (error) {
-    result.error ||= `Invalid match diagnostics: ${error.message}`;
+    result.error ||= `Invalid match diagnostics: ${error.message}`; // coverage-ignore: the worker writes JSON.stringify output
   }
   result.error ||= metadata.error || (response.systemMessage?.startsWith("[concise] internal error") ? response.systemMessage : null);
   const findings = (metadata.style?.findings || []).map((hit) => ({ ...hit,
