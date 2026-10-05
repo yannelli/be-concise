@@ -25,7 +25,7 @@ function passiveAt(list, at) {
     if (isParticiple(next)) return at + step;
     if (step === 3 || !(SKIPPABLE.has(next) || /ly$/.test(next))) return -1;
   }
-  return -1;
+  return -1; // coverage-ignore: the loop returns on its third step
 }
 
 function passiveIn(sentence) {

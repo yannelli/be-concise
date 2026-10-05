@@ -44,7 +44,6 @@ try {
     const address = `${consoleServer.browserUrl}/#token=${consoleServer.token}`;
     const network = consoleServer.networkUrls.map((url) => `Network console: ${url}/#token=${consoleServer.token}\n`).join("");
     const scope = consoleServer.hub ? `Projects: ${consoleServer.projectsDir}` : `Project: ${consoleServer.cwd}`;
-    process.stdout.write(`Concise console: ${address}\n${network}${scope}\nPress Ctrl+C to stop.\n`);
     let closing = false;
     const close = async () => {
       if (closing) return;
@@ -53,6 +52,7 @@ try {
     };
     process.on("SIGINT", close);
     process.on("SIGTERM", close);
+    process.stdout.write(`Concise console: ${address}\n${network}${scope}\nPress Ctrl+C to stop.\n`);
     if (args.open) {
       const [command, flags] = process.platform === "darwin" ? ["open", [address]]
         : process.platform === "win32" ? ["rundll32", ["url.dll,FileProtocolHandler", address]] : ["xdg-open", [address]];
