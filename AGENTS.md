@@ -45,4 +45,6 @@ node --test test/*.test.mjs
 env -u HOME -u USERPROFILE -u XDG_CONFIG_HOME node plugins/concise/test/run-tests.mjs
 ```
 
+CI runs these with `NODE_V8_COVERAGE` set, then `node scripts/coverage.mjs "$NODE_V8_COVERAGE"` fails the job when a source line never ran. To check locally, export `NODE_V8_COVERAGE=<empty dir>`, run the three commands, then run the script with that directory. Cover new code with tests; mark a line `coverage-ignore: <reason>` only when no test can reach it.
+
 Preview a release with `node scripts/release.mjs --dry-run` from a clean `main` checkout after fetching tags. Release automation uses Node.js and the GitHub API without package dependencies.
