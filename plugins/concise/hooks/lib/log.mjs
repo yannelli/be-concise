@@ -78,7 +78,7 @@ function normalize(entry, hook) {
       match: hit.match === undefined ? null : oneLine(hit.match).slice(0, MATCH_LIMIT),
       line: hit.line ?? null,
     })),
-    counts: { emDash: entry.counts?.emDash ?? 0, aiWriting: entry.counts?.aiWriting ?? 0 },
+    counts: { emDash: entry.counts?.emDash ?? 0, aiWriting: entry.counts?.aiWriting ?? 0, dictionary: entry.counts?.dictionary ?? 0 },
     durationMs: entry.durationMs ?? null,
     error: entry.error === undefined || entry.error === null ? null : oneLine(entry.error),
   };
@@ -89,6 +89,7 @@ function summaryOf(rec, given) {
   const bits = [];
   if (rec.counts.emDash) bits.push(`emDash=${rec.counts.emDash}`);
   if (rec.counts.aiWriting) bits.push(`aiWriting=${rec.counts.aiWriting}`);
+  if (rec.counts.dictionary) bits.push(`dictionary=${rec.counts.dictionary}`);
   if (rec.error) bits.push(`error=${rec.error}`);
   return bits.join(" ");
 }

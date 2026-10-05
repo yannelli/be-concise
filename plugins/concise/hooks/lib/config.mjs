@@ -18,6 +18,7 @@ const FEATURES = {
     disablePatterns: [],
     options: {},
   },
+  dictionary: { enabled: true, mode: "confirm", entries: [] },
 };
 
 // Agent instruction files: the style features skip them, the core checks still apply.
@@ -137,6 +138,10 @@ export function loadConfig(cwd, env = process.env) {
   if (!Array.isArray(config.subagentStop.exemptAgentTypes) || config.subagentStop.exemptAgentTypes.some((type) => typeof type !== "string")) {
     problems.push({ source: "subagentStop.exemptAgentTypes", reason: "expected an array of strings" });
     config.subagentStop.exemptAgentTypes = [];
+  }
+  if (!Array.isArray(config.features.dictionary?.entries)) {
+    problems.push({ source: "features.dictionary.entries", reason: "expected an array" });
+    config.features.dictionary = { ...DEFAULTS.features.dictionary, ...config.features.dictionary, entries: [] };
   }
   config.problems = problems;
   return config;

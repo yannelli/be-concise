@@ -51,7 +51,7 @@ console.log("log: records");
   const record = JSON.parse(lines(path)[0]);
   eq("hook comes from the logger options", record.hook, "check-edit");
   eq("the decision is written", record.decision, "deny");
-  eq("counts are written", record.counts, { emDash: 1, aiWriting: 2 });
+  eq("counts are written", record.counts, { emDash: 1, aiWriting: 2, dictionary: 0 });
   eq("a finding keeps category, match, line", record.findings, [{ category: "filler", match: "very long", line: 3 }]);
   eq("softFail defaults to false", record.softFail, false);
   eq("error defaults to null", record.error, null);

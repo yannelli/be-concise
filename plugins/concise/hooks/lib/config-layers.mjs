@@ -1,8 +1,11 @@
+import { mergeEntries } from "./dictionary.mjs";
+
 const AI_UNION_KEYS = ["allow", "packs", "excludePacks"];
 
 const FEATURE_TARGETS = {
   emDash: ["features", "emDash", "enabled"],
   aiWriting: ["features", "aiWriting", "enabled"],
+  dictionary: ["features", "dictionary", "enabled"],
   comments: ["checks", "comments"],
   fileSize: ["checks", "fileSize"],
   prBody: ["checks", "prBody"],
@@ -56,6 +59,11 @@ function mergeFeatures(base = {}, layer) {
     out[name] = { ...(base[name] || {}), ...(given[name] || {}) };
   }
   out.aiWriting = mergeAiWriting(base.aiWriting, isObject(given.aiWriting) ? given.aiWriting : {});
+  const layerEntries = isObject(given.dictionary) ? given.dictionary.entries : undefined;
+  if (isObject(out.dictionary) && layerEntries !== undefined) {
+    const below = base.dictionary?.entries;
+    out.dictionary.entries = Array.isArray(layerEntries) && Array.isArray(below) ? mergeEntries(below, layerEntries) : layerEntries;
+  }
   return out;
 }
 

@@ -30,6 +30,9 @@
         "websiteURL": "https://ryanyannelli.com",
         "defaultPrompt": [
             "Trim the comments in this file to the limits in the concise rules."
-        ]
-    }
+        ],
+        "composerIcon": "./assets/icon-256.png",
+        "logo": "./assets/icon-512.png"
+    },
+    "mcpServers": "./.codex-mcp.json"
 }

@@ -25,9 +25,13 @@ The deny carries a `permissionDecisionReason` naming the exact file/line or the 
 
 Copy `.claude/concise.json.example` to `.claude/concise.json` (Claude Code) or `.codex/concise.json` (Codex) in the target project and edit thresholds there.
 
+To read or change settings, use the `concise-config` skill: it runs a CLI that validates each edit and shows the diff before it writes. To fit the settings to samples of the user's writing, use the `concise-tune` skill.
+
 ## Optional features
 
 The 2 style checks ship disabled. Turn either one on per project in `.claude/concise.json` (Claude Code) or `.codex/concise.json` (Codex).
+
+A third style check, the dictionary (`features.dictionary`), flags terms the user lists. It runs when it has at least one entry. A deny tagged `[concise:dictionary:<id>]` names the entry and the fix the user wrote for it. The same confirm flow applies. The `concise-config` skill covers the entry fields.
 
 1. Em dash detection. Flags the em dash (`U+2014`). Flags the en dash (`U+2013`) when `enDash` is true. Flags `--` between word characters or between spaces when `doubleHyphen` is true. A `--flag` at the start of a token never matches.
 2. AI writing patterns. Flags 44 categories of phrasing, commit hygiene, punctuation, and text statistics, shipped as pattern packs and selected by a preset or by an explicit category list.
