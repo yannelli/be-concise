@@ -71,6 +71,7 @@ async function refreshProjects() {
       ctx.project = projects[0].key;
       ctx.state = await api("/api/state");
       navigate(ctx.page);
+      updateCounts();
     }
     renderSwitcher();
   } catch (error) { notify(error.message, true); }

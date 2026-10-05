@@ -88,6 +88,18 @@ test("argument and startup errors exit 1 with a message", async (t) => {
   assert.match(missing.stderr, /^concise-web: ENOENT/);
 });
 
+test("a signal sent as soon as the console line prints removes the registry file", async (t) => {
+  const space = await fixture(t);
+  const app = run(["--no-open", "--cwd", space.cwd], space);
+  t.after(() => app.child.kill("SIGKILL"));
+  await app.wait(/^Concise console: /);
+  assert.equal(existsSync(monitorPath(space.cwd, space.env)), true);
+  app.child.kill("SIGTERM");
+  const result = await app.exited;
+  assert.deepEqual([result.code, result.signal, result.stderr], [0, null, ""]);
+  assert.equal(existsSync(monitorPath(space.cwd, space.env)), false);
+});
+
 test("--cwd serves one project and SIGINT shuts it down once", async (t) => {
   const space = await fixture(t);
   const app = await started(t, ["--no-open", "--cwd", space.cwd, "--port", "0"], space);

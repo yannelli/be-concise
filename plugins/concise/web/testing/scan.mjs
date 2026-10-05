@@ -46,11 +46,19 @@ function replyText(input) {
   return "";
 }
 
+// The same sources check-reply reads: a handback message, then the event's reply, then the transcript.
+function replySource(input) {
+  if (input.tool_name === "SubagentHandback") return String(input.tool_input?.message ?? "");
+  if (typeof input.last_assistant_message === "string") return input.last_assistant_message;
+  return input.transcript_path ? replyText(input) : null;
+}
+
 const HOOK_IDS = { "check-edit": "edit", "check-bash": "bash" };
 
 export async function scan(input, config, hook) {
   const out = [];
-  const hookId = HOOK_IDS[hook] || (input.hook_event_name === "SubagentStop" ? "subagentStop" : "stop");
+  const handback = input.tool_name === "SubagentHandback";
+  const hookId = HOOK_IDS[hook] || (handback || input.hook_event_name === "SubagentStop" ? "subagentStop" : "stop");
   const add = (text, path, scope, rules = config, chunk = 0) => {
     const result = styleFindings(text, path, rules, scope, hookId);
     out.push(...result.emDash.map((hit) => ({
@@ -77,9 +85,9 @@ export async function scan(input, config, hook) {
     const text = isGh ? extractBody(command) : messages.join("\n\n");
     if (text) add(text, "reply.md", isGh ? "gh" : "commit", rules);
     add(command, "reply.md", "command", rules);
-  } else if (hook === "check-reply" && config.stopHook && input.transcript_path) {
-    const text = replyText(input);
-    if (bypassMatch(text, config)) return out;
+  } else if (hook === "check-reply" && config.stopHook) {
+    const text = replySource(input);
+    if (text === null || bypassMatch(text, config)) return out;
     const rules = { ...config, ignoreGlobs: [], styleIgnoreGlobs: [], features: { ...config.features } };
     for (const name of ["emDash", "aiWriting"]) {
       const feature = config.features[name];

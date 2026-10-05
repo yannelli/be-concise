@@ -99,7 +99,7 @@ console.log("\ncoverage: concise-config");
   check("a regex entry has no unit and shows its hooks", lines[1] === "re: regex \"fo+\" -> foo [hooks stop] from project-claude", lines[1]);
   check("an exact entry defaults to word and shows its scopes", lines[2] === "plain: exact on word \"bar\" -> baz [scopes reply,gh] from project-claude", lines[2]);
   check("an entry with a unit prints it", lines[3] === "lined: contains on line \"qux\" -> quux from project-claude", lines[3]);
-  check("a disabled entry is marked off", lines[4].startsWith("off-one: ") && lines[4].endsWith(" from project-claude (off)"), lines[4]);
+  check("a disabled entry is marked off", lines[4] === "off-one: from project-claude (off)", lines[4]);
   check("an unusable entry shows why it is skipped", lines[5].startsWith("bad: exact on word \"x\" ->  from project-claude (skipped: fix must be"), lines[5]);
   const none = await main(["dict", "test", "nothing here", "--value", "zorb", "--fix", "zap"]);
   check("dict test with no hit prints No matches.", none.text === "No matches.", none.text);

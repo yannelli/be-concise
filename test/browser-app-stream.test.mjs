@@ -95,6 +95,7 @@ test("a hub registers its first project from the stream and loads its state", as
   assert.deepEqual(dom.calls.map((call) => [call.path, call.query.project]).slice(2), [["/api/projects", undefined], ["/api/state", "p1"]]);
   assert.equal($(dom, "#view .workspace-path").textContent, "/work/p1");
   assert.equal($(dom, "#view .workspace-strip .badge").textContent, "Hub");
+  assert.equal($(dom, "#nav-count").textContent, "1");
   const control = $(dom, "#project-switch select");
   assert.deepEqual(control.querySelectorAll("option").map((option) => [option.value, option.textContent, option.selected]), [["p1", "Project one", true], ["p2", "Project two", false]]);
   await emit(dom, "record", JSON.stringify({ id: 2, project: "p2" }));

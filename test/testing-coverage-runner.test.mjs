@@ -52,6 +52,7 @@ test("runTest infers the raw event name and skips tools without hooks", async (t
   const stop = await runTest({ cwd, env, config, kind: "raw", event: { last_assistant_message: `Reply ${DASH} here.` } });
   assert.equal(stop.request.hook_event_name, "Stop");
   assert.deepEqual(stop.hooks.map((hook) => [hook.hook, hook.tool, hook.decision]), [["check-reply", null, "block"]]);
+  assert.deepEqual(stop.matches.map(({ category }) => category), ["emDash"]);
   const none = await runTest({ cwd, env, config, kind: "raw", event: { hook_event_name: "PreToolUse" } });
   assert.deepEqual(none.hooks, []);
 });
@@ -77,6 +78,7 @@ test("runTest labels bypassed calls and runs check-reply for subagent handbacks"
   assert.equal(handback.hooks[0].hook, "check-reply");
   assert.equal(handback.hooks[0].decision, "deny");
   assert.deepEqual(handback.hooks[0].findings.map(({ category }) => category), ["emDash"]);
+  assert.deepEqual(handback.matches.map(({ category, hook }) => [category, hook]), [["emDash", "check-reply"]]);
 });
 
 test("runTest copies the test filter config from USERPROFILE and works without a home", async (t) => {

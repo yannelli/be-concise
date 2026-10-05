@@ -115,3 +115,16 @@ test("scan reads the last assistant reply from Claude and Codex transcripts", as
   assert.deepEqual(await scan({ cwd, hook_event_name: "Stop", transcript_path: transcript }, config({ stopHook: false }), "check-reply"), []);
   assert.deepEqual(await scan({ cwd, hook_event_name: "Stop" }, config(), "check-reply"), []);
 });
+
+test("scan reads a subagent handback message as a reply", async () => {
+  const handback = (tool_input, rules = config()) => scan({ cwd, hook_event_name: "PreToolUse", tool_name: "SubagentHandback", tool_input }, rules, "check-reply");
+  const matches = await handback({ message: `Report ${DASH} here.` });
+  assert.deepEqual(matches.map(({ category, scope, path, hook }) => [category, scope, path, hook]), [["emDash", "reply", "reply.md", "check-reply"]]);
+  assert.deepEqual(await handback({}), []);
+  const inline = await scan({ cwd, hook_event_name: "Stop", last_assistant_message: `Reply ${DASH} here.` }, config(), "check-reply");
+  assert.deepEqual(inline.map(({ category, scope }) => [category, scope]), [["emDash", "reply"]]);
+  assert.deepEqual(await handback({ message: `Report ${DASH} here.` }, config({ stopHook: false })), []);
+  const scoped = config();
+  scoped.features.dictionary = { enabled: true, mode: "deny", entries: [{ id: "sub", match: "exact", value: "report", fix: "note", hooks: ["subagentStop"] }, { id: "main", match: "exact", value: "here", fix: "there", hooks: ["stop"] }] };
+  assert.deepEqual((await handback({ message: "Report here." }, scoped)).map(({ category }) => category), ["dictionary:sub"]);
+});
