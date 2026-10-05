@@ -47,9 +47,3 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Merge released versions into dev
-        run: |
-          git fetch origin main dev
-          git checkout -B dev origin/dev
-          git merge --no-ff origin/main -m 'chore(release): sync main into dev'
-          git push origin HEAD:refs/heads/dev

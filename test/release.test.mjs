@@ -16,7 +16,6 @@ test("Conventional Commits select the SemVer bump, including breaking changes be
     ["feat(config)!: replace keys", "major", "1.0.0"],
     ["docs: describe migration\n\nBREAKING CHANGE: use the new key", "major", "1.0.0"],
     ["refactor: replace keys\n\nBREAKING-CHANGE: use the new key", "major", "1.0.0"],
-    ["chore(release): promote dev to main", null, null],
     ["docs: explain setup", null, null],
     ["Update files", null, null],
   ];
@@ -42,16 +41,18 @@ test("release notes include breaking migration details and commit references", (
   assert.doesNotMatch(notes, /ci: check titles/);
 });
 
-function pullRequest(title, base = "dev", head = "feature", body = "") {
+function pullRequest(title, body = "", head = "feature") {
   const repo = { full_name: "yannelli/be-concise" };
-  return { title, body, base: { ref: base, repo }, head: { ref: head, repo } };
+  return { title, body, base: { ref: "main", repo }, head: { ref: head, repo } };
 }
 
-test("PR checks accept conventional titles and dev promotions", () => {
+test("PR checks accept conventional titles from branches and forks", () => {
   for (const title of ["feat: add a rule", "fix(codex): parse replies", "refactor(config)!: remove a key", "docs: describe setup"]) {
     assert.doesNotThrow(() => checkPullRequest(pullRequest(title)));
   }
-  assert.doesNotThrow(() => checkPullRequest(pullRequest("chore(release): promote dev to main", "main", "dev")));
+  const fork = pullRequest("fix: repair a hook");
+  fork.head.repo = { full_name: "someone/be-concise" };
+  assert.doesNotThrow(() => checkPullRequest(fork));
 });
 
 test("PR checks reject invalid titles and breaking changes hidden in the body", () => {
@@ -59,16 +60,9 @@ test("PR checks reject invalid titles and breaking changes hidden in the body", 
     assert.throws(() => checkPullRequest(pullRequest(title)), /Conventional Commit/);
   }
   for (const marker of ["BREAKING CHANGE", "BREAKING-CHANGE"]) {
-    assert.throws(() => checkPullRequest(pullRequest("refactor: remove a key", "dev", "feature", `${marker}: use the new key`)), /Put !/);
-    assert.doesNotThrow(() => checkPullRequest(pullRequest("refactor!: remove a key", "dev", "feature", `${marker}: use the new key`)));
+    assert.throws(() => checkPullRequest(pullRequest("refactor: remove a key", `${marker}: use the new key`)), /Put !/);
+    assert.doesNotThrow(() => checkPullRequest(pullRequest("refactor!: remove a key", `${marker}: use the new key`)));
   }
-});
-
-test("release PRs must come from this repository's dev branch", () => {
-  assert.throws(() => checkPullRequest(pullRequest("fix: repair", "main")), /dev branch/);
-  const fork = pullRequest("chore: promote", "main", "dev");
-  fork.head.repo = { full_name: "someone/be-concise" };
-  assert.throws(() => checkPullRequest(fork), /dev branch/);
 });
 
 async function fixture(t) {

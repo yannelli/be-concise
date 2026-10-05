@@ -114,7 +114,7 @@ Persistent defaults can live in `~/.claude/test-filter.conf` or `~/.codex/test-f
 
 ## Development
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the `dev` → `main` workflow, Conventional Commits, and automated semantic releases. [.agents/docs/INDEX.md](.agents/docs/INDEX.md) lists the researched maintainer notes, including npm trusted publishing.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch workflow, Conventional Commits, and automated semantic releases. [.agents/docs/INDEX.md](.agents/docs/INDEX.md) lists the researched maintainer notes, including npm trusted publishing.
 
 ```sh
 node plugins/concise/test/run-tests.mjs

@@ -11,7 +11,7 @@ The Release workflow (`.github/workflows/release.yml`) publishes `@yannelli/be-c
 2. The "Publish npm package" step reads `name` and `version` from `package.json`. It runs `npm publish` when `npm view <name>@<version> version` does not print that version. A rerun of the workflow repeats a failed publish and skips a version that npm already has.
 3. `publishConfig` in `package.json` sets `access: public` and `provenance: true`.
 
-The step runs before the merge back into `dev`, while the checkout is on the `main` release commit.
+The step runs while the checkout is on the `main` release commit.
 
 ## Authentication
 

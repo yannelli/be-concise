@@ -4,9 +4,9 @@ Use Node.js from `.nvmrc`, Bash, and `jq`.
 
 ## Branches
 
-`main` is the default branch and contains releases. Create feature branches from `dev` and open ordinary PRs against `dev`. Merge using the PR title and body; GitHub is configured to use those fields for the merge commit. Squash and rebase merges are disabled to preserve release history.
+`main` is the default branch, the only long-lived branch, and contains releases. Create feature branches from `main` and open PRs against `main`. Merge using the PR title and body; GitHub is configured to use those fields for the merge commit. Squash and rebase merges are disabled to preserve the individual commits used for version calculation.
 
-To release, open a PR from `dev` to `main`, titled `chore(release): promote dev to main`. Merge it with a **merge commit** to preserve the individual changes used for version calculation. A squash merge discards those commit messages.
+A merged PR releases as soon as it reaches `main` when one of its commits calls for a version bump.
 
 ## Commit and PR format
 
@@ -41,17 +41,17 @@ node --test test/*.test.mjs
 env -u HOME -u USERPROFILE -u XDG_CONFIG_HOME node plugins/concise/test/run-tests.mjs
 ```
 
-Checks validate JavaScript syntax, JSON, matching plugin versions, PR titles and branch targets, and the test suite. The repository has no separate type checker.
+Checks validate JavaScript syntax, JSON, matching plugin versions, PR titles, and the test suite. The repository has no separate type checker.
 
 ## Release ownership
 
 Automation owns the versions in `.claude-plugin/marketplace.json`, `plugins/concise/.claude-plugin/plugin.json`, `plugins/concise/.codex-plugin/plugin.json`, and `package.json`, plus release notes and `vX.Y.Z` tags. Keep these versions unchanged in feature PRs. The existing `v0.5.1` tag is the baseline for automated releases.
 
-`dev` does not publish releases. Changes without a release-triggering commit remain unreleased until a qualifying change reaches `main`.
+Changes without a release-triggering commit remain unreleased until a qualifying change reaches `main`.
 
-Each push to `main` runs the checks, computes the highest version bump since the latest reachable stable tag, updates the four manifests, pushes a release commit and annotated tag together, and publishes a GitHub release with generated notes. It then publishes `@yannelli/be-concise` to npm when npm lacks the `package.json` version. The workflow then merges `main` into `dev` to carry the versions forward. It uses the repository's `GITHUB_TOKEN` with `contents: write`, and `id-token: write` for npm trusted publishing. The `NPM_TOKEN` secret is a fallback until the trusted publisher is configured; see [.agents/docs/npm-trusted-publishing.md](.agents/docs/npm-trusted-publishing.md).
+Each push to `main` runs the checks, computes the highest version bump since the latest reachable stable tag, updates the four manifests, pushes a release commit and annotated tag together, and publishes a GitHub release with generated notes. It then publishes `@yannelli/be-concise` to npm when npm lacks the `package.json` version. The workflow uses the repository's `GITHUB_TOKEN` with `contents: write`, and `id-token: write` for npm trusted publishing. The `NPM_TOKEN` secret is a fallback until the trusted publisher is configured; see [.agents/docs/npm-trusted-publishing.md](.agents/docs/npm-trusted-publishing.md).
 
-Bot pushes do not start another workflow. Release validation and the merge back into `dev` run in the same workflow. See [GitHub's workflow trigger rules](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow).
+Bot pushes do not start another workflow, so release validation runs in the same workflow. See [GitHub's workflow trigger rules](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow).
 
 Preview from a clean, up-to-date `main` checkout with all tags fetched:
 
@@ -59,4 +59,4 @@ Preview from a clean, up-to-date `main` checkout with all tags fetched:
 node scripts/release.mjs --dry-run
 ```
 
-To retry an interrupted release, a failed npm publish, or a failed merge back into `dev`, rerun the Release workflow on `main`. A retry publishes a missing GitHub release from the existing annotated tag before processing newer commits. If `dev` has a merge conflict, resolve it by merging `main` into `dev`, then rerun. Branch rules must permit the release bot to push version commits, tags, and the merge into `dev`.
+To retry an interrupted release or a failed npm publish, rerun the Release workflow on `main`. A retry publishes a missing GitHub release from the existing annotated tag before processing newer commits. Branch rules must permit the release bot to push version commits and tags to `main`.
