@@ -26,7 +26,7 @@ function dashConfig() {
 async function fakeBash(cwd, name, script) {
   const bin = join(cwd, name);
   await mkdir(bin);
-  await writeFile(join(bin, "bash"), `#!/bin/sh\n${script}\n`);
+  await writeFile(join(bin, "bash"), `#!/bin/sh\ncat >/dev/null\n${script}\n`);
   await chmod(join(bin, "bash"), 0o755);
   return `${bin}${delimiter}${process.env.PATH}`;
 }
