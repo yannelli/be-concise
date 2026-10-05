@@ -8,6 +8,7 @@
 - `main` is the default branch and publishes stable releases automatically. `dev` is the integration branch and does not publish releases.
 - Release automation owns version files, release notes, and tags. Do not edit versions or create release tags manually.
 - The release workflow merges `main` back into `dev` after releases to include the release bot's version updates and preserve history.
+- The release workflow publishes `@yannelli/be-concise` to npm through trusted publishing. Read [.agents/docs/INDEX.md](.agents/docs/INDEX.md) before changing release or publishing behavior.
 
 ## Commits and PRs
 

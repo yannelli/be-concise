@@ -84,7 +84,7 @@ async function fixture(t) {
   return cwd;
 }
 
-test("release preparation updates the three versions and preserves other metadata", async (t) => {
+test("release preparation updates every manifest version and preserves other metadata", async (t) => {
   const cwd = await fixture(t);
   await verifyConditions({}, { cwd });
   await prepare({}, { cwd, nextRelease: { version: "0.6.0" } });

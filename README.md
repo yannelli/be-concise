@@ -70,12 +70,14 @@ Run from this repository with Node.js 24:
 node bin/concise-web.mjs
 ```
 
-Or install the command globally from this checkout:
+Or install the command globally from npm:
 
 ```sh
-npm install -g .
+npm install -g @yannelli/be-concise
 concise-web --cwd /path/to/project
 ```
+
+`npm install -g .` installs it from a checkout.
 
 The command starts a localhost server on an available port and opens the browser. Use `--port 4317` to select a port or `--no-open` to print the URL without opening it. `npm run web` also starts the console from the repository.
 
@@ -109,7 +111,7 @@ Persistent defaults can live in `~/.claude/test-filter.conf` or `~/.codex/test-f
 
 ## Development
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the `dev` → `main` workflow, Conventional Commits, and automated semantic releases.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the `dev` → `main` workflow, Conventional Commits, and automated semantic releases. [.agents/docs/INDEX.md](.agents/docs/INDEX.md) lists the researched maintainer notes, including npm trusted publishing.
 
 ```sh
 node plugins/concise/test/run-tests.mjs
