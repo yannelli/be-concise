@@ -34,9 +34,8 @@ async function repository(t) {
   git("add", ".");
   git("commit", "-m", "chore: initial fixture");
   git("tag", "v0.5.1");
-  git("branch", "dev");
   git("remote", "add", "origin", remote);
-  git("push", "origin", "main", "dev", "--tags");
+  git("push", "origin", "main", "--tags");
   return { cwd, git };
 }
 
@@ -49,11 +48,11 @@ test("dry-run calculates a release without changing files, commits, or tags", as
   assert.equal(git("rev-parse", "HEAD"), head);
   assert.equal(git("status", "--porcelain"), "");
   assert.equal(git("tag", "--list"), "v0.5.1");
-  git("checkout", "dev");
+  git("checkout", "-b", "feature");
   await assert.rejects(execute(process.execPath, [script, "--dry-run"], { cwd }), /Releases run from main/);
 });
 
-test("publication retries repair an existing tag without bumping again and dev accepts the release merge", async (t) => {
+test("publication retries repair an existing tag without bumping again", async (t) => {
   const { cwd, git } = await repository(t);
   git("commit", "--allow-empty", "-m", "fix: repair the parser");
   git("push", "origin", "main");
@@ -109,9 +108,4 @@ test("publication retries repair an existing tag without bumping again and dev a
     const document = JSON.parse(await readFile(join(cwd, path), "utf8"));
     assert.equal((document.plugins?.[0] || document).version, "0.5.2");
   }
-  git("checkout", "dev");
-  git("commit", "--allow-empty", "-m", "feat: next development change");
-  git("merge", "--no-ff", "main", "-m", "chore(release): sync main into dev");
-  assert.equal(git("merge-base", "--is-ancestor", "main", "dev"), "");
-  assert.equal(JSON.parse(await readFile(join(cwd, manifestPaths[1]), "utf8")).version, "0.5.2");
 });

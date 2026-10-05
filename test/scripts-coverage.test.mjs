@@ -54,10 +54,10 @@ test("check-pr validates the pull request from the GitHub event file", async (t)
   const directory = await temp(t, "concise-check-pr-");
   const event = join(directory, "event.json");
   const repo = { full_name: "yannelli/be-concise" };
-  const write = (title) => writeFile(event, JSON.stringify({ pull_request: { title, body: "", base: { ref: "dev", repo }, head: { ref: "feature", repo } } }));
+  const write = (title) => writeFile(event, JSON.stringify({ pull_request: { title, body: "", base: { ref: "main", repo }, head: { ref: "feature", repo } } }));
   await write("fix: repair a hook");
   const passed = await execute(process.execPath, [script("check-pr.mjs")], { env: { ...cleanEnv, GITHUB_EVENT_PATH: event } });
-  assert.match(passed.stdout, /PR title and target follow the release guidelines/);
+  assert.match(passed.stdout, /PR title follows the release guidelines/);
   await write("Update files");
   await assert.rejects(execute(process.execPath, [script("check-pr.mjs")], { env: { ...cleanEnv, GITHUB_EVENT_PATH: event } }), /Conventional Commit PR title/);
 });
