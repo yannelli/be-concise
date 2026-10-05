@@ -42,7 +42,7 @@ codex plugin marketplace add yannelli/be-concise
 codex plugin add concise@be-concise
 ```
 
-Start a new Codex session, run `/hooks`, and review and trust each `concise` hook under both `PreToolUse` and `Stop`. Codex asks for review again when a hook definition changes.
+Start a new Codex session, run `/hooks`, and review and trust each `concise` hook under both `PreToolUse` and `Stop`. Codex asks for review again when a hook definition changes, so trust the hooks again after an update.
 
 For automation that already validates its hook sources:
 
@@ -61,6 +61,9 @@ The bypass applies to that invocation and does not save trust.
 - [plugins/concise/docs/categories.md](plugins/concise/docs/categories.md): all 44 AI writing categories with an example, a fix, the presets, and the scopes.
 - [plugins/concise/docs/environment.md](plugins/concise/docs/environment.md): every `BEC_` variable and 3 worked scenarios, including a cloud agent with no config file.
 - [plugins/concise/docs/packs.md](plugins/concise/docs/packs.md): the pack file format, the 3 pattern kinds, `detect(text, ctx)`, and the validator and renderer commands.
+- [plugins/concise/docs/tools.md](plugins/concise/docs/tools.md): the `concise-config` CLI, the MCP tools, the settings skills, and the writing-sample tuner.
+- [plugins/concise/docs/host-features.md](plugins/concise/docs/host-features.md): the Claude Code and Codex features the manifests use, with dated sources. Read it before you change a hook manifest.
+- [plugins/concise/docs/INDEX.md](plugins/concise/docs/INDEX.md): every doc, with its created and updated dates.
 
 ## Web console
 

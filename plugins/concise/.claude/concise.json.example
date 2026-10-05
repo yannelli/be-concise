@@ -91,6 +91,11 @@
       "enablePatterns": [],
       "disablePatterns": [],
       "options": {}
+    },
+    "dictionary": {
+      "enabled": true,
+      "mode": "confirm",
+      "entries": []
     }
   }
 }

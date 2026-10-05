@@ -50,6 +50,9 @@ Copy `.claude/concise.json.example` to `.claude/concise.json` (Claude Code) or `
 | `features.aiWriting.enablePatterns` | `[]` | Category ids, pack ids, or `tag:<tag>` to add. |
 | `features.aiWriting.disablePatterns` | `[]` | Category ids, pack ids, or `tag:<tag>` to drop. |
 | `features.aiWriting.options` | `{}` | Script pack thresholds, keyed by pack id. |
+| `features.dictionary.enabled` | `true` | Runs the dictionary check. It does no work until it has an entry. |
+| `features.dictionary.mode` | `"confirm"` | `confirm`, `ask`, or `deny`. |
+| `features.dictionary.entries` | `[]` | Terms to flag, each with its own match rule and fix. See [dictionary](#dictionary). |
 
 The default `ignoreGlobs` list: `**/node_modules/**`, `**/vendor/**`, `**/dist/**`, `**/build/**`, `**/.next/**`, `**/*.generated.*`, `**/*.min.js`, `**/package-lock.json`, `**/*.lock`.
 
@@ -70,6 +73,7 @@ A project file overrides `BEC_FEATURE_ENABLE`. `BEC_FEATURE_ALWAYS_ENABLE` overr
 - Unioned across layers, duplicates dropped, order kept: `styleIgnoreGlobs`, `allowList.phrases`, `allowList.patterns`, `bypass.phrases`, `bypass.patterns`, `features.aiWriting.allow`, `features.aiWriting.packs`, `features.aiWriting.excludePacks`.
 - Replaced by the higher layer: `ignoreGlobs`, `features.aiWriting.categories`.
 - Merged one level deep: `features`, `checks`, `log`, `monitor`, `context`, `subagentStop`, `testFilter`, and `features.aiWriting.options` per pack id.
+- Merged by `id`: `features.dictionary.entries`. A higher entry replaces a lower entry with the same `id` in place, and new ids go at the end. `{ "id": "x", "enabled": false }` in a higher layer switches off entry `x`.
 - `enablePatterns` and `disablePatterns` end as two final lists. Inside one layer, an id in both goes to disable. A higher enable removes the id from a lower disable, and a higher disable removes it from a lower enable.
 
 A config file or a `BEC_CONFIG_JSON` value that does not parse as a JSON object is skipped. The other layers still apply, and the hook reports the skipped layer once per session in a `systemMessage`.
@@ -89,9 +93,11 @@ Each core check has its own switch under `checks`: `comments`, `fileSize`, and `
 
 ## Lifecycle context and host hooks
 
-`SessionStart` sends the resolved limits, enabled style checks, and escape hatches on `startup`, `resume`, `clear`, and `compact`. `SubagentStart` sends the same rules. Set `context.perTurn` to `true` for reminders on `UserPromptSubmit`. Configuration errors are reported even when reminders are disabled.
+`SessionStart` sends the resolved limits, enabled style checks, and escape hatches on `startup`, `resume`, `clear`, and `compact`, and in Claude Code on `fork`. `SubagentStart` sends the same rules. Set `context.perTurn` to `true` for reminders on `UserPromptSubmit`. Configuration errors are reported even when reminders are disabled.
 
-Claude reads `hooks/hooks.json`, with broad `if` filters for shell commands. Codex reads `hooks/codex.json`, which uses command hooks without Claude's `if` fields. Both hosts send lifecycle records to the existing monitor.
+Claude reads `hooks/hooks.json`, with broad `if` filters for shell commands. Codex reads `hooks/codex.json`, which uses command hooks without Claude's `if` fields. Both hosts send lifecycle records to the existing monitor, and both show a `concise: ...` status line while a hook runs.
+
+In Claude Code auto mode, a subagent hands its report back through the `SubagentHandback` tool. A `PreToolUse` hook on that tool runs the subagent reply check over the report and denies the handback with the findings, so the subagent revises before the parent sees it. `SubagentStop` skips Claude's internal agents, such as prompt suggestions, which arrive with an empty `agent_type` when the session runs without `--agent`. [Claude hook events](https://code.claude.com/docs/en/hooks)
 
 Codex keeps the existing test command rewrite by default. Set `testFilter.codexPostToolUse` to `true` to try filtering completed results. The post hook preserves failed output, the exit status, and a path to the available raw output. It uses `continue: false` feedback so nested code-mode promises can resolve. Direct calls, code-mode calls, and completed background polls must pass live host smoke checks before changing the default. [Codex PostToolUse contract](https://learn.chatgpt.com/docs/hooks#posttooluse)
 
@@ -112,7 +118,7 @@ The evaluator checks reply padding with the resolved rules, bypasses, soft-fail 
 
 ## mode
 
-`mode` is set per feature, under `features.emDash.mode` and `features.aiWriting.mode`. It takes `confirm`, `ask`, or `deny`. When both features fire on one call, the strictest mode wins (`deny` over `ask` over `confirm`) and one message carries both parts.
+`mode` is set per feature, under `features.emDash.mode`, `features.aiWriting.mode`, and `features.dictionary.mode`. It takes `confirm`, `ask`, or `deny`. When more than one feature fires on one call, the strictest mode wins (`deny` over `ask` over `confirm`) and one message carries every part.
 
 `confirm` is the default. The flow:
 
@@ -124,6 +130,49 @@ The evaluator checks reply padding with the resolved rules, bypasses, soft-fail 
 `ask` uses Claude Code's native permission prompt and also sends the finding to the agent. Codex does not support that hook decision, so Concise denies the call and tells the agent to revise or request your approval. After approval, the agent retries with `concise-ignore`; repeating the unchanged call stays denied. On `Stop`, `ask` behaves as `confirm`.
 
 `deny` denies until `maxRetries` is passed, then allows the write and flags it, the same as the 3 core checks.
+
+## dictionary
+
+`features.dictionary.entries` lists terms to flag. Each entry fires in the same hooks, with the same confirm flow, as the other style checks.
+
+```json
+{
+  "features": {
+    "dictionary": {
+      "entries": [
+        { "id": "blacklist", "match": "startsWith", "value": "blacklist", "fix": "denylist" },
+        { "id": "hope-helps", "match": "endsWith", "on": "line", "value": "Hope this helps!", "fix": "end on the last fact", "hooks": ["stop", "subagentStop"] },
+        { "id": "ticket", "match": "regex", "value": "\\bJIRA-\\d+\\b", "fix": "link the ticket", "scopes": ["commit", "gh"] }
+      ]
+    }
+  }
+}
+```
+
+| Field | Required | Values |
+|---|---|---|
+| `id` | yes | Lowercase letters, digits, and hyphens. The deny tag is `[concise:dictionary:<id>]`. |
+| `match` | yes | `exact`, `contains`, `startsWith`, `endsWith`, or `regex`. |
+| `value` | yes | The term, the phrase, or the regular expression. |
+| `fix` | yes | What to write instead. The deny shows it. |
+| `on` | no | `word` (default), `line`, or `text`. `regex` ignores it. |
+| `caseSensitive` | no | `false` by default. |
+| `flags` | no | Regex flags for `regex` entries. Default `i`. The scanner adds `g` and `d` and drops `y`. |
+| `hooks` | no | `edit`, `bash`, `stop`, `subagentStop`. Absent means all 4. |
+| `scopes` | no | `files`, `comments`, `gh`, `commit`, `command`, `reply`. Absent means every scope except `command`. |
+| `enabled` | no | `false` switches the entry off. A switched-off entry needs only its `id`. |
+
+How `on` changes the match:
+
+- `word`: `exact` matches the whole word or phrase. `startsWith`, `endsWith`, and `contains` match inside a word and report the whole word. A word edge is any character other than a letter, a digit, or `_`, so `C++` and `#tag` work as values.
+- `line`: the value is compared with each line, with leading and trailing spaces ignored. In a code comment, the comment marker is ignored as well.
+- `text`: the value is compared with the whole scanned span: a prose file, one comment run, a commit message, a `gh` body, or a reply.
+
+For `regex`, a named group `(?<hit>...)` sets the part the deny quotes.
+
+The hooks map to the text they scan: `edit` covers file writes, edits, and patches; `bash` covers `git commit` messages and `gh` bodies; `stop` covers the final reply; `subagentStop` covers subagent replies and `SubagentHandback` reports. `concise-ignore`, `concise-ignore-file`, `allowList`, `bypass`, `ignoreGlobs`, and `styleIgnoreGlobs` apply to dictionary findings. `features.aiWriting.allow` does not.
+
+An entry that does not validate is skipped, and the hook reports it once per session. The settings console and `concise-config` refuse to save it. The feature id for `BEC_FEATURE_*` is `dictionary`.
 
 ## allowList and bypass
 

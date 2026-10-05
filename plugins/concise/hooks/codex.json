@@ -8,7 +8,8 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
-                        "timeout": 15
+                        "timeout": 15,
+                        "statusMessage": "concise: checking written text"
                     }
                 ]
             },
@@ -18,17 +19,20 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/monitor-filter.mjs\"",
-                        "timeout": 15
+                        "timeout": 15,
+                        "statusMessage": "concise: preparing test output filter"
                     },
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
-                        "timeout": 15
+                        "timeout": 15,
+                        "statusMessage": "concise: checking commit and PR text"
                     },
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
-                        "timeout": 15
+                        "timeout": 15,
+                        "statusMessage": "concise: checking written text"
                     }
                 ]
             }
@@ -39,7 +43,8 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.mjs\"",
-                        "timeout": 15
+                        "timeout": 15,
+                        "statusMessage": "concise: checking reply"
                     }
                 ]
             }
@@ -50,7 +55,8 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-context.mjs\"",
-                        "timeout": 15
+                        "timeout": 15,
+                        "statusMessage": "concise: loading rules"
                     }
                 ],
                 "matcher": "startup|resume|clear|compact"
@@ -62,7 +68,8 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-context.mjs\"",
-                        "timeout": 15
+                        "timeout": 15,
+                        "statusMessage": "concise: loading rules"
                     }
                 ]
             }
@@ -73,7 +80,8 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-context.mjs\"",
-                        "timeout": 15
+                        "timeout": 15,
+                        "statusMessage": "concise: loading rules"
                     }
                 ]
             }
@@ -84,7 +92,8 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.mjs\"",
-                        "timeout": 15
+                        "timeout": 15,
+                        "statusMessage": "concise: checking subagent reply"
                     }
                 ]
             }
@@ -95,7 +104,8 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-end.mjs\"",
-                        "timeout": 1
+                        "timeout": 1,
+                        "statusMessage": "concise: clearing session state"
                     }
                 ]
             }
@@ -107,7 +117,8 @@
                     {
                         "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/post-test-filter.mjs\"",
-                        "timeout": 15
+                        "timeout": 15,
+                        "statusMessage": "concise: filtering test output"
                     }
                 ]
             }

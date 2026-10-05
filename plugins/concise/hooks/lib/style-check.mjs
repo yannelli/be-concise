@@ -1,39 +1,25 @@
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
 import { isIgnored } from "./config.mjs";
 import { proseSpans, isProsePath } from "./prose.mjs";
 import { findDashes } from "./em-dash.mjs";
 import { resolveCategories, scanAiWriting } from "./ai-patterns.mjs";
 import { resolveStyle, clearStyle, sha256 } from "./confirm.mjs";
 import { loadPacks, inScope } from "./packs.mjs";
+import { dictionaryActive, dictionaryEntries, scanDictionary } from "./dictionary.mjs";
 import { once } from "./state.mjs";
+import { PLAIN, EDIT, parts, firedAny, trailer, styleSummary, referenceFor } from "./style-message.mjs";
 
-const PLUGIN_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
-export const REFERENCE_DIR = resolve(PLUGIN_ROOT, "skills", "concise-rules", "references");
-const DASH_REFERENCE = resolve(REFERENCE_DIR, "avoid-ai-speak.md");
-const AI_REFERENCE = resolve(REFERENCE_DIR, "ai-speak-patterns.md");
+export { REFERENCE_DIR, styleMessage, styleSummary } from "./style-message.mjs";
 
-const DASH_NAMES = { "—": "em dash", "–": "en dash", "--": "double hyphen" };
-const SHORT_NAMES = { "—": "em", "–": "en", "--": "double hyphen" };
-const LINE_LIMIT = 10;
-const MATCH_LIMIT = 4;
 const TEXT_PATH = "reply.md";
 const MODE_ORDER = ["deny", "ask", "confirm"];
-const DASH_FIX = "Fix: a comma, period, colon, parentheses, or two sentences.";
-const SUPPRESS_HINT = "Suppress: concise-ignore on the line, or allowList.phrases in concise.json.";
-
-const PLAIN = { one: (n) => `line ${n}`, many: (list) => `lines ${list}` };
-const EDIT = { one: (n) => `line ${n} of the edit`, many: (list) => `lines ${list} of the edit` };
 const firstLineOf = (text) => text.split("\n")[0].trim().slice(0, 60);
-const oneLine = (text) => text.replace(/\s+/g, " ").trim();
-const plural = (name, n) => (n === 1 ? name : `${name}${name.endsWith("dash") ? "es" : "s"}`);
 
 let loaded = { packs: [], categories: [], presets: {}, problems: [] };
 let runtime = [];
 let record = emptyRecord();
 
 function emptyRecord() {
-  return { findings: [], counts: { emDash: 0, aiWriting: 0 }, key: null, scope: null, lastScope: null };
+  return { findings: [], counts: { emDash: 0, aiWriting: 0, dictionary: 0 }, key: null, scope: null, lastScope: null };
 }
 
 /** Loads the pattern packs for this cwd. Every hook awaits it before it calls styleFindings. */
@@ -80,12 +66,22 @@ function allowTester(config) {
   };
 }
 
-function collect(emDash, aiWriting, scope) {
+function collect({ emDash, aiWriting, dictionary }, scope) {
   record.counts.emDash += emDash.length;
   record.counts.aiWriting += aiWriting.length;
+  record.counts.dictionary += dictionary.length;
   record.lastScope = record.lastScope || scope;
   for (const hit of emDash) record.findings.push({ category: "emDash", match: hit.snippet, line: hit.line });
   for (const hit of aiWriting) record.findings.push({ category: hit.category, match: hit.match, line: hit.line });
+  for (const hit of dictionary) record.findings.push({ category: `dictionary:${hit.id}`, match: hit.match, line: hit.line });
+}
+
+function compiledDictionary(config) {
+  const { entries, problems } = dictionaryEntries(config);
+  for (const problem of problems) {
+    noteProblem(`dictionary:${problem.id}`, `[concise] dictionary entry "${problem.id}" ignored: ${problem.reason}`);
+  }
+  return entries;
 }
 
 /** One line per skipped pack or bad config regex, at most once per session. */
@@ -105,18 +101,21 @@ export function withPackWarnings(result, sessionId) {
   return { ...result, systemMessage: result.systemMessage ? `${result.systemMessage} ${text}` : text };
 }
 
-export function styleFindings(text, path, config, scope = "files") {
-  const emDash = [];
-  const aiWriting = [];
+/** `hook` is edit, bash, stop, or subagentStop; dictionary entries can be limited to some of them. */
+export function styleFindings(text, path, config, scope = "files", hook = null) {
+  const found = { emDash: [], aiWriting: [], dictionary: [] };
+  const { emDash, aiWriting, dictionary } = found;
   const dash = (config.features || {}).emDash || {};
   const ai = (config.features || {}).aiWriting || {};
-  if (!dash.enabled && !ai.enabled) return { emDash, aiWriting };
-  if (isIgnored(path, config.ignoreGlobs || [])) return { emDash, aiWriting };
-  if (isIgnored(path, config.styleIgnoreGlobs || [])) return { emDash, aiWriting };
+  const dictOn = dictionaryActive(config);
+  if (!dash.enabled && !ai.enabled && !dictOn) return found;
+  if (isIgnored(path, config.ignoreGlobs || [])) return found;
+  if (isIgnored(path, config.styleIgnoreGlobs || [])) return found;
 
   const dashOn = dash.enabled && loaded.packs.some((p) => p.feature === "emDash" && inScope(p, scope));
   const resolved = ai.enabled ? resolveCategories(ai, loaded) : null;
   const packs = resolved ? resolved.packs.filter((p) => inScope(p, scope)) : [];
+  const entries = dictOn ? compiledDictionary(config) : [];
   const lines = text.split("\n");
   const allowed = allowTester(config);
   const keep = (line, match) => {
@@ -132,94 +131,26 @@ export function styleFindings(text, path, config, scope = "files") {
         if (keep(at(hit.line), hit.char)) emDash.push({ ...hit, line: at(hit.line) });
       }
     }
+    for (const hit of scanDictionary(span.text, entries, { hook, scope })) {
+      if (keep(at(hit.line), hit.match)) dictionary.push({ ...hit, line: at(hit.line) });
+    }
     if (packs.length === 0) continue;
-    const found = scanAiWriting(span.text, { packs, allow: resolved.allow, ctx: { path, scope }, problems: runtime });
-    for (const hit of found) {
+    const hits = scanAiWriting(span.text, { packs, allow: resolved.allow, ctx: { path, scope }, problems: runtime });
+    for (const hit of hits) {
       if (keep(at(hit.line), hit.match)) aiWriting.push({ ...hit, line: at(hit.line) });
     }
   }
-  collect(emDash, aiWriting, scope);
-  return { emDash, aiWriting };
-}
-
-function dashPhrase(hits) {
-  const names = new Set(hits.map((hit) => DASH_NAMES[hit.char]));
-  if (names.size === 1) return `${hits.length} ${plural([...names][0], hits.length)}`;
-  const counts = Object.keys(SHORT_NAMES)
-    .map((char) => ({ char, n: hits.filter((hit) => hit.char === char).length }))
-    .filter((entry) => entry.n > 0)
-    .map((entry) => `${entry.n} ${SHORT_NAMES[entry.char]}`);
-  return `${hits.length} dashes (${counts.join(", ")})`;
-}
-
-function lineList(lines, where) {
-  const unique = [...new Set(lines)].sort((a, b) => a - b);
-  if (unique.length === 1) return `at ${where.one(unique[0])}`;
-  const shown = unique.slice(0, LINE_LIMIT);
-  const extra = unique.length - shown.length;
-  return `on ${where.many(shown.join(", "))}${extra > 0 ? ` (+${extra} more)` : ""}`;
-}
-
-function dashGroup(hits, where) {
-  const lines = hits.map((hit) => hit.line);
-  return `[concise:emDash] ${dashPhrase(hits)} ${lineList(lines, where)}: "…${hits[0].snippet}…". ${DASH_FIX}`;
-}
-
-/** One line per category: the count, the lines, and each distinct match with its fix. */
-function aiGroups(hits, where) {
-  const groups = new Map();
-  for (const hit of hits) {
-    if (!groups.has(hit.category)) groups.set(hit.category, { lines: [], fixes: new Map() });
-    const group = groups.get(hit.category);
-    group.lines.push(hit.line);
-    const match = oneLine(hit.match);
-    if (!group.fixes.has(match)) group.fixes.set(match, hit.fix);
-  }
-  return [...groups].map(([category, group]) => {
-    const shown = [...group.fixes].slice(0, MATCH_LIMIT).map(([match, fix]) => `"${match}" (${fix})`);
-    const extra = group.fixes.size - shown.length;
-    const count = group.lines.length;
-    const noun = count === 1 ? "match" : "matches";
-    return `[concise:${category}] ${count} ${noun} ${lineList(group.lines, where)}: ${shown.join("; ")}${extra > 0 ? `; +${extra} more` : ""}.`;
-  });
-}
-
-function parts(findings, label, where) {
-  const summary = styleSummary(findings, label);
-  if (!summary) return [];
-  const dash = findings.emDash.length ? [dashGroup(findings.emDash, where)] : [];
-  return [`[concise] ${summary}.`, ...dash, ...aiGroups(findings.aiWriting, where)];
-}
-
-function trailer(fired, scope) {
-  const references = [fired.emDash ? DASH_REFERENCE : null, fired.aiWriting ? AI_REFERENCE : null].filter(Boolean);
-  const suppress = scope === "reply" ? "" : `${SUPPRESS_HINT} `;
-  return `${suppress}Reference: ${references.join(", ")}`;
-}
-
-export function styleMessage(findings, label, where = PLAIN) {
-  const out = parts(findings, label, where);
-  return out.length ? out.join("\n") : null;
-}
-
-export function styleSummary(findings, label) {
-  const out = [];
-  if (findings.emDash.length) out.push(dashPhrase(findings.emDash));
-  if (findings.aiWriting.length) {
-    out.push(`${findings.aiWriting.length} ${plural("AI writing pattern", findings.aiWriting.length)}`);
-  }
-  if (out.length === 0) return null;
-  return label ? `${out.join(", ")} in ${label}` : out.join(", ");
+  collect(found, scope);
+  return found;
 }
 
 function strictestMode(fired, config) {
   const modes = [];
   if (fired.emDash) modes.push(config.features.emDash.mode);
   if (fired.aiWriting) modes.push(config.features.aiWriting.mode);
+  if (fired.dictionary) modes.push(config.features.dictionary.mode);
   return MODE_ORDER.find((mode) => modes.includes(mode)) || "confirm";
 }
-
-const referenceFor = (fired) => (fired.emDash ? DASH_REFERENCE : AI_REFERENCE);
 
 function decide({ input, config, key, hash, fired, texts, summaries, event, scope }) {
   return resolveStyle({
@@ -229,7 +160,7 @@ function decide({ input, config, key, hash, fired, texts, summaries, event, scop
     hash,
     mode: strictestMode(fired, config),
     maxRetries: config.maxRetries,
-    message: [...texts, trailer(fired, scope)].join("\n"),
+    message: [...texts, trailer(fired, scope)].filter(Boolean).join("\n"),
     summary: summaries.join("; "),
     event,
     reference: referenceFor(fired),
@@ -239,7 +170,7 @@ function decide({ input, config, key, hash, fired, texts, summaries, event, scop
 export function styleDecision(targets, input, config) {
   const texts = [];
   const summaries = [];
-  const fired = { emDash: false, aiWriting: false };
+  const fired = { emDash: false, aiWriting: false, dictionary: false };
   const clean = [];
   let key = null;
 
@@ -249,13 +180,12 @@ export function styleDecision(targets, input, config) {
     const lines = target.wholeFile ? PLAIN : EDIT;
     let hit = false;
     for (const chunk of target.chunks) {
-      const findings = styleFindings(chunk, target.path, config, scope);
+      const findings = styleFindings(chunk, target.path, config, scope, "edit");
       const where = label || `${target.path}, starting "${firstLineOf(chunk)}"`;
       const chunkTexts = parts(findings, where, lines);
       if (chunkTexts.length === 0) continue;
       hit = true;
-      fired.emDash = fired.emDash || findings.emDash.length > 0;
-      fired.aiWriting = fired.aiWriting || findings.aiWriting.length > 0;
+      for (const [name, on] of Object.entries(firedAny(findings))) fired[name] = fired[name] || on;
       texts.push(...chunkTexts);
       summaries.push(styleSummary(findings, where));
     }
@@ -275,8 +205,8 @@ export function styleDecision(targets, input, config) {
   return decide({ input, config, key, hash, fired, texts, summaries, event: "PreToolUse", scope: "files" });
 }
 
-export function styleDecisionForText(text, key, label, input, config, event = "PreToolUse", scope = "reply") {
-  const findings = styleFindings(text, TEXT_PATH, { ...config, ignoreGlobs: [], styleIgnoreGlobs: [] }, scope);
+export function styleDecisionForText(text, key, label, input, config, event = "PreToolUse", scope = "reply", hook = null) {
+  const findings = styleFindings(text, TEXT_PATH, { ...config, ignoreGlobs: [], styleIgnoreGlobs: [] }, scope, hook);
   const texts = parts(findings, label, PLAIN);
   if (texts.length === 0) {
     clearStyle(input.session_id, key);
@@ -284,7 +214,7 @@ export function styleDecisionForText(text, key, label, input, config, event = "P
   }
   record.key = record.key || key;
   record.scope = record.scope || scope;
-  const fired = { emDash: findings.emDash.length > 0, aiWriting: findings.aiWriting.length > 0 };
+  const fired = firedAny(findings);
   return decide({
     input,
     config,

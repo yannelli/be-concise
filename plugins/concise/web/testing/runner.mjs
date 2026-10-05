@@ -153,7 +153,7 @@ async function execute(hook, request, requestPath, env) {
   return { matches: metadata.matches || [], record: {
     hook: hook.name, event: request.hook_event_name, tool: request.tool_name ?? null,
     session: request.session_id, cwd: request.cwd, decision: result.error ? "error" : decision(response),
-    durationMs: result.durationMs, findings, counts: metadata.style?.counts || { emDash: 0, aiWriting: 0 },
+    durationMs: result.durationMs, findings, counts: metadata.style?.counts || { emDash: 0, aiWriting: 0, dictionary: 0 },
     error: result.error, request, response, stdout: result.stdout, stderr: result.stderr,
     exitCode: result.exitCode, source: "test",
   } };

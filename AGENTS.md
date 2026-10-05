@@ -31,6 +31,10 @@ For breaking changes, add `!` to the commit subject and PR title and explain the
 
 PR bodies describe the behavior changed, the checks run, and any migration. Do not claim checks that were not run.
 
+## Docs
+
+[plugins/concise/docs/INDEX.md](plugins/concise/docs/INDEX.md) lists the plugin docs with their dates. Before you change `hooks/hooks.json`, `hooks/codex.json`, `.mcp.json`, `.codex-mcp.json`, or a plugin manifest, read [plugins/concise/docs/host-features.md](plugins/concise/docs/host-features.md) and check its sources for changes. Update its dates and the index when you change it.
+
 ## Validation
 
 Use Node.js 24, Bash, and `jq`. Run:

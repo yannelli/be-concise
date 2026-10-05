@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { openSync, readSync, fstatSync, closeSync } from "node:fs";
 import { loadConfig } from "./lib/config.mjs";
+import { dictionaryActive } from "./lib/dictionary.mjs";
 import { styleFindings, styleSummary, styleDecisionForText, prepareStyle, withPackWarnings } from "./lib/style-check.mjs";
 import { sha256 } from "./lib/confirm.mjs";
 import { takePending, resetAttempt } from "./lib/state.mjs";
@@ -51,6 +52,7 @@ function lastAssistantText(path) {
 }
 
 // A feature that is off for replies is off for this hook, so styleFindings skips it.
+// Dictionary entries pick their hooks themselves.
 function replyConfig(config) {
   const { emDash, aiWriting } = config.features;
   return {
@@ -58,14 +60,17 @@ function replyConfig(config) {
     ignoreGlobs: [],
     styleIgnoreGlobs: [],
     features: {
+      ...config.features,
       emDash: { ...emDash, enabled: Boolean(emDash.enabled && emDash.replies) },
       aiWriting: { ...aiWriting, enabled: Boolean(aiWriting.enabled && aiWriting.replies) },
     },
   };
 }
 
-function afterBlock(text, input, config) {
-  const summary = styleSummary(styleFindings(text, REPLY_PATH, config, "reply"), null);
+const anyStyle = (config) => config.features.emDash.enabled || config.features.aiWriting.enabled || dictionaryActive(config);
+
+function afterBlock(text, input, config, hook) {
+  const summary = styleSummary(styleFindings(text, REPLY_PATH, config, "reply", hook), null);
   const pending = takePending(input.session_id, KEY);
   resetAttempt(input.session_id, KEY);
   if (!summary) return {};
@@ -73,14 +78,37 @@ function afterBlock(text, input, config) {
   return { systemMessage: `[concise] Reply still has ${summary}; allowed.` };
 }
 
+function subagentExempt(input, config) {
+  if (config.subagentStop?.enabled === false) return true;
+  if (config.subagentStop?.exemptAgentTypes?.includes(input.agent_type)) return true;
+  // Claude Code reports its own internal agents, such as prompt suggestions, with an empty type.
+  return typeof input.turn_id !== "string" && input.agent_type === "";
+}
+
+// In auto mode a Claude Code subagent delivers its report as SubagentHandback's message.
+async function handbackDecision(input, ctx) {
+  const text = input.tool_input?.message;
+  if (typeof text !== "string" || text === "") return {};
+  const config = replyConfig(loadConfig(input.cwd));
+  ctx.config = config;
+  if (!config.stopHook || subagentExempt(input, config) || !anyStyle(config)) return {};
+  const bypassed = bypassResult(text, config, ctx);
+  if (bypassed) return bypassed;
+  await prepareStyle(input.cwd, config);
+  const result = styleDecisionForText(text, `${KEY}:handback`, "your report", input, config, "PreToolUse", "reply", "subagentStop");
+  return withPackWarnings(result, input.session_id);
+}
+
 async function decide(input, ctx) {
   const event = input.hook_event_name || "Stop";
+  if (event === "PreToolUse" && input.tool_name === "SubagentHandback") return handbackDecision(input, ctx);
   if (event !== "Stop" && event !== "SubagentStop") return {};
   const config = replyConfig(loadConfig(input.cwd));
   ctx.config = config;
   if (!config.stopHook) return {};
-  if (event === "SubagentStop" && (config.subagentStop?.enabled === false || config.subagentStop?.exemptAgentTypes?.includes(input.agent_type))) return {};
-  if (!config.features.emDash.enabled && !config.features.aiWriting.enabled) return {};
+  if (event === "SubagentStop" && subagentExempt(input, config)) return {};
+  if (!anyStyle(config)) return {};
+  const hook = event === "SubagentStop" ? "subagentStop" : "stop";
   let text = typeof input.last_assistant_message === "string" ? input.last_assistant_message : null;
   const transcriptPath = event === "SubagentStop" ? input.agent_transcript_path : input.transcript_path;
   if (text === null && transcriptPath) {
@@ -96,8 +124,8 @@ async function decide(input, ctx) {
   if (bypassed) return bypassed;
   await prepareStyle(input.cwd, config);
   const result = input.stop_hook_active
-    ? afterBlock(text, input, config)
-    : styleDecisionForText(text, KEY, "your reply", input, config, event, "reply");
+    ? afterBlock(text, input, config, hook)
+    : styleDecisionForText(text, KEY, "your reply", input, config, event, "reply", hook);
   return withPackWarnings(result, input.session_id);
 }
 
