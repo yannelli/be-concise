@@ -6,7 +6,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 export const BUILTIN_DIR = join(HERE, "patterns");
 const PRESETS_FILE = join(BUILTIN_DIR, "presets.json");
 
-const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
+export const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
 const FEATURES = ["aiWriting", "emDash"];
 export const SCOPES = ["files", "comments", "gh", "commit", "command", "reply"];
 export const DEFAULT_SCOPE = SCOPES.filter((s) => s !== "command");

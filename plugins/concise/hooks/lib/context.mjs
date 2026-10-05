@@ -1,10 +1,18 @@
+import { dictionaryActive } from "./dictionary.mjs";
+
 export function contextText(config) {
   const lines = ["[concise] Active rules:"];
   if (config.checks.comments) lines.push(`Comments: at most ${config.maxCommentLines} contiguous lines in new text.`);
   if (config.checks.fileSize) lines.push(`New files: at most ${config.maxFileLines} lines.`);
   if (config.checks.prBody) lines.push(`PR/issue prose: at most ${config.maxPrBodyParagraphs} paragraphs and ${config.maxPrBodySentences} sentences per paragraph.`);
-  const features = Object.entries(config.features).filter(([, value]) => value.enabled);
+  const features = Object.entries(config.features).filter(([name, value]) => (name === "dictionary" ? dictionaryActive(config) : value.enabled));
   for (const [name, feature] of features) {
+    if (name === "dictionary") {
+      const ids = feature.entries.filter((entry) => entry?.enabled !== false).map((entry) => entry.id);
+      const more = ids.length > 10 ? `, +${ids.length - 10} more` : "";
+      lines.push(`dictionary: ${feature.mode}; ${ids.length} ${ids.length === 1 ? "entry" : "entries"} (${ids.slice(0, 10).join(", ")}${more}).`);
+      continue;
+    }
     const detail = name === "aiWriting" ? `, preset ${feature.preset}` : "";
     lines.push(`${name}: ${feature.mode}${detail}; reply checks ${config.stopHook && feature.replies ? "on" : "off"}.`);
   }

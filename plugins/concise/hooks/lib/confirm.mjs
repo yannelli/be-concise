@@ -6,7 +6,7 @@ export const sha256 = (text) => createHash("sha256").update(text).digest("hex");
 
 const STOP_HINT = "\n\nRewrite the reply, or send the same reply again to confirm intent.";
 const keepHint = (reference) =>
-  `\n\nTo keep it, send the identical write again to confirm. To fix it, read ${reference}.`;
+  `\n\nTo keep it, send the identical write again to confirm. To fix it, ${reference ? `read ${reference}` : "apply the fix named above"}.`;
 
 export const STOP_BLOCK_MESSAGE = "[concise] reply held for style review";
 const isStop = (event) => event === "Stop" || event === "SubagentStop";

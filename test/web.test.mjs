@@ -284,6 +284,15 @@ test("validation supports nullable categories, sizes, and custom pack thresholds
   assert.throws(() => validateConfig({ features: { emDash: { mode: "off" } } }), /must be confirm/);
 });
 
+test("validation checks dictionary entries", () => {
+  const entry = { id: "synergy", match: "startsWith", value: "synerg", fix: "name the shared part", hooks: ["stop"], scopes: ["reply"] };
+  assert.doesNotThrow(() => validateConfig({ features: { dictionary: { mode: "deny", entries: [entry, { id: "off", enabled: false }] } } }));
+  assert.throws(() => validateConfig({ features: { dictionary: { entries: {} } } }), /entries must be an array/);
+  assert.throws(() => validateConfig({ features: { dictionary: { entries: [{ ...entry, match: "fuzzy" }] } } }), /entries\[0\]: match must be one of/);
+  assert.throws(() => validateConfig({ features: { dictionary: { entries: [entry, entry] } } }), /entries\[1\]: duplicate id synergy/);
+  assert.throws(() => validateConfig({ features: { dictionary: { mode: "warn" } } }), /must be confirm/);
+});
+
 async function packServer(t, initial) {
   let pack = initial;
   let release = { tag_name: "v0.0.1", html_url: "https://github.com/yannelli/be-concise/releases/tag/v0.0.1" };

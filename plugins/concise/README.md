@@ -24,7 +24,7 @@ codex plugin marketplace add yannelli/be-concise
 codex plugin add concise@be-concise
 ```
 
-Start a new Codex session, run `/hooks`, and review and trust each `concise` hook under both `PreToolUse` and `Stop`. Codex asks for review again when a hook definition changes. Automation that already validates its hook sources can pass `codex exec --dangerously-bypass-hook-trust "<prompt>"`. The bypass applies to that invocation and does not save trust.
+Start a new Codex session, run `/hooks`, and review and trust each `concise` hook under both `PreToolUse` and `Stop`. Codex asks for review again when a hook definition changes, so trust the hooks again after an update. Automation that already validates its hook sources can pass `codex exec --dangerously-bypass-hook-trust "<prompt>"`. The bypass applies to that invocation and does not save trust.
 
 The 3 core checks run right away. No config file is needed.
 
@@ -80,6 +80,7 @@ To keep it, send the identical write again to confirm. To fix it, read <plugin>/
 | PR and issue bodies | A `gh` body over 1 prose paragraph, or a paragraph over 3 sentences | `[concise] PR/issue body is too verbose: a paragraph has 4 sentences (limit 3)` |
 | Em dashes | `U+2014`, plus `U+2013` when `enDash` is true, plus `--` between word characters when `doubleHyphen` is true | `The parser runs first — then it rejects the file.` |
 | AI writing patterns | 44 categories of phrasing, commit hygiene, punctuation, and text statistics | `We delve into the parser.` |
+| Dictionary | Terms you list in `features.dictionary.entries` | `[concise:dictionary:blacklist] 1 match at line 3: "blacklisted" (denylist).` |
 
 A bulleted `## Summary` body is never flagged as a verbose PR body. Only unstructured prose is.
 
@@ -166,7 +167,36 @@ The full field list, the 3 pattern kinds, the `.mjs` script pack format with `de
 
 ## Configuration
 
-Every config key, the 5 config layers and their merge rules, `mode` and the confirm flow, `allowList`, `bypass`, `softFail`, the ignore globs, and the log format are in [docs/configuration.md](docs/configuration.md).
+Every config key, the 5 config layers and their merge rules, `mode` and the confirm flow, `allowList`, `bypass`, `softFail`, the ignore globs, and the log format are in [docs/configuration.md](docs/configuration.md). [docs/INDEX.md](docs/INDEX.md) lists every doc.
+
+To change settings from a session, ask the agent: the `concise-config` skill reads the settings, shows a diff, and writes it after you agree. The `concise-tune` skill reads samples of your writing and proposes settings that let it pass. Both run the CLI in [docs/tools.md](docs/tools.md), which you can also run yourself from the installed plugin directory (`${CLAUDE_PLUGIN_ROOT}` in a Claude Code session) or from `plugins/concise` in a checkout:
+
+```sh
+node scripts/concise-config.mjs show --cwd /path/to/project
+node scripts/concise-config.mjs set features.aiWriting.preset ryan --cwd /path/to/project --apply
+node scripts/concise-config.mjs tune ~/notes --kind docs --cwd /path/to/project
+```
+
+Claude Code also starts a `concise` MCP server with the same operations.
+
+## Dictionary
+
+`features.dictionary.entries` flags terms you list, with the fix you want. An entry matches by `exact`, `contains`, `startsWith`, `endsWith`, or `regex`, compares a word, a line, or the whole text, and can be limited to some hooks and scopes:
+
+```json
+{
+  "features": {
+    "dictionary": {
+      "entries": [
+        { "id": "blacklist", "match": "startsWith", "value": "blacklist", "fix": "denylist" },
+        { "id": "hope-helps", "match": "endsWith", "on": "line", "value": "Hope this helps!", "fix": "end on the last fact", "hooks": ["stop"] }
+      ]
+    }
+  }
+}
+```
+
+A finding uses the same confirm flow as the other style checks. The fields are in [docs/configuration.md](docs/configuration.md#dictionary).
 
 ## Escape hatches
 

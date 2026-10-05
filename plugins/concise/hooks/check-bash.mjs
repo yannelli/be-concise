@@ -23,7 +23,7 @@ function ghDecision(command, input, config) {
   const digest = scaffoldHash(command, [body]);
   const key = `pr-body:${digest}`;
   const label = /\bgh\s+issue\b/.test(command) ? "issue body" : "PR body";
-  const styled = () => styleDecisionForText(body, `style:gh:${digest}`, label, input, config, "PreToolUse", "gh");
+  const styled = () => styleDecisionForText(body, `style:gh:${digest}`, label, input, config, "PreToolUse", "gh", "bash");
 
   const off = (config.checks || {}).prBody === false;
   const result = off
@@ -48,14 +48,14 @@ function commitDecision(command, messages, input, config) {
   const text = messages.join("\n\n");
   if (text.includes("concise-ignore")) return {};
   const key = `style:commit:${scaffoldHash(command, messages)}`;
-  return styleDecisionForText(text, key, "commit message", input, config, "PreToolUse", "commit");
+  return styleDecisionForText(text, key, "commit message", input, config, "PreToolUse", "commit", "bash");
 }
 
 // Packs scoped to `command` also see the flags and trailers around the message.
 function commandDecision(command, input, config) {
   if (command.includes("concise-ignore")) return {};
   const key = `style:command:${shortHash(command)}`;
-  return styleDecisionForText(command, key, "command", input, config, "PreToolUse", "command");
+  return styleDecisionForText(command, key, "command", input, config, "PreToolUse", "command", "bash");
 }
 
 function combine(...results) {

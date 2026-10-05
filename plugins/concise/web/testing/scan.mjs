@@ -46,14 +46,18 @@ function replyText(input) {
   return "";
 }
 
+const HOOK_IDS = { "check-edit": "edit", "check-bash": "bash" };
+
 export async function scan(input, config, hook) {
   const out = [];
+  const hookId = HOOK_IDS[hook] || (input.hook_event_name === "SubagentStop" ? "subagentStop" : "stop");
   const add = (text, path, scope, rules = config, chunk = 0) => {
-    const result = styleFindings(text, path, rules, scope);
+    const result = styleFindings(text, path, rules, scope, hookId);
     out.push(...result.emDash.map((hit) => ({
       ...hit, category: "emDash", match: hit.char, fix: "Use a comma, period, colon, parentheses, or two sentences.",
       path, scope, chunk, hook,
-    })), ...result.aiWriting.map((hit) => ({ ...hit, path, scope, chunk, hook })));
+    })), ...result.aiWriting.map((hit) => ({ ...hit, path, scope, chunk, hook })),
+    ...result.dictionary.map((hit) => ({ ...hit, category: `dictionary:${hit.id}`, path, scope, chunk, hook })));
   };
   if (hook === "check-edit") {
     const list = targets(input);

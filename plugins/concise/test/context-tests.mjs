@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { ROOT, run, ok } from "./lib.mjs";
@@ -118,6 +118,19 @@ console.log("\ncontext and optional model hooks");
   }
   assert.ok(codex.hooks.PostToolUse);
   assert.ok(Object.values(codex.hooks).flatMap((groups) => groups.flatMap((group) => group.hooks)).every((hook) => !("if" in hook)));
+  for (const host of [codex, claude]) {
+    const handlers = Object.values(host.hooks).flatMap((groups) => groups.flatMap((group) => group.hooks));
+    assert.ok(handlers.every((hook) => /^concise: \S/.test(hook.statusMessage)), "every handler shows a status message");
+  }
+  assert.match(claude.hooks.SessionStart[0].matcher, /\|fork$/);
+  assert.doesNotMatch(codex.hooks.SessionStart[0].matcher, /fork/);
+  const handback = claude.hooks.PreToolUse.find((group) => group.matcher === "SubagentHandback");
+  assert.ok(handback?.hooks.some((hook) => hook.command.includes("check-reply.mjs")));
+  assert.ok(!codex.hooks.PreToolUse.some((group) => group.matcher.includes("SubagentHandback")));
+  const codexMcp = JSON.parse(readFileSync(join(ROOT, manifest.mcpServers), "utf8")).mcpServers.concise;
+  assert.equal(codexMcp.cwd, ".");
+  assert.ok(existsSync(join(ROOT, codexMcp.args[0])) && !codexMcp.args[0].includes("$"), "Codex does not expand variables in MCP args");
+  for (const asset of [manifest.interface.composerIcon, manifest.interface.logo]) assert.ok(existsSync(join(ROOT, asset)), asset);
   const shellHooks = claude.hooks.PreToolUse.find((group) => group.matcher === "Bash").hooks;
   const matches = (condition, command) => new RegExp(`^${condition.slice(5, -1).split("*").map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s\\S]*")}$`).test(command);
   for (const [script, commands] of [
@@ -127,7 +140,7 @@ console.log("\ncontext and optional model hooks");
   ]) {
     for (const command of commands) assert.ok(shellHooks.some((hook) => hook.command.includes(script) && matches(hook.if, command)), command);
   }
-  ok("host manifests wire lifecycle hooks, keep evaluators opt-in and retain command coverage");
+  ok("host manifests wire lifecycle hooks, status messages, the handback check, and the MCP server");
 }
 
 cleanup();

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "concise": {
+      "command": "node",
+      "args": ["./tools/mcp-server.mjs"],
+      "cwd": "."
+    }
+  }
+}

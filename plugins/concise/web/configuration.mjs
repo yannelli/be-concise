@@ -3,10 +3,22 @@ import { dirname, join, resolve } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { defaultConfig, loadConfig, projectConfigPath, userConfigPath } from "../hooks/lib/config.mjs";
 import { readEnv, parseSize } from "../hooks/lib/env.mjs";
+import { entryProblem } from "../hooks/lib/dictionary.mjs";
 
 export const problem = (message, status = 400) => Object.assign(new Error(message), { status });
 const object = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const revision = (text) => createHash("sha256").update(text).digest("hex");
+
+function validateEntries(entries, path) {
+  if (!Array.isArray(entries)) throw problem(`${path} must be an array`);
+  const seen = new Set();
+  entries.forEach((entry, index) => {
+    const reason = entryProblem(entry);
+    if (reason) throw problem(`${path}[${index}]: ${reason}`);
+    if (seen.has(entry.id)) throw problem(`${path}[${index}]: duplicate id ${entry.id}`);
+    seen.add(entry.id);
+  });
+}
 
 export function validateConfig(config, base = defaultConfig(), prefix = "") {
   if (!object(config)) throw problem(`${prefix || "Configuration"} must be a JSON object`);
@@ -23,6 +35,8 @@ export function validateConfig(config, base = defaultConfig(), prefix = "") {
       if (value !== null && typeof value !== "string") throw problem(`${path} must be null or a path`);
     } else if (path === "log.maxSize") {
       if (!parseSize(value)) throw problem(`${path} must be a positive size such as 5m`);
+    } else if (path === "features.dictionary.entries") {
+      validateEntries(value, path);
     } else if (Array.isArray(expected)) {
       if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) throw problem(`${path} must be a string array`);
     } else if (object(expected)) validateConfig(value, expected, path);
