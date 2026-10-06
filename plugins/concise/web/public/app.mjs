@@ -52,23 +52,43 @@ function renderSwitcher() {
   host.hidden = !ctx.state?.hub;
   if (!ctx.state?.hub) return;
   const projects = ctx.state.projects || [];
-  host.replaceChildren(projects.length
-    ? select(projects.map((project) => [project.key, project.name]), ctx.project, async (event) => {
+  const missing = projects.filter((project) => project.missing).length;
+  const shown = projects.filter((project) => ctx.showMissing || !project.missing || project.key === ctx.project);
+  const toggle = missing ? button(`${ctx.showMissing ? "Hide" : "Show"} ${missing} missing`, () => {
+    ctx.showMissing = !ctx.showMissing;
+    renderSwitcher();
+  }, "text-button") : null;
+  host.replaceChildren(...(shown.length
+    ? [select(projectGroups(shown), ctx.project, async (event) => {
       ctx.project = event.target.value;
       try {
         ctx.state = await api("/api/state");
         navigate(ctx.page);
         updateCounts();
       } catch (error) { notify(error.message, true); }
-    })
-    : el("p", { class: "muted" }, "No projects registered yet."));
+    }), toggle]
+    : [el("p", { class: "muted" }, missing ? "Every registered project directory is missing." : "No projects registered yet."), toggle]).filter(Boolean));
+}
+function projectLabel({ name, repo, missing }) {
+  const base = !repo ? name : repo.worktree ? `${repo.worktree} (worktree)` : repo.name;
+  return `${[base, repo?.subdir].filter(Boolean).join(" · ")}${missing ? " (missing)" : ""}`;
+}
+/** One optgroup per repository, ordered by its most recent project; entries outside git share one group. */
+function projectGroups(projects) {
+  const groups = new Map();
+  for (const project of projects) {
+    const id = project.repo?.root ?? "";
+    if (!groups.has(id)) groups.set(id, { label: project.repo?.name ?? "No git repository", options: [] });
+    groups.get(id).options.push([project.key, projectLabel(project), project.cwd]);
+  }
+  return [...groups.values()];
 }
 async function refreshProjects() {
   try {
     const { projects } = await api("/api/projects");
     ctx.state.projects = projects;
     if (!ctx.project && projects.length) {
-      ctx.project = projects[0].key;
+      ctx.project = (projects.find((project) => !project.missing) || projects[0]).key;
       ctx.state = await api("/api/state");
       navigate(ctx.page);
       updateCounts();

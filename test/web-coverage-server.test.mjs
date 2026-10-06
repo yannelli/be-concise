@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { existsSync } from "node:fs";
 import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { createServer, request } from "node:http";
 import { tmpdir } from "node:os";
@@ -181,4 +182,23 @@ test("hub without projects reports no project until one registers", async (t) =>
   assert.equal(state.project, key);
   assert.equal(state.cwd, space.cwd);
   assert.equal((await app.api("/api/clear", { method: "POST", body: "{}" })).status, 200);
+});
+
+test("hub opens the newest existing project and refuses writes to deleted directories", async (t) => {
+  const space = await workspace(t);
+  const gone = join(space.root, "gone");
+  await mkdir(gone);
+  registerProject(space.cwd, space.env, Date.now() - 1000);
+  registerProject(gone, space.env);
+  await rm(gone, { recursive: true });
+  const app = await launch(t, space, { all: true });
+  const state = await (await app.api("/api/state")).json();
+  assert.equal(state.cwd, space.cwd);
+  assert.deepEqual(state.projects.map(({ name, missing }) => [name, missing]), [["gone", true], ["project", false]]);
+  const goneKey = projectKey(gone).key;
+  assert.equal((await app.api(`/api/state?project=${goneKey}`)).status, 200);
+  const refused = await app.api(`/api/config?project=${goneKey}`, { method: "PATCH", body: "{}" });
+  assert.equal(refused.status, 409);
+  assert.match((await refused.json()).error, /no longer exists/);
+  assert.equal(existsSync(gone), false);
 });

@@ -1,6 +1,6 @@
-import { closeSync, mkdirSync, openSync, readSync, statSync, truncateSync, watch } from "node:fs";
+import { closeSync, existsSync, mkdirSync, openSync, readSync, statSync, truncateSync, watch } from "node:fs";
 import { dirname } from "node:path";
-import { listProjects, projectsDir } from "../hooks/lib/projects.mjs";
+import { gitRepo, listProjects, projectsDir } from "../hooks/lib/projects.mjs";
 import { problem } from "./configuration.mjs";
 
 const POLL_MS = 5000;
@@ -94,6 +94,8 @@ export function createHub(env, { retained, publish }) {
         projects.set(entry.key, project);
         load(project);
       } else project.entry = entry;
+      project.missing = !existsSync(entry.cwd);
+      if (!project.missing && project.repo === undefined) project.repo = gitRepo(entry.cwd);
       project.watcher ||= watchDir(dirname(entry.records));
       tail(project);
     }
@@ -107,6 +109,10 @@ export function createHub(env, { retained, publish }) {
     }, DEBOUNCE_MS);
   }
 
+  const summary = ({ entry, missing }) => ({ key: entry.key, name: entry.name, cwd: entry.cwd, missing });
+  // A deleted directory can no longer be read, so fall back to the repo the hook stored at registration.
+  const repoOf = ({ repo, entry }) => repo ?? (typeof entry.repo?.name === "string" ? entry.repo : null);
+
   const registry = watchDir(dir);
   const poll = setInterval(scan, POLL_MS);
   poll.unref();
@@ -116,13 +122,12 @@ export function createHub(env, { retained, publish }) {
     dir,
     size: () => projects.size,
     list: () => [...projects.values()]
-      .map(({ entry }) => ({ key: entry.key, name: entry.name, cwd: entry.cwd, lastSeen: entry.lastSeen }))
+      .map((project) => ({ ...summary(project), lastSeen: project.entry.lastSeen, repo: repoOf(project) }))
       .sort((a, b) => String(b.lastSeen).localeCompare(String(a.lastSeen))),
     resolve(key) {
       if (key == null) return null;
       if (!KEY.test(key) || !projects.has(key)) throw problem("Unknown project", 404);
-      const { entry } = projects.get(key);
-      return { key: entry.key, name: entry.name, cwd: entry.cwd };
+      return summary(projects.get(key));
     },
     clear(key) {
       const targets = key ? [projects.get(key)].filter(Boolean) : [...projects.values()];

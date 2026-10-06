@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { appendFileSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, writeFileSync } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve } from "node:path";
 import { rotateBySize } from "./log.mjs";
 
 const REFRESH_MS = 60_000;
@@ -51,6 +51,37 @@ export function recordsPath(cwd, env = process.env) {
   return dir ? join(dir, "projects", projectKey(cwd).key, "records.jsonl") : null;
 }
 
+/** Reads `<dir>/.git`: its text when it is a file, true when it is a directory, null when absent or unreadable. */
+function gitMarker(dir) {
+  try {
+    return readFileSync(join(dir, ".git"), "utf8");
+  } catch (error) {
+    return error.code === "EISDIR" || null;
+  }
+}
+
+/** Maps a `.git` file's gitdir to the main repo root and worktree name; null for submodules and other links. */
+function linkedWorktree(dir, text) {
+  const gitdir = text.match(/^gitdir:\s*(.+?)\s*$/m);
+  const worktree = gitdir && resolve(dir, gitdir[1]).match(/^(.*)[\\/]worktrees[\\/][^\\/]+$/);
+  if (!worktree) return null;
+  const root = basename(worktree[1]) === ".git" ? dirname(worktree[1]) : worktree[1];
+  return { name: basename(root).replace(/\.git$/, ""), root, worktree: basename(dir) };
+}
+
+/** The git checkout that holds cwd, found by reading `.git` in cwd and its parents without running git. */
+export function gitRepo(cwd) {
+  const start = resolve(cwd);
+  for (let dir = start; ; dir = dirname(dir)) {
+    const marker = gitMarker(dir);
+    const subdir = relative(dir, start);
+    const linked = typeof marker === "string" && linkedWorktree(dir, marker);
+    if (linked) return { ...linked, subdir };
+    if (marker !== null) return { name: basename(dir), root: dir, worktree: null, subdir };
+    if (dirname(dir) === dir) return null;
+  }
+}
+
 function readJson(path) {
   try {
     return JSON.parse(readFileSync(path, "utf8"));
@@ -76,7 +107,7 @@ export function registerProject(cwd, env = process.env, now = Date.now()) {
   const fresh = current && current.cwd === path && current.records === records && now - Date.parse(current.lastSeen) < REFRESH_MS;
   if (fresh) return current;
   const ts = new Date(now).toISOString();
-  const entry = { cwd: path, name: projectName(path), key, firstSeen: current?.firstSeen || ts, lastSeen: ts, records };
+  const entry = { cwd: path, name: projectName(path), key, firstSeen: current?.firstSeen || ts, lastSeen: ts, records, repo: gitRepo(path) };
   writeAtomic(file, entry);
   return entry;
 }

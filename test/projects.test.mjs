@@ -5,7 +5,7 @@ import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import {
-  appendProjectRecord, listProjects, projectFile, projectKey, projectsDir, recordsPath, registerProject, stateDir,
+  appendProjectRecord, gitRepo, listProjects, projectFile, projectKey, projectsDir, recordsPath, registerProject, stateDir,
 } from "../plugins/concise/hooks/lib/projects.mjs";
 
 async function fixture(t) {
@@ -65,4 +65,39 @@ test("records append as JSON lines, skip oversized entries, and rotate at 5 MiB"
   for (let i = 0; i < 6; i += 1) assert.equal(appendProjectRecord({ cwd, i, pad: "x".repeat(1024 * 1024) }, env), true);
   assert.ok(existsSync(`${path}.1`));
   assert.equal((await readFile(path, "utf8")).trim().split("\n").length, 1);
+});
+
+test("gitRepo names the repo and linked worktree from .git markers in cwd or its parents", async (t) => {
+  const { root } = await fixture(t);
+  const main = join(root, "be-concise");
+  await mkdir(join(main, ".git", "worktrees", "old-mantis"), { recursive: true });
+  await mkdir(join(main, "plugins", "web"), { recursive: true });
+  assert.deepEqual(gitRepo(main), { name: "be-concise", root: main, worktree: null, subdir: "" });
+  assert.deepEqual(gitRepo(join(main, "plugins", "web")), { name: "be-concise", root: main, worktree: null, subdir: join("plugins", "web") });
+  const linked = join(root, "worktrees", "old-mantis");
+  await mkdir(join(linked, "src"), { recursive: true });
+  await writeFile(join(linked, ".git"), `gitdir: ${join(main, ".git", "worktrees", "old-mantis")}\n`);
+  assert.deepEqual(gitRepo(join(linked, "src")), { name: "be-concise", root: main, worktree: "old-mantis", subdir: "src" });
+  const sibling = join(root, "sibling");
+  await mkdir(sibling);
+  await writeFile(join(sibling, ".git"), "gitdir: ../bare.git/worktrees/sibling");
+  assert.deepEqual(gitRepo(sibling), { name: "bare", root: join(root, "bare.git"), worktree: "sibling", subdir: "" });
+  const submodule = join(main, "vendor", "lib");
+  await mkdir(submodule, { recursive: true });
+  await writeFile(join(submodule, ".git"), "gitdir: ../../.git/modules/lib\n");
+  assert.deepEqual(gitRepo(submodule), { name: "lib", root: submodule, worktree: null, subdir: "" });
+  assert.equal(gitRepo(join(root, "plain")), null);
+});
+
+test("registration stores the repo, and entries written before the repo field still list", async (t) => {
+  const { root, env, cwd } = await fixture(t);
+  await mkdir(join(cwd, ".git"));
+  assert.deepEqual(registerProject(cwd, env).repo, { name: "My Project", root: projectKey(cwd).cwd, worktree: null, subdir: "" });
+  const legacy = join(root, "legacy");
+  const { key } = projectKey(legacy);
+  const entry = { cwd: legacy, name: "legacy", key, firstSeen: "2026-01-01T00:00:00.000Z", lastSeen: "2026-01-01T00:00:00.000Z", records: recordsPath(legacy, env) };
+  await writeFile(projectFile(legacy, env), JSON.stringify(entry));
+  const listed = listProjects(env);
+  assert.deepEqual(listed.map((project) => project.name), ["my-project", "legacy"]);
+  assert.equal("repo" in listed[1], false);
 });
