@@ -6,6 +6,7 @@ export const manifestPaths = [
   "plugins/concise/.claude-plugin/plugin.json",
   "plugins/concise/.codex-plugin/plugin.json",
   "package.json",
+  "plugins/concise/package.json",
 ];
 
 const stableVersion = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;

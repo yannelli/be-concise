@@ -45,7 +45,7 @@ Checks validate JavaScript syntax, JSON, matching plugin versions, PR titles, an
 
 ## Release ownership
 
-Automation owns the versions in `.claude-plugin/marketplace.json`, `plugins/concise/.claude-plugin/plugin.json`, `plugins/concise/.codex-plugin/plugin.json`, and `package.json`, plus release notes and `vX.Y.Z` tags. Keep these versions unchanged in feature PRs. The existing `v0.5.1` tag is the baseline for automated releases.
+Automation owns the versions in `.claude-plugin/marketplace.json`, `plugins/concise/.claude-plugin/plugin.json`, `plugins/concise/.codex-plugin/plugin.json`, `plugins/concise/package.json`, and `package.json`, plus release notes and `vX.Y.Z` tags. Keep these versions unchanged in feature PRs. The existing `v0.5.1` tag is the baseline for automated releases.
 
 Changes without a release-triggering commit remain unreleased until a qualifying change reaches `main`.
 
