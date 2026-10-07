@@ -1,6 +1,6 @@
 # concise
 
-Concise is a Claude Code and Codex plugin that stops the agent's own verbose or machine-sounding writing before it lands. It runs as `PreToolUse` and `Stop` hooks, so a long comment, an oversized new file, a padded PR body, an em dash, or a flagged phrase is denied while the agent still holds the text. The agent reads the reason and sends a rewrite. Nothing reaches your working tree or GitHub in between.
+Concise is a Claude Code, Codex, and omp plugin that stops the agent's own verbose or machine-sounding writing before it lands. It runs as `PreToolUse` and `Stop` hooks, so a long comment, an oversized new file, a padded PR body, an em dash, or a flagged phrase is denied while the agent still holds the text. The agent reads the reason and sends a rewrite. Nothing reaches your working tree or GitHub in between.
 
 ## Quick start
 
@@ -26,6 +26,15 @@ codex plugin add concise@be-concise
 
 Start a new Codex session, run `/hooks`, and review and trust each `concise` hook under both `PreToolUse` and `Stop`. Codex asks for review again when a hook definition changes, so trust the hooks again after an update. Automation that already validates its hook sources can pass `codex exec --dangerously-bypass-hook-trust "<prompt>"`. The bypass applies to that invocation and does not save trust.
 
+omp (oh-my-pi):
+
+```sh
+omp plugin marketplace add yannelli/be-concise
+omp plugin install concise@be-concise
+```
+
+Start a new omp session. omp loads the hooks as an extension at session start, so `/reload-plugins` does not pick them up.
+
 The 3 core checks run right away. No config file is needed.
 
 ### 2. Copy the example config
@@ -34,7 +43,7 @@ The 3 core checks run right away. No config file is needed.
 cp plugins/concise/.claude/concise.json.example .claude/concise.json
 ```
 
-Codex projects use `.codex/concise.json`. If both files exist, `.claude/concise.json` wins.
+Codex projects use `.codex/concise.json`. If both files exist, `.claude/concise.json` wins. omp reads the same two files.
 
 ### 3. Turn on the style checks
 
@@ -212,7 +221,8 @@ A finding uses the same confirm flow as the other style checks. The fields are i
 
 - `gh pr create --body-file <path>` is not inspected. Only inline `--body`, `-b`, and heredoc bodies are.
 - `git commit -F <path>` and `--file` are not inspected. Only `-m`, repeated `-m`, `--message=`, and heredoc messages are.
-- Hook contract tests cover Claude Code and Codex notices, approval handling, reply correction, and continuation guards. Live agent sessions are not part of the suite.
+- Hook contract tests cover Claude Code and Codex notices, approval handling, reply correction, and continuation guards. The omp tests drive the extension with a stand-in for omp. Live agent sessions are not part of the suite.
+- omp has no subagent stop event, so omp subagent replies are not checked.
 - The dash characters come from the built-in `prose/em-dash.json` file. A user pack with that id changes which scopes the dash check runs in, and `excludePacks` does not reach it. Turn `features.emDash.enabled` off instead.
 - Activation is per category. `enablePatterns` with a pack id or a tag turns on the whole category that pack belongs to, and a user pack that reuses a built-in category id runs together with the built-in patterns under every preset either one is active in.
 - A `.mjs` pack runs its top-level code and its `detect` in the hook process on every tool call, with your permissions. Read it before you add it.
@@ -223,7 +233,7 @@ A finding uses the same confirm flow as the other style checks. The fields are i
 - Pattern detection is regex, so it produces false positives. Tune it with `allow`, `allowList`, `concise-ignore`, or an explicit `categories` list.
 - `genuine change` without an article is not flagged. `a genuine change` is (`filler`). Adding the bare form to `inflation` would report the article form twice.
 
-## How the two hosts share one hook set
+## How the hosts share one hook set
 
 Both hosts expose `${CLAUDE_PLUGIN_ROOT}` to hook commands, so one `hooks/hooks.json` serves both. The Claude manifest is `.claude-plugin/plugin.json`, the Codex manifest is `.codex-plugin/plugin.json`, and the marketplaces are `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json` at the repo root.
 
@@ -231,13 +241,15 @@ Claude Code sends `Write`, `Edit`, and `MultiEdit`. Codex sends `apply_patch` wi
 
 The reply hook reads `last_assistant_message` first, with a transcript fallback. A `Stop` block supplies the agent's correction instructions. Confirmation, bypass, and soft-fail notices remain terminal UI messages so they do not start another turn. These contracts follow the [Claude Code hook reference](https://code.claude.com/docs/en/hooks) and [Codex hook reference](https://developers.openai.com/codex/hooks/).
 
+omp does not read `hooks/hooks.json`. Its marketplace install loads `omp/extension.mjs`, which `package.json` lists under `omp.extensions`. The extension turns each omp event into the input Claude Code would send and runs the same hook scripts. omp `write` becomes `Write`, `bash` becomes `Bash`, and each `edit` mode becomes the `apply_patch` text `check-edit` reads. A denial blocks the call with its reason, and a `Stop` block holds the reply. An `ask` opens omp's confirmation dialog when a UI is attached and denies the call otherwise, as in Codex. See [docs/host-features.md](docs/host-features.md#omp) for the event mapping.
+
 ## Test
 
 ```sh
 node test/run-tests.mjs
 ```
 
-The suite runs the Claude Code cases, then `test/codex-tests.mjs`, which feeds `apply_patch` payloads in the shape Codex 0.152 sends, and then a self-check that writes every file in this plugin through the hook under the `ryan` preset.
+The suite runs the Claude Code cases, then `test/codex-tests.mjs`, which feeds `apply_patch` payloads in the shape Codex 0.152 sends, then the `test/omp-*-tests.mjs` cases for the omp extension, and then a self-check that writes every file in this plugin through the hook under the `ryan` preset.
 
 ## License
 

@@ -1,9 +1,9 @@
 # Host features
 
 Created: 2026-10-05
-Last updated: 2026-10-05
+Last updated: 2026-10-07
 
-The Claude Code and Codex features the concise manifests use, as the host docs described them on 2026-10-05. Read the sources again before you change a manifest.
+The Claude Code and Codex features the concise manifests use, as the host docs described them on 2026-10-05, and the omp features the omp extension uses, as of 2026-10-07. Read the sources again before you change a manifest or `omp/extension.mjs`.
 
 ## Used by the manifests
 
@@ -34,6 +34,28 @@ The `concise-config` and `concise-tune` skills call the CLI, so they work withou
 codex mcp add concise -- node /path/to/plugins/concise/tools/mcp-server.mjs
 ```
 
+## omp
+
+omp (oh-my-pi) installs the plugin from the Claude Code marketplace catalog, `.claude-plugin/marketplace.json`. It does not run `hooks/hooks.json`. It loads JavaScript extensions instead, so `package.json` in the plugin root lists `omp/extension.mjs` under `omp.extensions`. A marketplace install links the cached plugin into omp's `plugins/node_modules` and loads that entry. The extension builds the hook input that Claude Code would send and runs the same hook scripts with `node`.
+
+| omp feature | Used for |
+|---|---|
+| `tool_call` with `{ block, reason }` | Denials from `check-edit`, `check-bash`, and the `ask` mode |
+| `tool_call` returning `input` | The test-output filter's command rewrite |
+| `tool_call` returning `additionalContext` | Flags and notices for the model |
+| `before_agent_start` returning `message` | The rules from `session-context`, as `SessionStart`, `SubagentStart`, or `UserPromptSubmit` |
+| `session_stop` with `{ decision: "block", reason }` | Reply checks. The event carries `last_assistant_message`, `session_id`, and `stop_hook_active` |
+| `session_shutdown` | `session-end`, with a 1.5 s limit inside omp's 2 s budget |
+| `ctx.ui.confirm` and `ctx.ui.notify` | `ask` prompts and terminal notices when a UI is attached |
+
+Tool names and inputs differ from Claude Code. `write` sends `{ path, content }`. `edit` input depends on the edit mode: `hashline` (the default) sends `[path#TAG]` sections with `+` body rows, `apply_patch` sends a Codex patch, `replace` sends `old_string` and `new_string`, `patch` sends `edits[].diff`, and `sloppy` sends `*** Edit File:` sections. `omp/translate.mjs` turns each mode into the added lines that `check-edit` reads.
+
+A live run with omp 18.7.0 on 2026-10-07 confirmed these shapes. In that run, a hashline edit and a write were denied, the test filter's rewritten command ran in omp's shell, the rules reached the model, and a reply with an em dash was held and rewritten.
+
+omp's Claude marketplace loader, `src/discovery/claude-plugins.ts`, substitutes `${CLAUDE_PLUGIN_ROOT}` in MCP `args` and loads `skills/`. The omp docs do not mention `CLAUDE_PROJECT_DIR`, so pass `cwd` to the project tools as in Codex.
+
+Gaps: omp has no subagent stop event, so subagent replies are not checked. omp blocks a tool call whose handler throws or runs past 30 s, so the extension catches every hook failure and allows the call. omp loads extensions at session start: start a new session after an install or update.
+
 ## Left out
 
 - Plugin `bin/` on `PATH` (Claude Code): claude.ai and Cowork refuse a plugin with a `bin/` directory.
@@ -48,3 +70,8 @@ codex mcp add concise -- node /path/to/plugins/concise/tools/mcp-server.mjs
 - Codex hooks: https://learn.chatgpt.com/docs/hooks
 - Codex plugins: https://developers.openai.com/plugins/build/plugins
 - Codex MCP: https://developers.openai.com/codex/mcp
+- omp extensions: https://github.com/can1357/oh-my-pi/blob/main/docs/extensions.md
+- omp marketplace: https://github.com/can1357/oh-my-pi/blob/main/docs/marketplace.md
+- omp plugin install plumbing: https://github.com/can1357/oh-my-pi/blob/main/docs/plugin-manager-installer-plumbing.md
+- omp edit modes: https://github.com/can1357/oh-my-pi/blob/main/docs/tools/edit.md
+- omp Claude marketplace loader: https://github.com/can1357/oh-my-pi/blob/main/packages/coding-agent/src/discovery/claude-plugins.ts

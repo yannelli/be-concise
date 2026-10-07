@@ -2,7 +2,7 @@
 
 # concise
 
-Concise is a Claude Code and Codex plugin that catches the agent's own verbosity before a write or GitHub command runs. It also filters test-runner output before the agent reads it.
+Concise is a Claude Code, Codex, and omp plugin that catches the agent's own verbosity before a write or GitHub command runs. It also filters test-runner output before the agent reads it.
 
 New here? Start with [plugins/concise/README.md](plugins/concise/README.md).
 
@@ -54,6 +54,19 @@ The bypass applies to that invocation and does not save trust.
 
 [Codex plugin documentation](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli)
 
+### omp
+
+omp (oh-my-pi) installs from the same marketplace:
+
+```sh
+omp plugin marketplace add yannelli/be-concise
+omp plugin install concise@be-concise
+```
+
+Start a new omp session. omp loads the hooks as an extension at session start, so `/reload-plugins` does not pick them up. Subagent replies are not checked in omp, because omp has no subagent stop event.
+
+[omp marketplace documentation](https://github.com/can1357/oh-my-pi/blob/main/docs/marketplace.md)
+
 ## Documentation
 
 - [plugins/concise/README.md](plugins/concise/README.md): the entry point. Quick start, what each check does, the 8 presets, and the escape hatches.
@@ -62,7 +75,7 @@ The bypass applies to that invocation and does not save trust.
 - [plugins/concise/docs/environment.md](plugins/concise/docs/environment.md): every `BEC_` variable and 3 worked scenarios, including a cloud agent with no config file.
 - [plugins/concise/docs/packs.md](plugins/concise/docs/packs.md): the pack file format, the 3 pattern kinds, `detect(text, ctx)`, and the validator and renderer commands.
 - [plugins/concise/docs/tools.md](plugins/concise/docs/tools.md): the `concise-config` CLI, the MCP tools, the settings skills, and the writing-sample tuner.
-- [plugins/concise/docs/host-features.md](plugins/concise/docs/host-features.md): the Claude Code and Codex features the manifests use, with dated sources. Read it before you change a hook manifest.
+- [plugins/concise/docs/host-features.md](plugins/concise/docs/host-features.md): the Claude Code, Codex, and omp features the manifests and the omp extension use, with dated sources. Read it before you change a hook manifest.
 - [plugins/concise/docs/INDEX.md](plugins/concise/docs/INDEX.md): every doc, with its created and updated dates.
 
 ## Web console
@@ -110,7 +123,7 @@ Adjust the output cap, match pattern, context, or tail length:
 FILTER_LINES=300 FILTER_PATTERN='FAIL|timeout' FILTER_CONTEXT=10 FILTER_TAIL=20 go test ./...
 ```
 
-Persistent defaults can live in `~/.claude/test-filter.conf` or `~/.codex/test-filter.conf`.
+Persistent defaults can live in `~/.claude/test-filter.conf` or `~/.codex/test-filter.conf`. omp sessions read the same files.
 
 ## Development
 
@@ -120,7 +133,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch workflow, Conventional Com
 node plugins/concise/test/run-tests.mjs
 ```
 
-The suite runs the Claude Code cases, then `plugins/concise/test/codex-tests.mjs`, which feeds `apply_patch` payloads in the shape Codex 0.152 sends, and then a self-check that writes every file in the plugin through the hook under the `ryan` preset.
+The suite runs the Claude Code cases, then `plugins/concise/test/codex-tests.mjs`, which feeds `apply_patch` payloads in the shape Codex 0.152 sends, then the omp extension cases, and then a self-check that writes every file in the plugin through the hook under the `ryan` preset.
 
 ## Maintainer
 

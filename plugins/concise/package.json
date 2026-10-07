@@ -1,0 +1,12 @@
+{
+    "name": "concise",
+    "version": "0.11.0",
+    "private": true,
+    "description": "Concise hooks for omp, loaded from a be-concise marketplace install.",
+    "license": "MIT",
+    "omp": {
+        "extensions": [
+            "./omp/extension.mjs"
+        ]
+    }
+}
