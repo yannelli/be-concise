@@ -81,3 +81,23 @@ test("hub ignores watcher errors", async (t) => {
   assert.equal(hub.size(), 1);
   assert.deepEqual(published, []);
 });
+
+test("hub flags deleted project directories and labels repos live or from the stored entry", async (t) => {
+  const { root, cwd, env, open, key } = await fixture(t);
+  const main = join(root, "repo");
+  await mkdir(join(main, ".git"), { recursive: true });
+  await writeFile(join(cwd, ".git"), `gitdir: ${join(main, ".git", "worktrees", "project")}\n`);
+  const gone = join(root, "gone");
+  await mkdir(gone);
+  await writeFile(join(gone, ".git"), `gitdir: ${join(main, ".git", "worktrees", "gone")}\n`);
+  const now = Date.now();
+  registerProject(cwd, env, now);
+  registerProject(gone, env, now - 1000);
+  registerProject(join(root, "never-a-repo"), env, now - 2000);
+  await rm(gone, { recursive: true });
+  const hub = open();
+  assert.deepEqual(hub.list().map(({ name, missing, repo }) => [name, missing, repo?.name ?? null, repo?.worktree ?? null]), [
+    ["project", false, "repo", "project"], ["gone", true, "repo", "gone"], ["never-a-repo", true, null, null],
+  ]);
+  assert.deepEqual(hub.resolve(key), { key, name: "project", cwd, missing: false });
+});

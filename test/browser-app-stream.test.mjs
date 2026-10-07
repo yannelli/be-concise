@@ -139,3 +139,40 @@ test("a hub state without a project list and a state without monitor settings us
   for (const id of [1, 2, 3]) await emit(local, "record", JSON.stringify({ id }));
   assert.equal($(local, "#nav-count").textContent, "3");
 });
+
+const platform = (worktree, subdir = "") => ({ name: "platform", root: "/repos/platform", worktree, subdir });
+const grouped = [
+  { key: "g1", name: "gone", cwd: "/trees/gone", missing: true, repo: platform("gone") },
+  { key: "w1", name: "old-mantis", cwd: "/trees/old-mantis", missing: false, repo: platform("old-mantis") },
+  { key: "s1", name: "ui", cwd: "/trees/old-mantis/resources/ui", missing: false, repo: platform("old-mantis", "resources/ui") },
+  { key: "b1", name: "be-concise", cwd: "/repos/be-concise", missing: false, repo: { name: "be-concise", root: "/repos/be-concise", worktree: null, subdir: "" } },
+  { key: "n1", name: "scratch", cwd: "/tmp/scratch", missing: false, repo: null },
+];
+const groups = (dom) => dom.document.querySelectorAll("#project-switch optgroup").map((group) => [group.getAttribute("label"), group.querySelectorAll("option").map((option) => option.textContent)]);
+
+test("the hub switcher groups projects by repository and hides missing directories until asked", async () => {
+  const dom = await boot({ "GET /api/state": baseState({ hub: true, project: "w1", projects: grouped }) });
+  assert.deepEqual(groups(dom), [["platform", ["old-mantis (worktree)", "old-mantis (worktree) · resources/ui"]], ["be-concise", ["be-concise"]], ["No git repository", ["scratch"]]]);
+  assert.equal($(dom, "#project-switch option").getAttribute("title"), "/trees/old-mantis");
+  const toggle = () => $(dom, "#project-switch button");
+  assert.equal(toggle().textContent, "Show 1 missing");
+  toggle().click();
+  assert.deepEqual(groups(dom)[0], ["platform", ["gone (worktree) (missing)", "old-mantis (worktree)", "old-mantis (worktree) · resources/ui"]]);
+  assert.equal(toggle().textContent, "Hide 1 missing");
+  toggle().click();
+  assert.equal(groups(dom)[0][1].length, 2);
+});
+
+test("the hub selects the newest existing project and keeps a selected missing one visible", async () => {
+  const dom = await boot({
+    "GET /api/state": (_, url) => baseState({ hub: true, project: url.searchParams.get("project"), projects: url.searchParams.get("project") ? grouped : [] }),
+    "GET /api/projects": { projects: grouped },
+  });
+  await emit(dom, "record", JSON.stringify({ id: 1, project: "w1" }));
+  assert.equal(dom.calls.at(-1).query.project, "w1");
+  const selected = await boot({ "GET /api/state": baseState({ hub: true, project: "g1", projects: grouped }) });
+  assert.deepEqual(groups(selected)[0][1], ["gone (worktree) (missing)", "old-mantis (worktree)", "old-mantis (worktree) · resources/ui"]);
+  const allMissing = await boot({ "GET /api/state": baseState({ hub: true, project: null, projects: [grouped[0]] }) });
+  assert.equal($(allMissing, "#project-switch p").textContent, "Every registered project directory is missing.");
+  assert.equal($(allMissing, "#project-switch button").textContent, "Show 1 missing");
+});

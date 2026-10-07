@@ -127,6 +127,8 @@ td.match { max-width: 390px; white-space: normal; overflow-wrap: anywhere; }
 @media (max-width: 640px) { .topbar-actions .local-label { display: none; } .topbar .breadcrumb { min-width: 0; gap: 8px; font-size: 12px; } .topbar .breadcrumb strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .topbar-actions { flex-shrink: 0; margin-left: 12px; } }
 .project-switch { padding: 4px 16px 4px; }
 .project-switch select { font-size: 12px; }
+.project-switch .native-select { display: block; }
+.project-switch .text-button { height: 24px; margin-top: 4px; padding: 0 6px; color: var(--muted-foreground); font-size: 12px; }
 .pack-switch { display: inline-flex; align-items: center; }
 .pack-form { display: grid; gap: 12px; padding: 0 16px 16px; }
 .pack-form textarea { min-height: 120px; }

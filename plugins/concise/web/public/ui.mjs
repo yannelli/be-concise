@@ -22,11 +22,14 @@ export const heading = (_eyebrow, title, subtitle, action) => el("div", { class:
 export const panel = (title, content, aside) => el("section", { "data-slot": "card", class: "panel" }, el("div", { "data-slot": "card-header", class: "panel-heading" }, el("h2", { "data-slot": "card-title" }, title), aside), content);
 export const empty = (title, detail) => el("div", { class: "empty" }, el("strong", {}, title), detail ? el("p", {}, detail) : null);
 export const field = (label, input, detail) => el("label", { class: "field" }, el("span", {}, label), input, detail ? el("small", {}, detail) : null);
+/** Options are values, [value, label, title?] pairs, or { label, options } groups rendered as optgroups. */
 export function select(options, value, onChange) {
-  const control = el("select", { "data-slot": "native-select", onchange: onChange }, options.map((item) => {
-    const [key, label] = Array.isArray(item) ? item : [item, item];
-    return el("option", { value: key, selected: key === value }, label);
-  }));
+  const option = (item) => {
+    const [key, label, title] = Array.isArray(item) ? item : [item, item];
+    return el("option", { value: key, selected: key === value, ...(title ? { title } : {}) }, label);
+  };
+  const control = el("select", { "data-slot": "native-select", onchange: onChange }, options.map((item) => (
+    item?.options ? el("optgroup", { label: item.label }, item.options.map(option)) : option(item))));
   const wrapper = el("span", { class: "native-select", "data-slot": "native-select-wrapper" }, control, icon("down"));
   Object.defineProperty(wrapper, "value", { get: () => control.value, set: (next) => { control.value = next; } });
   return wrapper;

@@ -112,8 +112,9 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
   const projectOf = (route) => {
     if (!hub) return { cwd, key: null };
     const key = route.searchParams.get("project");
-    const project = key ? hub.resolve(key) : hub.list()[0] || null;
-    return project ? { cwd: project.cwd, key: project.key } : { cwd: null, key: null };
+    const listed = key ? [] : hub.list();
+    const project = key ? hub.resolve(key) : listed.find(({ missing }) => !missing) || listed[0] || null;
+    return project ? { cwd: project.cwd, key: project.key, missing: project.missing } : { cwd: null, key: null };
   };
   const state = async ({ cwd: target, key }) => {
     const base = { hub: Boolean(hub), projects: projects(), project: key, defaults: defaultConfig(),
@@ -194,6 +195,7 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
         const project = projectOf(route);
         if (route.pathname === "/api/state" && method === "GET") return send(response, await state(project));
         if (!project.cwd) throw problem("No project is registered yet. Run a hook in a project first.", 404);
+        if (project.missing && method !== "GET") throw problem("This project's directory no longer exists", 409);
         if (route.pathname === "/api/config" && method === "PATCH") {
           saveConfiguration(project.cwd, env, await body(request));
           return send(response, await state(project));
