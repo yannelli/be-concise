@@ -66,7 +66,7 @@ export const TOOLS = [
       caseSensitive: flag("Match case. Defaults to false."),
       flags: text("Regex flags for match regex. Defaults to i."),
       hooks: list(HOOKS, "Hooks the entry runs in. Omit for all."),
-      scopes: list(SCOPES, "Text scopes the entry runs in. Omit for every scope except command."),
+      scopes: list(SCOPES, "Text scopes the entry runs in. Omit for every scope except command and code."),
       text: text("Sample text for action test."),
       scope: { type: "string", enum: SCOPES, description: "Scope for action test. Defaults to reply." },
       hook: { type: "string", enum: HOOKS, description: "Hook for action test." },
@@ -80,7 +80,7 @@ export const TOOLS = [
     description: "Run the concise checks over text the way a hook would, without changing retry or confirmation state.",
     inputSchema: schema({
       text: text("Text to check."),
-      scope: { type: "string", enum: SCOPES, description: "files (prose), comments (code), gh, commit, command, or reply (default)." },
+      scope: { type: "string", enum: SCOPES, description: "files (prose), comments (code comments), code (a whole code file), gh, commit, command, or reply (default)." },
       hook: { type: "string", enum: HOOKS, description: "Hook to imitate. Defaults from the scope." },
       path: text("File path that decides prose or comment rules and the ignore globs."),
       cwd,

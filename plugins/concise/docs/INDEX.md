@@ -10,6 +10,6 @@ Last updated: 2026-10-08
 | [environment.md](environment.md) | Control a session with `BEC_` variables. | 2026-09-04 | 2026-10-08 |
 | [categories.md](categories.md) | Look up an AI writing category, its presets, and its scopes. | 2026-09-04 | 2026-10-08 |
 | [packs.md](packs.md) | Write or check a pattern pack. | 2026-09-04 | 2026-10-08 |
-| [host-features.md](host-features.md) | Check which Claude Code, Codex, and omp hook, skill, and MCP features the manifests and the omp extension use, with the host doc sources and the live test results. | 2026-10-05 | 2026-10-07 |
+| [host-features.md](host-features.md) | Check which Claude Code, Codex, and omp hook, skill, and MCP features the manifests and the omp extension use, with the host doc sources and the live test results. | 2026-10-05 | 2026-10-08 |
 
 Read [host-features.md](host-features.md) and its sources before you change `hooks/hooks.json`, `hooks/codex.json`, `.mcp.json`, `.codex-mcp.json`, `package.json`, `omp/`, or a plugin manifest.

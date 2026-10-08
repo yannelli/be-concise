@@ -10,6 +10,14 @@ const FEATURE_TARGETS = {
   fileSize: ["checks", "fileSize"],
   prBody: ["checks", "prBody"],
   stopHook: ["stopHook"],
+  codeFiles: ["scan", "codeFiles"],
+  notebooks: ["scan", "notebooks"],
+  heredocWrites: ["scan", "heredocWrites"],
+  shellWrites: ["scan", "shellWrites"],
+  mcp: ["scan", "mcp"],
+  plans: ["scan", "plans"],
+  tasks: ["scan", "tasks"],
+  questions: ["scan", "questions"],
 };
 
 const isObject = (value) => Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -84,7 +92,7 @@ export function applyLayer(base, layer) {
   next.checks = { ...base.checks, ...(isObject(layer.checks) ? layer.checks : {}) };
   next.log = { ...base.log, ...(isObject(layer.log) ? layer.log : {}) };
   next.monitor = { ...base.monitor, ...(isObject(layer.monitor) ? layer.monitor : {}) };
-  for (const name of ["context", "subagentStop", "testFilter"]) {
+  for (const name of ["context", "subagentStop", "testFilter", "scan"]) {
     next[name] = { ...base[name], ...(isObject(layer[name]) ? layer[name] : {}) };
   }
   next.allowList = mergeStringSets(base.allowList, layer.allowList);

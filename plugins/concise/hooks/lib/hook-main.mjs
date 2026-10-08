@@ -1,7 +1,7 @@
 import { flagged, modelNotices } from "./respond.mjs";
 import { loadConfig } from "./config.mjs";
 import { createLogger, softFailResult } from "./log.mjs";
-import { once, withStateScope } from "./state.mjs";
+import { claim, once, withStateScope } from "./state.mjs";
 import { styleLog } from "./style-check.mjs";
 import { STOP_BLOCK_MESSAGE } from "./confirm.mjs";
 import { publishMonitor } from "./monitor.mjs";
@@ -113,7 +113,7 @@ function logRun({ hook, event, input, ctx, config, result, error, started }) {
 }
 
 /** Reads the event, runs decide, applies soft fail and logging, writes the hook JSON. */
-export async function runHook({ hook, event }, decide) {
+export async function runHook({ hook, event, overlaps }, decide) {
   const started = Date.now();
   const ctx = { config: null, key: null, decision: null };
   const raw = await readStdin();
@@ -124,6 +124,11 @@ export async function runHook({ hook, event }, decide) {
     input = JSON.parse(raw || "{}");
   } catch (err) {
     error = err.message;
+  }
+  // Two `if` rules can both start this handler for one call; the second run exits without output.
+  if (!error && overlaps?.(input) && typeof input.tool_use_id === "string" && !claim(input.session_id, `${hook}:${input.tool_use_id}`)) {
+    process.stdout.write("{}");
+    return;
   }
   const actualEvent = input.hook_event_name || event;
   let config;

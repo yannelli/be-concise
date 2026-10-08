@@ -34,16 +34,24 @@ The 2 style checks ship disabled. Turn either one on per project in `.claude/con
 A third style check, the dictionary (`features.dictionary`), flags terms the user lists. It runs when it has at least one entry. A deny tagged `[concise:dictionary:<id>]` names the entry and the fix the user wrote for it. The same confirm flow applies. The `concise-config` skill covers the entry fields.
 
 1. Em dash detection. Flags the em dash (`U+2014`). Flags the en dash (`U+2013`) when `enDash` is true. Flags `--` between word characters or between spaces when `doubleHyphen` is true. A `--flag` at the start of a token never matches.
-2. AI writing patterns. Flags 44 categories of phrasing, commit hygiene, punctuation, and text statistics, shipped as pattern packs and selected by a preset or by an explicit category list.
+2. AI writing patterns. Flags 47 categories of phrasing, commit hygiene, punctuation, and text statistics, shipped as pattern packs and selected by a preset or by an explicit category list.
 
 ### What gets scanned
 
 - Prose files (`md`, `mdx`, `markdown`, `txt`, `rst`, `adoc`, `asciidoc`): the whole written text. Fenced blocks, inline code, URLs, and HTML comments are blanked first, so an example inside backticks is exempt.
-- Code files: comment runs only, the same runs the comment-length check reads. String literals and code are never scanned.
-- Every other extension (`json`, `csv`, lock files, unknown): nothing.
-- `gh pr` and `gh issue` bodies, inline `--body` and heredoc forms.
-- `git commit` messages from `-m`, repeated `-m`, `--message=`, and the heredoc form.
+- Code files: comment runs, the same runs the comment-length check reads. Packs with the `code` scope, `hidden-characters` by default, read the whole file, string literals included.
+- Every other extension (`json`, `csv`, lock files, unknown): the whole file, for `code`-scope packs only.
+- Notebook cells: a markdown cell as prose, a code cell as code.
+- A file that `cat` or `tee` writes from a heredoc, before the command runs. After a shell command runs, any other file it changed in a git work tree; findings come back next to the command output, so fix them with Edit.
+- `gh pr`, `gh issue`, and `gh release` titles and bodies: inline `--title`, `--body`, or `--notes`, the heredoc form, and `--body-file` or `-F`. `gh api` request fields `body`, `message`, `description`, and `title`.
+- `git commit`, `git tag`, `git merge`, and `git notes` messages from `-m`, repeated `-m`, `--message=`, `-F`, `--trailer`, and the heredoc form, with `git -C <dir>` or `-c` options in front. `jj` and `hg` messages the same way.
+- Text an MCP tool posts (a PR body, an issue, a chat message, a doc page) and files it writes, read like a Write of that file.
+- The plan you show with `ExitPlanMode`, `TaskCreate` and `TaskUpdate` text, and `AskUserQuestion` questions and options.
 - Your final chat reply, through the `Stop` hook, when `replies` is true.
+
+Each of these past Write and Edit has a switch under `scan`: `codeFiles`, `notebooks`, `heredocWrites`, `shellWrites`, `mcp`, `plans`, `tasks`, `questions`.
+
+Not scanned: your text between tool calls, page text in HTML files, and shell writes outside a git work tree.
 
 Only the text being written is scanned, as with the other 3 checks.
 
@@ -97,7 +105,7 @@ Only the text being written is scanned, as with the other 3 checks.
 
 ### Environment control
 
-Both features, the 3 core checks, and the `Stop` hook also answer to `BEC_` environment variables, so a session can differ from the project file. `BEC_FEATURE_ENABLE=emDash,aiWriting` turns the style checks on, and `BEC_FEATURE_ALWAYS_DISABLE=aiWriting` turns one off over the project file. Feature ids are `emDash`, `aiWriting`, `comments`, `fileSize`, `prBody`, and `stopHook`. `BEC_HOOK_SOFT_FAIL=1` downgrades every deny and block to a flagged allow, `BEC_DISABLE_STOP_HOOK=1` silences the reply check, and `BEC_LOG_ENABLED=1` writes one record per hook call to `~/.cache/concise/concise.log`. The `allowList` and `bypass` keys hold phrases and regex strings: an `allowList` entry drops the findings on a line, and a `bypass` entry allows the whole tool call with a flag. The full table is in [../../docs/environment.md](../../docs/environment.md).
+Both features, the 3 core checks, and the `Stop` hook also answer to `BEC_` environment variables, so a session can differ from the project file. `BEC_FEATURE_ENABLE=emDash,aiWriting` turns the style checks on, and `BEC_FEATURE_ALWAYS_DISABLE=aiWriting` turns one off over the project file. Feature ids are `emDash`, `aiWriting`, `dictionary`, `comments`, `fileSize`, `prBody`, `stopHook`, and the `scan` switches. `BEC_HOOK_SOFT_FAIL=1` downgrades every deny and block to a flagged allow, `BEC_DISABLE_STOP_HOOK=1` silences the reply check, and `BEC_LOG_ENABLED=1` writes one record per hook call to `~/.cache/concise/concise.log`. The `allowList` and `bypass` keys hold phrases and regex strings: an `allowList` entry drops the findings on a line, and a `bypass` entry allows the whole tool call with a flag. The full table is in [../../docs/environment.md](../../docs/environment.md).
 
 ### Presets
 

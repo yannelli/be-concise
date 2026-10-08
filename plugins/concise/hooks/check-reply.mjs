@@ -2,7 +2,7 @@
 import { openSync, readSync, fstatSync, closeSync } from "node:fs";
 import { loadConfig } from "./lib/config.mjs";
 import { dictionaryActive } from "./lib/dictionary.mjs";
-import { styleFindings, styleSummary, styleDecisionForText, prepareStyle, withPackWarnings } from "./lib/style-check.mjs";
+import { styleFindings, styleSummary, styleDecisionForText, prepareStyle, replyConfig, withPackWarnings } from "./lib/style-check.mjs";
 import { sha256 } from "./lib/confirm.mjs";
 import { takePending, resetAttempt } from "./lib/state.mjs";
 import { runHook, bypassResult } from "./lib/hook-main.mjs";
@@ -49,22 +49,6 @@ function lastAssistantText(path) {
     if (text !== null) return text;
   }
   return null;
-}
-
-// A feature that is off for replies is off for this hook, so styleFindings skips it.
-// Dictionary entries pick their hooks themselves.
-function replyConfig(config) {
-  const { emDash, aiWriting } = config.features;
-  return {
-    ...config,
-    ignoreGlobs: [],
-    styleIgnoreGlobs: [],
-    features: {
-      ...config.features,
-      emDash: { ...emDash, enabled: Boolean(emDash.enabled && emDash.replies) },
-      aiWriting: { ...aiWriting, enabled: Boolean(aiWriting.enabled && aiWriting.replies) },
-    },
-  };
 }
 
 const anyStyle = (config) => config.features.emDash.enabled || config.features.aiWriting.enabled || dictionaryActive(config);

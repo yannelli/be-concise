@@ -5,7 +5,7 @@ import { contextOf, editCall, replyText, toolCallResult } from "./translate.mjs"
 const HOOKS = fileURLToPath(new URL("../hooks/", import.meta.url));
 const TIMEOUT_MS = 15000;
 // The same cheap gates as the `if` conditions in hooks/hooks.json.
-const BASH_HOOKS = [["monitor-filter", "t"], ["check-bash", "g"], ["check-edit", "Begin Patch"]];
+const BASH_HOOKS = [["monitor-filter", "t"], ["check-bash", /g|\bjj\s/], ["check-edit", /Begin Patch|<</]];
 const NO_PROMPT = "omp cannot show an approval prompt in this mode. Revise the flagged text, or ask the user to approve keeping it. After approval, retry with concise-ignore.";
 
 /** Runs one hook script with the event on stdin and resolves its JSON output. */
@@ -56,7 +56,8 @@ function toolHooks(event, ctx) {
   if (event.toolName === "bash") {
     const command = typeof event.input?.command === "string" ? event.input.command : "";
     const hookInput = { ...input, tool_name: "Bash", tool_input: { command } };
-    return BASH_HOOKS.filter(([, needle]) => command.includes(needle)).map(([name]) => [name, hookInput]);
+    const gated = ([, needle]) => (typeof needle === "string" ? command.includes(needle) : needle.test(command));
+    return BASH_HOOKS.filter(gated).map(([name]) => [name, hookInput]);
   }
   const call = editCall(event.toolName, event.input, ctx.cwd);
   return call ? [["check-edit", { ...input, ...call }]] : [];

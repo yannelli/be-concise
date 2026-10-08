@@ -1,36 +1,10 @@
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { isIgnored } from "../../hooks/lib/config.mjs";
 import { bypassMatch } from "../../hooks/lib/hook-main.mjs";
-import { extractPatch, parseApplyPatch } from "../../hooks/lib/apply-patch.mjs";
-import { extractBody } from "../../hooks/lib/pr-body.mjs";
+import { targetsOf, isExempt } from "../../hooks/lib/edit-targets.mjs";
+import { GH_COMMAND, apiFields, extractBody, extractTitle } from "../../hooks/lib/pr-body.mjs";
 import { gitCommitMessages, isProsePath } from "../../hooks/lib/prose.mjs";
 import { prepareStyle, styleFindings } from "../../hooks/lib/style-check.mjs";
-
-function targets(input) {
-  const tool = input.tool_input || {};
-  if (["Write", "Edit", "MultiEdit"].includes(input.tool_name)) {
-    if (!tool.file_path) return [];
-    const chunks = input.tool_name === "Write" ? [tool.content || ""]
-      : input.tool_name === "Edit" ? [tool.new_string || ""]
-        : (tool.edits || []).map((edit) => edit.new_string || "");
-    return [{ path: tool.file_path, chunks, wholeFile: input.tool_name === "Write" }];
-  }
-  const patch = input.tool_name === "apply_patch" ? tool.command || tool.input
-    : input.tool_name === "Bash" ? extractPatch(tool.command) : null;
-  return patch ? parseApplyPatch(patch).map((file) => ({
-    path: resolve(input.cwd, file.path), chunks: file.chunks, wholeFile: file.kind === "add",
-  })) : [];
-}
-
-function exempt(target) {
-  if (target.chunks.some((chunk) => chunk.includes("concise-ignore-file"))) return true;
-  if (target.wholeFile) return false;
-  try {
-    return readFileSync(target.path, "utf8").includes("concise-ignore-file");
-  } catch {
-    return false;
-  }
-}
 
 function replyText(input) {
   const lines = readFileSync(input.transcript_path, "utf8").trim().split("\n");
@@ -68,22 +42,23 @@ export async function scan(input, config, hook) {
     ...result.dictionary.map((hit) => ({ ...hit, category: `dictionary:${hit.id}`, path, scope, chunk, hook })));
   };
   if (hook === "check-edit") {
-    const list = targets(input);
+    const list = targetsOf(input).filter((target) => config.scan?.[target.scan] !== false && !(target.file && isIgnored(target.file, config.ignoreGlobs)));
     if (bypassMatch(list.flatMap((target) => target.chunks), config)) return out;
     await prepareStyle(input.cwd, config);
-    for (const target of list.filter((item) => !exempt(item))) {
+    for (const target of list.filter((item) => !isExempt(item))) {
       target.chunks.forEach((text, index) => add(text, target.path, isProsePath(target.path) ? "files" : "comments", config, index));
     }
   } else if (hook === "check-bash") {
     const command = input.tool_input?.command || "";
     if (bypassMatch(command, config) || command.includes("concise-ignore")) return out;
-    const isGh = /\bgh\s+(pr|issue)\s+(create|comment|edit)\b/.test(command);
-    const messages = isGh ? [] : gitCommitMessages(command);
-    if (!isGh && !messages.length) return out;
+    const isGh = GH_COMMAND.test(command);
+    const posts = (isGh ? [extractTitle(command), extractBody(command, input.cwd)] : apiFields(command, input.cwd)).filter(Boolean);
+    const messages = isGh ? [] : gitCommitMessages(command, input.cwd);
+    if (!posts.length && !messages.length) return out;
     await prepareStyle(input.cwd, config);
     const rules = { ...config, ignoreGlobs: [], styleIgnoreGlobs: [] };
-    const text = isGh ? extractBody(command) : messages.join("\n\n");
-    if (text) add(text, "reply.md", isGh ? "gh" : "commit", rules);
+    posts.forEach((text, index) => add(text, "reply.md", "gh", rules, index));
+    if (messages.length) add(messages.join("\n\n"), "reply.md", "commit", rules);
     add(command, "reply.md", "command", rules);
   } else if (hook === "check-reply" && config.stopHook) {
     const text = replySource(input);

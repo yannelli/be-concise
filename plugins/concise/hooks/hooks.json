@@ -3,7 +3,7 @@
     "hooks": {
         "PreToolUse": [
             {
-                "matcher": "Write|Edit|MultiEdit|apply_patch",
+                "matcher": "Write|Edit|MultiEdit|apply_patch|NotebookEdit",
                 "hooks": [
                     {
                         "type": "command",
@@ -32,10 +32,72 @@
                     },
                     {
                         "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(jj *)",
+                        "statusMessage": "concise: checking commit and PR text"
+                    },
+                    {
+                        "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
                         "timeout": 15,
                         "if": "Bash(*Begin Patch*)",
                         "statusMessage": "concise: checking patch text"
+                    },
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(cat *)",
+                        "statusMessage": "concise: checking heredoc file writes"
+                    },
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(tee *)",
+                        "statusMessage": "concise: checking heredoc file writes"
+                    }
+                ]
+            },
+            {
+                "matcher": "PowerShell",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
+                        "timeout": 15,
+                        "if": "PowerShell(*g*)",
+                        "statusMessage": "concise: checking commit and PR text"
+                    },
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
+                        "timeout": 15,
+                        "if": "PowerShell(jj *)",
+                        "statusMessage": "concise: checking commit and PR text"
+                    }
+                ]
+            },
+            {
+                "matcher": "mcp__.*",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-tool-text.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking posted tool text"
+                    }
+                ]
+            },
+            {
+                "matcher": "ExitPlanMode|TaskCreate|TaskUpdate|AskUserQuestion",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-tool-text.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking plan, task, and question text"
                     }
                 ]
             },
@@ -47,6 +109,19 @@
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.mjs\"",
                         "timeout": 15,
                         "statusMessage": "concise: checking subagent report"
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "Bash|PowerShell",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-shell-writes.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking files the command wrote"
                     }
                 ]
             }

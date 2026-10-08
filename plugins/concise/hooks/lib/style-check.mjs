@@ -101,6 +101,22 @@ export function withPackWarnings(result, sessionId) {
   return { ...result, systemMessage: result.systemMessage ? `${result.systemMessage} ${text}` : text };
 }
 
+// A feature that is off for replies is off for reply text, so styleFindings skips it.
+// Dictionary entries pick their hooks themselves.
+export function replyConfig(config) {
+  const { emDash, aiWriting } = config.features;
+  return {
+    ...config,
+    ignoreGlobs: [],
+    styleIgnoreGlobs: [],
+    features: {
+      ...config.features,
+      emDash: { ...emDash, enabled: Boolean(emDash.enabled && emDash.replies) },
+      aiWriting: { ...aiWriting, enabled: Boolean(aiWriting.enabled && aiWriting.replies) },
+    },
+  };
+}
+
 /** `hook` is edit, bash, stop, or subagentStop; dictionary entries can be limited to some of them. */
 export function styleFindings(text, path, config, scope = "files", hook = null) {
   const found = { emDash: [], aiWriting: [], dictionary: [] };
@@ -139,6 +155,13 @@ export function styleFindings(text, path, config, scope = "files", hook = null) 
     for (const hit of hits) {
       if (keep(at(hit.line), hit.match)) aiWriting.push({ ...hit, line: at(hit.line) });
     }
+  }
+  // The `code` scope reads the whole code file, string literals included.
+  if (scope === "comments" && config.scan?.codeFiles !== false) {
+    for (const hit of scanDictionary(text, entries, { hook, scope: "code" })) if (keep(hit.line, hit.match)) dictionary.push(hit);
+    const codePacks = resolved ? resolved.packs.filter((p) => inScope(p, "code")) : [];
+    const hits = codePacks.length ? scanAiWriting(text, { packs: codePacks, allow: resolved.allow, ctx: { path, scope: "code", raw: text }, problems: runtime }) : [];
+    for (const hit of hits) if (keep(hit.line, hit.match)) aiWriting.push(hit);
   }
   collect(found, scope);
   return found;

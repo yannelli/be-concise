@@ -61,14 +61,17 @@ Every `'` inside a `phrase` or an `opening` compiles to `['’]`, so the straigh
 
 | Scope | Text scanned | Hook |
 |---|---|---|
-| `files` | A prose file, whole (`md`, `mdx`, `markdown`, `txt`, `rst`, `adoc`, `asciidoc`) | `check-edit.mjs` |
-| `comments` | Comment runs in a code file | `check-edit.mjs` |
-| `gh` | A `gh pr` or `gh issue` body | `check-bash.mjs` |
-| `commit` | A `git commit` message | `check-bash.mjs` |
-| `command` | The full `git commit` or `gh` command line | `check-bash.mjs` |
-| `reply` | The agent's final reply | `check-reply.mjs` |
+| `files` | A prose file, whole (`md`, `mdx`, `markdown`, `txt`, `rst`, `adoc`, `asciidoc`), and the plan `ExitPlanMode` shows | `check-edit.mjs`, `check-shell-writes.mjs`, `check-tool-text.mjs` |
+| `comments` | Comment runs in a code file | `check-edit.mjs`, `check-shell-writes.mjs`, `check-tool-text.mjs` |
+| `code` | A code file or a file of unknown type, whole, string literals included | `check-edit.mjs`, `check-shell-writes.mjs`, `check-tool-text.mjs` |
+| `gh` | A `gh pr`, `gh issue`, or `gh release` title or body, a `gh api` request body, and the text an MCP tool posts | `check-bash.mjs`, `check-tool-text.mjs` |
+| `commit` | A `git commit`, `git tag`, `git merge`, `git notes`, `jj`, or `hg` message, and the commit message of an MCP file push | `check-bash.mjs`, `check-tool-text.mjs` |
+| `command` | The full `git` or `gh` command line | `check-bash.mjs` |
+| `reply` | The agent's final reply, task text, and questions to the user | `check-reply.mjs`, `check-tool-text.mjs` |
 
-Leaving `scope` out gives the pack every scope except `command`.
+`check-edit.mjs` also reads a file that `cat` or `tee` writes from a heredoc, and a notebook cell: a markdown cell as a prose file, a code cell as a code file. `check-shell-writes.mjs` reads the lines a shell command added to files in a git work tree, after the command runs. `check-tool-text.mjs` reads a file an MCP tool writes the same way.
+
+Leaving `scope` out gives the pack every scope except `command` and `code`.
 
 ## presets semantics
 

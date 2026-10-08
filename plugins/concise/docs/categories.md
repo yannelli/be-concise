@@ -4,7 +4,7 @@ The `aiWriting` feature ships 47 categories. Each category is one pack file unde
 
 Pick categories with `features.aiWriting.preset`, or replace the preset list with `features.aiWriting.categories`. Both keys are described in [configuration.md](configuration.md). The flagged text and the replacement for every pattern are in [../skills/concise-rules/references/ai-speak-patterns.md](../skills/concise-rules/references/ai-speak-patterns.md).
 
-Scope names: `files` (prose files), `comments` (comment runs in code files), `gh` (`gh pr` and `gh issue` bodies), `commit` (`git commit` messages), `command` (the full command line), `reply` (the agent's final reply).
+Scope names: `files` (prose files and plans), `comments` (comment runs in code files), `code` (whole code files, string literals included), `gh` (`gh pr`, `gh issue`, and `gh release` titles and bodies, `gh api` bodies, and MCP tool posts), `commit` (`git commit`, `git tag`, `git merge`, `jj`, and `hg` messages), `command` (the full command line), `reply` (the agent's final reply, task text, and questions to the user).
 
 ## Phrase categories
 
@@ -63,11 +63,11 @@ Scopes across this group: `comments`, `gh`, `commit`, `command`, `reply`. The sc
 
 ## Punctuation categories
 
-Scopes across this group: `files`, `comments`, `gh`, `commit`, `command`, `reply`. The scope column below gives the scopes for each category.
+Scopes across this group: `files`, `comments`, `code`, `gh`, `commit`, `command`, `reply`. The scope column below gives the scopes for each category.
 
 | id | What it catches | Flagged example | Fix | Presets | Scopes |
 |---|---|---|---|---|---|
-| `hidden-characters` | Invisible or look-alike characters that model output and chat UIs leave in text. | a zero-width space | remove the character | `default`, `ryan`, `technical`, `git`, `all` | `files`, `comments`, `gh`, `commit`, `command`, `reply` |
+| `hidden-characters` | Invisible or look-alike characters that model output and chat UIs leave in text. | a zero-width space | remove the character | `default`, `ryan`, `technical`, `git`, `all` | `files`, `code`, `gh`, `commit`, `command`, `reply` |
 | `smart-punctuation` | Curly quotes and the ellipsis character typical of text pasted from a chat UI. | a curly apostrophe | use a straight apostrophe | `default`, `ryan`, `technical`, `all` | `comments`, `commit`, `gh`, `command`, `reply` |
 | `unicode-glyphs` | Arrows, box drawing, dingbats, and geometric symbols used in place of plain ASCII or words. | an arrow character | use `->` | `default`, `ryan`, `technical`, `all` | `commit`, `gh`, `command`, `reply` |
 

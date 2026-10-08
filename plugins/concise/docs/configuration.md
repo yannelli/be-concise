@@ -15,6 +15,14 @@ Copy `.claude/concise.json.example` to `.claude/concise.json` (Claude Code) or `
 | `checks.comments` | `true` | Runs the comment length check. |
 | `checks.fileSize` | `true` | Runs the file length check. |
 | `checks.prBody` | `true` | Runs the `gh` body check. |
+| `scan.codeFiles` | `true` | Runs `code`-scope packs and dictionary entries over whole code files, string literals included. |
+| `scan.notebooks` | `true` | Checks notebook cells that `NotebookEdit` writes. |
+| `scan.heredocWrites` | `true` | Checks files that `cat` or `tee` writes from a heredoc, before the command runs. |
+| `scan.shellWrites` | `true` | Checks the lines a shell command added to files in a git work tree, after it runs. |
+| `scan.mcp` | `true` | Checks the text and files that MCP tools post or write. |
+| `scan.plans` | `true` | Checks the plan that `ExitPlanMode` shows for approval. |
+| `scan.tasks` | `true` | Checks `TaskCreate` and `TaskUpdate` text. |
+| `scan.questions` | `true` | Checks `AskUserQuestion` questions and options. |
 | `stopHook` | `true` | Runs reply checks on `Stop` and `SubagentStop`. |
 | `context.enabled` | `true` | Sends resolved rules at startup, resume, compaction, and subagent creation. |
 | `context.perTurn` | `false` | Also sends rules on `UserPromptSubmit`. |
@@ -80,7 +88,7 @@ Of the three config files, the `BEC_CONFIG_PATH` file loads first. The user file
 
 A config file or a `BEC_CONFIG_JSON` value that does not parse as a JSON object is skipped. The other layers still apply, and the hook reports the skipped layer once per session in a `systemMessage`.
 
-## checks and stopHook
+## checks, scan, and stopHook
 
 Each core check has its own switch under `checks`: `comments`, `fileSize`, and `prBody`, all `true` by default. Setting one to `false` skips that check and leaves the style checks running.
 
@@ -88,6 +96,16 @@ Each core check has its own switch under `checks`: `comments`, `fileSize`, and `
 {
   "checks": { "comments": true, "fileSize": false, "prBody": true },
   "stopHook": false
+}
+```
+
+Each place the style checks read beyond Write and Edit has a switch under `scan`, all `true` by default. Setting one to `false` stops the style checks there and leaves the rest running. The README lists what each one covers.
+
+`scan.shellWrites` runs on `PostToolUse`, so the text is already on disk and the findings come back next to the command output. It reads files whose mtime falls inside the command's run time, at most 20 per command, and reports each finding once per session. It compares the work tree with the git index: older unstaged lines in a changed file are reported once too, and a change the command also staged is missed.
+
+```json
+{
+  "scan": { "shellWrites": false, "tasks": false }
 }
 ```
 
@@ -161,7 +179,7 @@ The evaluator checks reply padding with the resolved rules, bypasses, soft-fail 
 | `caseSensitive` | no | `false` by default. |
 | `flags` | no | Regex flags for `regex` entries. Default `i`. The scanner adds `g` and `d` and drops `y`. |
 | `hooks` | no | `edit`, `bash`, `stop`, `subagentStop`. Absent means all 4. |
-| `scopes` | no | `files`, `comments`, `gh`, `commit`, `command`, `reply`. Absent means every scope except `command`. |
+| `scopes` | no | `files`, `comments`, `code`, `gh`, `commit`, `command`, `reply`. Absent means every scope except `command` and `code`. |
 | `enabled` | no | `false` switches the entry off. A switched-off entry needs only its `id`. |
 
 How `on` changes the match:
