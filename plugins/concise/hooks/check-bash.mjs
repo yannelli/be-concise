@@ -8,7 +8,10 @@ import { deny, mergeFlag } from "./lib/respond.mjs";
 import { styleDecisionForText, prepareStyle, withPackWarnings } from "./lib/style-check.mjs";
 import { runHook, bypassResult } from "./lib/hook-main.mjs";
 
-const GH_PATTERN = /\bgh\s+(pr|issue)\s+(create|comment|edit)\b/;
+const GH_PATTERN = /\bgh\s+(?:(?:pr|issue)\s+(?:create|comment|edit|review|merge)|release\s+(?:create|edit))\b/;
+// Release notes and merge-commit bodies get the style check but not the PR prose limit.
+const PROSE_LIMITED = /\bgh\s+(?:pr|issue)\s+(?:create|comment|edit|review)\b/;
+const SHELL_TOOLS = ["Bash", "PowerShell"];
 
 const shortHash = (text) => createHash("sha256").update(text).digest("hex").slice(0, 12);
 
@@ -16,16 +19,21 @@ const shortHash = (text) => createHash("sha256").update(text).digest("hex").slic
 // while an unrelated PR later in the session starts fresh.
 const scaffoldHash = (command, bodies) => shortHash(bodies.reduce((acc, body) => acc.replace(body, ""), command));
 
+function labelOf(command) {
+  if (/\bgh\s+release\b/.test(command)) return "release notes";
+  return /\bgh\s+issue\b/.test(command) ? "issue body" : "PR body";
+}
+
 function ghDecision(command, input, config) {
-  const body = extractBody(command);
+  const body = extractBody(command, input.cwd);
   if (!body || body.includes("concise-ignore")) return {};
 
   const digest = scaffoldHash(command, [body]);
   const key = `pr-body:${digest}`;
-  const label = /\bgh\s+issue\b/.test(command) ? "issue body" : "PR body";
+  const label = labelOf(command);
   const styled = () => styleDecisionForText(body, `style:gh:${digest}`, label, input, config, "PreToolUse", "gh", "bash");
 
-  const off = (config.checks || {}).prBody === false;
+  const off = (config.checks || {}).prBody === false || !PROSE_LIMITED.test(command);
   const result = off
     ? { verbose: false }
     : isVerbose(body, { maxParagraphs: config.maxPrBodyParagraphs, maxSentences: config.maxPrBodySentences });
@@ -64,10 +72,10 @@ function combine(...results) {
 }
 
 async function decide(input, ctx) {
-  if (input.tool_name !== "Bash") return {};
+  if (!SHELL_TOOLS.includes(input.tool_name)) return {};
   const command = (input.tool_input || {}).command || "";
   const isGh = GH_PATTERN.test(command);
-  const messages = isGh ? [] : gitCommitMessages(command);
+  const messages = isGh ? [] : gitCommitMessages(command, input.cwd);
   if (!isGh && messages.length === 0) return {};
 
   const config = loadConfig(input.cwd);

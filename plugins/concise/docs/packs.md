@@ -63,12 +63,15 @@ Every `'` inside a `phrase` or an `opening` compiles to `['’]`, so the straigh
 |---|---|---|
 | `files` | A prose file, whole (`md`, `mdx`, `markdown`, `txt`, `rst`, `adoc`, `asciidoc`) | `check-edit.mjs` |
 | `comments` | Comment runs in a code file | `check-edit.mjs` |
-| `gh` | A `gh pr` or `gh issue` body | `check-bash.mjs` |
-| `commit` | A `git commit` message | `check-bash.mjs` |
-| `command` | The full `git commit` or `gh` command line | `check-bash.mjs` |
+| `code` | A code file or a file of unknown type, whole, string literals included | `check-edit.mjs` |
+| `gh` | A `gh pr`, `gh issue`, or `gh release` body, and the body or message an MCP tool posts | `check-bash.mjs`, `check-mcp.mjs` |
+| `commit` | A `git commit`, `git tag`, `git merge`, or `git notes` message | `check-bash.mjs` |
+| `command` | The full `git` or `gh` command line | `check-bash.mjs` |
 | `reply` | The agent's final reply | `check-reply.mjs` |
 
-Leaving `scope` out gives the pack every scope except `command`.
+`check-edit.mjs` also reads a file that `cat` or `tee` writes from a heredoc, and a notebook cell: a markdown cell as a prose file, a code cell as a code file.
+
+Leaving `scope` out gives the pack every scope except `command` and `code`.
 
 ## presets semantics
 

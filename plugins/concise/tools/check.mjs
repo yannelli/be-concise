@@ -7,12 +7,13 @@ import { SCOPES } from "../hooks/lib/packs.mjs";
 import { HOOKS } from "../hooks/lib/dictionary.mjs";
 import { problem } from "../web/configuration.mjs";
 
-const HOOK_FOR = { files: "edit", comments: "edit", gh: "bash", commit: "bash", command: "bash", reply: "stop" };
-const PATH_FOR = { files: "check.md", comments: "check.js" };
+const HOOK_FOR = { files: "edit", comments: "edit", code: "edit", gh: "bash", commit: "bash", command: "bash", reply: "stop" };
+const PATH_FOR = { files: "check.md", comments: "check.js", code: "check.js" };
+const FILE_SCOPES = ["files", "comments", "code"];
 const DASH_FIX = "a comma, period, colon, parentheses, or two sentences";
 
 function rulesFor(config, scope, hook, path) {
-  const rules = path && ["files", "comments"].includes(scope) ? { ...config } : { ...config, ignoreGlobs: [], styleIgnoreGlobs: [] };
+  const rules = path && FILE_SCOPES.includes(scope) ? { ...config } : { ...config, ignoreGlobs: [], styleIgnoreGlobs: [] };
   if (scope !== "reply" && !["stop", "subagentStop"].includes(hook)) return rules;
   const { emDash, aiWriting } = config.features;
   return {
@@ -32,14 +33,14 @@ function coreFindings(text, path, scope, config) {
     const verdict = isVerbose(text, { maxParagraphs: config.maxPrBodyParagraphs, maxSentences: config.maxPrBodySentences });
     if (verdict.verbose) out.push({ check: "prBody", reason: verdict.reason });
   }
-  if (scope === "comments" && checks.comments !== false) {
+  if (["comments", "code"].includes(scope) && checks.comments !== false) {
     for (const run of scanComments(text, path)) {
       if (run.length > config.maxCommentLines && !run.text.includes("concise-ignore")) {
         out.push({ check: "comments", line: run.startLine, reason: `comment run of ${run.length} lines (limit ${config.maxCommentLines})` });
       }
     }
   }
-  if (["files", "comments"].includes(scope) && checks.fileSize !== false) {
+  if (FILE_SCOPES.includes(scope) && checks.fileSize !== false) {
     const lines = text.split("\n").length;
     if (lines > config.maxFileLines) out.push({ check: "fileSize", reason: `${lines} lines as a new file (limit ${config.maxFileLines})` });
   }
@@ -58,7 +59,8 @@ export async function checkText({ text, scope = "reply", hook, path, cwd = proce
   const target = path || PATH_FOR[scope] || "reply.md";
   const rules = rulesFor(effective, scope, hookId, path);
   await prepareStyle(cwd, rules);
-  const found = styleFindings(text, target, rules, scope, hookId);
+  // A code file is checked as an edit is: comment runs, then the whole text for `code` packs.
+  const found = styleFindings(text, target, rules, scope === "code" ? "comments" : scope, hookId);
   const findings = [
     ...found.emDash.map((hit) => ({ category: "emDash", match: hit.char, line: hit.line, fix: DASH_FIX })),
     ...found.aiWriting.map(({ category, match, line, fix }) => ({ category, match, line, fix })),

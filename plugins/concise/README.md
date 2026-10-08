@@ -140,7 +140,9 @@ The 47 categories fall into 5 groups.
 
 The full table, with every category id, its presets, and the scopes it runs in, is in [docs/categories.md](docs/categories.md). The flagged text and the replacement for every pattern are in [skills/concise-rules/references/ai-speak-patterns.md](skills/concise-rules/references/ai-speak-patterns.md).
 
-What gets scanned: prose files (`md`, `mdx`, `markdown`, `txt`, `rst`, `adoc`, `asciidoc`) whole, with fenced blocks, inline code, URLs, and HTML comments blanked first; comment runs in code files; `gh pr` and `gh issue` bodies; `git commit` messages from `-m`, `--message=`, and the heredoc form; and the agent's final reply through the `Stop` hook when `replies` is true.
+What gets scanned: prose files (`md`, `mdx`, `markdown`, `txt`, `rst`, `adoc`, `asciidoc`) whole, with fenced blocks, inline code, URLs, and HTML comments blanked first; comment runs in code files, and the whole file for `code`-scope packs such as `hidden-characters`; files that `cat` or `tee` writes from a heredoc; notebook cells; `gh pr`, `gh issue`, and `gh release` bodies, inline, heredoc, or from a body file; `git commit`, `git tag`, and `git merge` messages from `-m`, `--message=`, `-F`, `--trailer`, and the heredoc form; the body or message an MCP tool posts, such as a PR body or a chat message; and the agent's final reply through the `Stop` hook when `replies` is true.
+
+Not scanned: files written by `echo`, `printf`, `sed -i`, or a script, and the agent's text between tool calls. Codex and omp do not check MCP tool calls or notebook edits.
 
 ## Cloud agents and environment variables
 

@@ -1,18 +1,21 @@
+import { fileFlagPaths, readMessageFile } from "./shell-text.mjs";
+
 // The terminator is anchored to its own line (tabs allowed, for `<<-`) so a body
 // that merely mentions "EOF" mid-line doesn't truncate the capture.
 export const HEREDOC = /<<[-~]?['"]?(\w+)['"]?\r?\n([\s\S]*?)\r?\n\t*\1(?=\r?\n|$)/;
 
-/** Pulls the body text out of a `gh pr/issue ...` command: heredoc form or a quoted flag. */
-export function extractBody(command) {
+/** The body of a `gh pr`, `gh issue`, or `gh release` command: heredoc, quoted flag, or body file. */
+export function extractBody(command, cwd = ".") {
   const heredoc = HEREDOC.exec(command);
   if (heredoc) return heredoc[2];
 
-  const dq = /(?:--body|-b)[= ]"((?:[^"\\]|\\.)*)"/.exec(command);
+  const dq = /(?:--body|-b|--notes|-n)[= ]"((?:[^"\\]|\\.)*)"/.exec(command);
   if (dq) return dq[1];
-  const sq = /(?:--body|-b)[= ]'((?:[^'\\]|\\.)*)'/.exec(command);
+  const sq = /(?:--body|-b|--notes|-n)[= ]'((?:[^'\\]|\\.)*)'/.exec(command);
   if (sq) return sq[1];
 
-  return null;
+  const [file] = fileFlagPaths(command);
+  return file ? readMessageFile(file, { cwd, command }) : null;
 }
 
 const STRUCTURAL = [/^#{1,6}\s/, /^[-*]\s/, /^\d+\.\s/, /^>/];

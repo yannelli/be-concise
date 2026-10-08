@@ -140,6 +140,13 @@ export function styleFindings(text, path, config, scope = "files", hook = null) 
       if (keep(at(hit.line), hit.match)) aiWriting.push({ ...hit, line: at(hit.line) });
     }
   }
+  // The `code` scope reads the whole code file, string literals included.
+  if (scope === "comments") {
+    for (const hit of scanDictionary(text, entries, { hook, scope: "code" })) if (keep(hit.line, hit.match)) dictionary.push(hit);
+    const codePacks = resolved ? resolved.packs.filter((p) => inScope(p, "code")) : [];
+    const hits = codePacks.length ? scanAiWriting(text, { packs: codePacks, allow: resolved.allow, ctx: { path, scope: "code", raw: text }, problems: runtime }) : [];
+    for (const hit of hits) if (keep(hit.line, hit.match)) aiWriting.push(hit);
+  }
   collect(found, scope);
   return found;
 }

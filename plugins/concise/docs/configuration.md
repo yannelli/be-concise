@@ -159,7 +159,7 @@ The evaluator checks reply padding with the resolved rules, bypasses, soft-fail 
 | `caseSensitive` | no | `false` by default. |
 | `flags` | no | Regex flags for `regex` entries. Default `i`. The scanner adds `g` and `d` and drops `y`. |
 | `hooks` | no | `edit`, `bash`, `stop`, `subagentStop`. Absent means all 4. |
-| `scopes` | no | `files`, `comments`, `gh`, `commit`, `command`, `reply`. Absent means every scope except `command`. |
+| `scopes` | no | `files`, `comments`, `code`, `gh`, `commit`, `command`, `reply`. Absent means every scope except `command` and `code`. |
 | `enabled` | no | `false` switches the entry off. A switched-off entry needs only its `id`. |
 
 How `on` changes the match:

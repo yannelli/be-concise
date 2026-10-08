@@ -1,5 +1,6 @@
 import { scanComments } from "./comment-scan.mjs";
 import { HEREDOC } from "./pr-body.mjs";
+import { readMessageFile, segmentFrom, unquote } from "./shell-text.mjs";
 
 export const PROSE_EXTENSIONS = ["md", "mdx", "markdown", "txt", "rst", "adoc", "asciidoc"];
 
@@ -68,8 +69,15 @@ function maskHeredocs(command) {
   return { masked, bodies };
 }
 
-export function gitCommitMessages(command) {
-  if (typeof command !== "string" || !/\bgit\s+commit\b/.test(command)) return [];
+// `git -C dir commit`, `git -c k=v tag`, `git merge`, and `git notes add` all take a message.
+const GIT_MESSAGE_COMMAND = /\bgit(?:\s+(?:-C\s+\S+|-c\s+\S+|--[\w-]+(?:=\S+)?))*\s+(?:commit|tag|merge|notes\s+(?:add|append|edit))\b/;
+const QUOTED_OR_WORD = String.raw`("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^\s;&|]+)`;
+const GIT_FILE_FLAG = new RegExp(String.raw`(?:^|\s)(?:--file(?:=|\s+)|-[A-Za-z]*F\s*)` + QUOTED_OR_WORD, "g");
+const TRAILER_FLAG = new RegExp(String.raw`(?:^|\s)--trailer(?:=|\s+)` + QUOTED_OR_WORD, "g");
+
+/** Message text from `-m`, `--message`, `-F`/`--file` (a file or a heredoc on stdin), and `--trailer`. */
+export function gitCommitMessages(command, cwd = ".") {
+  if (typeof command !== "string" || !GIT_MESSAGE_COMMAND.test(command)) return [];
   const { masked, bodies } = maskHeredocs(command);
   const messages = [];
   for (const m of masked.matchAll(MESSAGE_FLAG)) {
@@ -77,5 +85,14 @@ export function gitCommitMessages(command) {
     const body = MASKED_BODY.exec(quoted);
     messages.push(body ? bodies[Number(body[1])] : quoted);
   }
+  const start = masked.search(GIT_MESSAGE_COMMAND);
+  const segment = start === -1 ? "" : segmentFrom(masked, start);
+  for (const m of segment.matchAll(GIT_FILE_FLAG)) {
+    const path = unquote(m[1]);
+    const body = path === "-" ? bodies[0] : readMessageFile(path, { cwd, command });
+    if (body) messages.push(body);
+  }
+  const trailers = [...segment.matchAll(TRAILER_FLAG)].map((m) => unquote(m[1])).map((t) => (t.includes(":") ? t : t.replace("=", ": ")));
+  if (trailers.length > 0) messages.push(trailers.join("\n"));
   return messages;
 }

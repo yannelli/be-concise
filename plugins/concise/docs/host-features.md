@@ -1,9 +1,9 @@
 # Host features
 
 Created: 2026-10-05
-Last updated: 2026-10-07
+Last updated: 2026-10-08
 
-The Claude Code and Codex features the concise manifests use, as the host docs described them on 2026-10-05, and the omp features the omp extension uses, as of 2026-10-07. Read the sources again before you change a manifest or `omp/extension.mjs`.
+The Claude Code and Codex features the concise manifests use, as the host docs described them on 2026-10-05 (2026-10-08 for the `NotebookEdit`, `PowerShell`, and MCP rows), and the omp features the omp extension uses, as of 2026-10-07. Read the sources again before you change a manifest or `omp/extension.mjs`.
 
 ## Used by the manifests
 
@@ -12,6 +12,10 @@ The Claude Code and Codex features the concise manifests use, as the host docs d
 | `statusMessage` on a command handler | yes | yes | Every handler in `hooks/hooks.json` and `hooks/codex.json` |
 | `SessionStart` matcher `fork` | yes | no: `startup`, `resume`, `clear`, `compact` | `hooks/hooks.json` |
 | `if` on a handler | yes | no | `hooks/hooks.json` shell hooks only |
+| `if` with a permission rule per handler, such as `Bash(cat *)`, matched against each subcommand | yes | no | `hooks/hooks.json`: the heredoc-write handlers of `check-edit` and the `PowerShell` handler |
+| `NotebookEdit` input: `notebook_path`, `cell_id`, `new_source`, `cell_type`, `edit_mode` | yes | no | `hooks/hooks.json` `PreToolUse`, read by `check-edit.mjs` |
+| `PowerShell` tool with `tool_input.command` | yes | no | `hooks/hooks.json` `PreToolUse`, read by `check-bash.mjs` |
+| A matcher with characters outside letters, digits, `_`, `-`, `\|`, and `,` is a regex, so `mcp__.*` matches every `mcp__<server>__<tool>` call | yes | not used: `hooks/codex.json` has no MCP handler | `hooks/hooks.json` `PreToolUse`, read by `check-mcp.mjs` |
 | `SubagentHandback` tool carries the subagent report in `tool_input.message` (auto mode, v2.1.271 or later) | yes | no | `hooks/hooks.json` `PreToolUse` |
 | `SubagentStop` fires for internal agents, with an empty `agent_type` when the session has no `--agent` | yes | no | `check-reply.mjs` skips them |
 | Plugin MCP server file with `${CLAUDE_PLUGIN_ROOT}` in `args` | yes | no: see below | `.mcp.json` (Claude Code), `.codex-mcp.json` (Codex) |
@@ -54,7 +58,7 @@ A live run with omp 18.7.0 on 2026-10-07 confirmed these shapes. In that run, a 
 
 omp's Claude marketplace loader, `src/discovery/claude-plugins.ts`, substitutes `${CLAUDE_PLUGIN_ROOT}` in MCP `args` and loads `skills/`. The omp docs do not mention `CLAUDE_PROJECT_DIR`, so pass `cwd` to the project tools as in Codex.
 
-Gaps: omp has no subagent stop event, so subagent replies are not checked. omp blocks a tool call whose handler throws or runs past 30 s, so the extension catches every hook failure and allows the call. omp loads extensions at session start: start a new session after an install or update.
+Gaps: omp has no subagent stop event, so subagent replies are not checked. The extension does not check MCP tool calls. omp blocks a tool call whose handler throws or runs past 30 s, so the extension catches every hook failure and allows the call. omp loads extensions at session start: start a new session after an install or update.
 
 ## Left out
 

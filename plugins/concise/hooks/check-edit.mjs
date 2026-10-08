@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { loadConfig, isIgnored } from "./lib/config.mjs";
 import { scanComments } from "./lib/comment-scan.mjs";
 import { extractPatch, parseApplyPatch } from "./lib/apply-patch.mjs";
+import { heredocWrites, fileFlagPaths } from "./lib/shell-text.mjs";
 import { bumpAttempt, resetAttempt } from "./lib/state.mjs";
 import { deny, mergeFlag } from "./lib/respond.mjs";
 import { styleDecision, prepareStyle, withPackWarnings } from "./lib/style-check.mjs";
@@ -30,16 +31,47 @@ function targetsOf(input) {
     return [{ path: toolInput.file_path, chunks: writtenChunks(toolName, toolInput), wholeFile: toolName === "Write" }];
   }
 
+  if (toolName === "NotebookEdit") return notebookTargets(toolInput);
+
   let patch = null;
   if (toolName === "apply_patch") patch = toolInput.command || toolInput.input || "";
   if (toolName === "Bash") patch = extractPatch(toolInput.command);
-  if (!patch) return [];
+  const shellWrites = toolName === "Bash" ? heredocTargets(toolInput.command, input.cwd) : [];
+  if (!patch) return shellWrites;
 
-  return parseApplyPatch(patch).map((file) => ({
-    path: resolve(input.cwd || ".", file.path),
-    chunks: file.chunks,
-    wholeFile: file.kind === "add",
-  }));
+  return parseApplyPatch(patch)
+    .map((file) => ({
+      path: resolve(input.cwd || ".", file.path),
+      chunks: file.chunks,
+      wholeFile: file.kind === "add",
+    }))
+    .concat(shellWrites);
+}
+
+// `cat > notes.md <<'EOF'` writes a file that no Write call ever shows. A body file that
+// `gh --body-file` or `git commit -F` reads in the same command is check-bash's to scan.
+function heredocTargets(command, cwd = ".") {
+  const consumed = new Set(fileFlagPaths(command).map((path) => resolve(cwd, path)));
+  return heredocWrites(command)
+    .map((write) => ({ path: resolve(cwd, write.path), chunks: [write.body], wholeFile: !write.append }))
+    .filter((target) => !consumed.has(target.path));
+}
+
+// A cell has no file of its own, so the path gets an extension that picks prose or comment rules.
+function notebookTargets({ notebook_path: path, new_source: source, cell_type: type, cell_id: id, edit_mode: mode }) {
+  if (!path || typeof source !== "string" || mode === "delete") return [];
+  const notebook = readNotebook(path);
+  const cellType = type || notebook?.cells?.find((cell) => cell.id === id)?.cell_type || "code";
+  const ext = cellType === "markdown" ? ".md" : notebook?.metadata?.language_info?.file_extension || ".py";
+  return [{ path: `${path}#${id || "new"}${ext}`, chunks: [source], wholeFile: false }];
+}
+
+function readNotebook(path) {
+  try {
+    return JSON.parse(readFileSync(path, "utf8"));
+  } catch {
+    return null;
+  }
 }
 
 function hasFileMarker(filePath) {

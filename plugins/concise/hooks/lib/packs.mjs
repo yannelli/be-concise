@@ -8,8 +8,8 @@ const PRESETS_FILE = join(BUILTIN_DIR, "presets.json");
 
 export const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
 const FEATURES = ["aiWriting", "emDash"];
-export const SCOPES = ["files", "comments", "gh", "commit", "command", "reply"];
-export const DEFAULT_SCOPE = SCOPES.filter((s) => s !== "command");
+export const SCOPES = ["files", "comments", "code", "gh", "commit", "command", "reply"];
+export const DEFAULT_SCOPE = SCOPES.filter((s) => s !== "command" && s !== "code");
 const KINDS = ["phrase", "opening", "regex"];
 
 const AI_DEFAULTS = {

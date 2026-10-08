@@ -16,6 +16,7 @@ const KNOWN = new Map([
   ['node "${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs"', { name: "check-edit", worker: true }],
   ['node "${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs"', { name: "check-bash", worker: true }],
   ['node "${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.mjs"', { name: "check-reply", worker: true }],
+  ['node "${CLAUDE_PLUGIN_ROOT}/hooks/check-mcp.mjs"', { name: "check-mcp", file: "check-mcp.mjs" }],
   ['node "${CLAUDE_PLUGIN_ROOT}/hooks/monitor-filter.mjs"', { name: "test-filter", file: "monitor-filter.mjs" }],
   ['bash "${CLAUDE_PLUGIN_ROOT}/hooks/PreToolUse-test-filter.sh"', { name: "test-filter", file: "PreToolUse-test-filter.sh", shell: true }],
 ]);
@@ -92,7 +93,8 @@ async function applicable(request) {
     if (group.matcher && !new RegExp(`^(?:${group.matcher})$`).test(request.tool_name || "")) continue;
     for (const hook of group.hooks || []) {
       if (hook.type !== "command" || !KNOWN.has(hook.command)) throw new Error(`Unsupported hook command: ${hook.command}`);
-      hooks.push(KNOWN.get(hook.command));
+      // The playground ignores `if`, so check-edit's several Bash handlers run once.
+      if (!hooks.includes(KNOWN.get(hook.command))) hooks.push(KNOWN.get(hook.command));
     }
   }
   return hooks;

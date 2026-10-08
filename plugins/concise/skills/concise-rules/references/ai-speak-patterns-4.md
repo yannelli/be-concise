@@ -112,9 +112,9 @@ Invisible or look-alike characters that model output and chat UIs leave in text.
 | a Unicode tag character | remove the tag character, it can hide text |
 | a variation selector other than the emoji and text selectors | remove the variation selector, it can hide data |
 | a bidirectional control character | remove the bidi control |
-| `citeturn0search0`, `contentReference[oaicite:0]` | remove the citation residue |
+| ChatGPT citation markers: `cite` followed by `turn0search0`, or `contentReference` followed by an `oaicite` index | remove the citation residue |
 
-Anthropic's text watermark adds no characters, so this pack cannot see it. U+00A0 is left out: npm READMEs carry it 5.6 times per 10,000 words. A zero-width joiner inside an emoji sequence and tag characters after the black flag (subdivision flags) stay unflagged. A right-to-left project lists `hidden-characters` in `excludePacks` or drops the bidi row with its own pack.
+Anthropic's text watermark adds no characters, so this pack cannot see it. In a code file the pack reads the whole file, string literals included, through the `code` scope. U+00A0 is left out: npm READMEs carry it 5.6 times per 10,000 words. A zero-width joiner inside an emoji sequence and tag characters after the black flag (subdivision flags) stay unflagged. A right-to-left project lists `hidden-characters` in `excludePacks` or drops the bidi row with its own pack.
 
 ## smart-punctuation
 

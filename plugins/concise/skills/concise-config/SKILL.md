@@ -60,7 +60,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/concise-config.mjs" set maxCommentLines 4 --
 | `caseSensitive` | `false` by default. |
 | `flags` | Regex flags for `regex` entries. Default `i`. |
 | `hooks` | `edit`, `bash`, `stop`, `subagentStop`. Omit for all. |
-| `scopes` | `files`, `comments`, `gh`, `commit`, `command`, `reply`. Omit for every scope except `command`. |
+| `scopes` | `files`, `comments`, `code`, `gh`, `commit`, `command`, `reply`. Omit for every scope except `command` and `code`. |
 
 Pick `match` and `on` from what the user wants to catch:
 
