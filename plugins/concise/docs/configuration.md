@@ -62,11 +62,13 @@ The hook reads config from 5 layers, lowest first. A higher layer replaces a sca
 
 1. The built-in defaults.
 2. `BEC_CONFIG_JSON`, then the baseline variables `BEC_FEATURE_ENABLE`, `BEC_FEATURE_DISABLE`, `BEC_ENABLE_PATTERNS`, `BEC_DISABLE_PATTERNS`, and `BEC_LOAD_LIB_PATHS`.
-3. User config: the first of `$XDG_CONFIG_HOME/concise/concise.json`, `~/.config/concise/concise.json`, `~/.claude/concise.json`, `~/.codex/concise.json`.
-4. Project config: `BEC_CONFIG_PATH` when it is set, else `<cwd>/.claude/concise.json`, else `<cwd>/.codex/concise.json`.
+3. The `BEC_CONFIG_PATH` file, then the user config. The user config is the first of `$XDG_CONFIG_HOME/concise/concise.json`, `~/.config/concise/concise.json`, `~/.claude/concise.json`, `~/.codex/concise.json`.
+4. Project config: `<cwd>/.claude/concise.json`, else `<cwd>/.codex/concise.json`.
 5. The override variables: the `ALWAYS` forms, `BEC_HOOK_SOFT_FAIL`, `BEC_DISABLE_STOP_HOOK`, the `BEC_LOG_*` set, the `BEC_ALLOW_*` set, and the `BEC_BYPASS_*` set.
 
 A project file overrides `BEC_FEATURE_ENABLE`. `BEC_FEATURE_ALWAYS_ENABLE` overrides the project file. The variables are listed in [environment.md](environment.md).
+
+Of the three config files, the `BEC_CONFIG_PATH` file loads first. The user file merges over it, then the project file merges over both, so the project file wins a conflict. A relative `BEC_CONFIG_PATH` resolves against the cwd. When `BEC_CONFIG_PATH` names the user file or the project file, the hook reads that file once, in the user or project place. `BEC_CONFIG_PATH_ONLY=1` skips the user file and the project file.
 
 ## Merge rules per key
 

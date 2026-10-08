@@ -115,7 +115,7 @@ test("BEC_CONFIG_PATH resolves against the project directory", async (t) => {
   const app = await fixture(t, { BEC_CONFIG_PATH: "custom.json" });
   const state = await (await app.api("/api/state")).json();
   assert.equal(state.environment.BEC_CONFIG_PATH, join(app.cwd, "custom.json"));
-  assert.equal(state.layers.find((layer) => layer.id === "project-override").path, join(app.cwd, "custom.json"));
+  assert.equal(state.layers.find((layer) => layer.id === "env-config").path, join(app.cwd, "custom.json"));
 });
 
 test("playground input must be an object and defaults to the saved settings", async (t) => {

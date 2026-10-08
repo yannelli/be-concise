@@ -46,7 +46,7 @@ function environment(env, directory, configPath) {
   const home = join(directory, "home");
   const state = join(directory, "state");
   return { ...out, HOME: home, USERPROFILE: home, XDG_CONFIG_HOME: join(home, ".config"),
-    TMPDIR: state, TMP: state, TEMP: state, BEC_CONFIG_PATH: configPath,
+    TMPDIR: state, TMP: state, TEMP: state, BEC_CONFIG_PATH: configPath, BEC_CONFIG_PATH_ONLY: "1",
     BEC_MONITOR_DISABLED: "1", CLAUDE_PLUGIN_ROOT: PLUGIN };
 }
 

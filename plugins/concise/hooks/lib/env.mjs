@@ -80,6 +80,7 @@ export function readEnv(env = process.env) {
   return {
     configJson: parseConfigJson(raw("BEC_CONFIG_JSON"), problems),
     configPath: raw("BEC_CONFIG_PATH")?.trim() || null,
+    configPathOnly: bool("BEC_CONFIG_PATH_ONLY") === true,
     featureEnable: ids("BEC_FEATURE_ENABLE"),
     featureDisable: ids("BEC_FEATURE_DISABLE"),
     alwaysEnableFeatures: ids("BEC_FEATURE_ALWAYS_ENABLE"),

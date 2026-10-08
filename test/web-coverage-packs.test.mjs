@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
@@ -111,7 +112,7 @@ test("path sources resolve against the project and must be packs", async (t) => 
   await rejects(addPack({ cwd, env, source: "notes.txt" }), 400, /must be a \.json or \.mjs file or a directory/);
 });
 
-test("layer edits refuse invalid and shadowed project layers", async (t) => {
+test("layer edits refuse invalid project layers and ignore BEC_CONFIG_PATH", async (t) => {
   const { cwd, env, writeJson } = await fixture(t);
   await mkdir(join(cwd, "local-packs"));
   const layerPath = join(cwd, ".claude", "concise.json");
@@ -121,7 +122,12 @@ test("layer edits refuse invalid and shadowed project layers", async (t) => {
   await writeJson(layerPath, "[]");
   await rejects(add(), 400, /concise\.json is not a JSON object$/);
   await rm(layerPath);
-  await rejects(add({ BEC_CONFIG_PATH: ".claude/concise.json" }), 400, /^Unknown configuration layer$/);
+  for (const pinned of ["pinned.json", ".claude/concise.json"]) {
+    assert.deepEqual(await add({ BEC_CONFIG_PATH: pinned }), { path: join(cwd, "local-packs"), layer: "project-claude" });
+    assert.deepEqual(JSON.parse(await readFile(layerPath, "utf8")).features.aiWriting.packs, ["local-packs"]);
+    await rm(layerPath);
+  }
+  assert.equal(existsSync(join(cwd, "pinned.json")), false);
 });
 
 test("remove and toggle validate their inputs", async (t) => {

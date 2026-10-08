@@ -1,5 +1,5 @@
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, existsSync, realpathSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { readEnv } from "./env.mjs";
 import { applyLayer, envBaselineLayer, envOverrideLayer } from "./config-layers.mjs";
 
@@ -116,10 +116,21 @@ export function userConfigPath(env) {
   return candidates.find((path) => existsSync(path)) || null;
 }
 
-export function projectConfigPath(cwd, vars) {
-  if (vars.configPath) return vars.configPath;
+export function projectConfigPath(cwd) {
   const base = cwd || ".";
   return CONFIG_DIRS.map((dir) => join(base, dir, "concise.json")).find((path) => existsSync(path)) || null;
+}
+
+const realPath = (path) => (existsSync(path) ? realpathSync(path) : path);
+
+// The files in merge order: env (BEC_CONFIG_PATH, resolved against cwd), user, project.
+// env is null when that file is also the user or project file, so it loads once.
+export function configFiles(cwd, env = process.env, vars = readEnv(env)) {
+  const pinned = vars.configPath ? resolve(cwd || ".", vars.configPath) : null;
+  const user = vars.configPathOnly ? null : userConfigPath(env);
+  const project = vars.configPathOnly ? null : projectConfigPath(cwd);
+  const shared = pinned && [user, project].some((path) => path && realPath(path) === realPath(pinned));
+  return { env: shared ? null : pinned, user, project };
 }
 
 export function loadConfig(cwd, env = process.env) {
@@ -127,8 +138,8 @@ export function loadConfig(cwd, env = process.env) {
   const problems = [...vars.problems];
   let config = applyLayer(defaultConfig(), vars.configJson);
   config = applyLayer(config, envBaselineLayer(vars));
-  config = applyLayer(config, readLayer(userConfigPath(env || {}), problems));
-  config = applyLayer(config, readLayer(projectConfigPath(cwd, vars), problems));
+  const files = configFiles(cwd, env || {}, vars);
+  for (const path of [files.env, files.user, files.project]) config = applyLayer(config, readLayer(path, problems));
   config = applyLayer(config, envOverrideLayer(vars));
   for (const [group, key] of [["context", "enabled"], ["context", "perTurn"], ["subagentStop", "enabled"], ["testFilter", "codexPostToolUse"]]) {
     if (typeof config[group][key] === "boolean") continue;

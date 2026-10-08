@@ -114,7 +114,7 @@ console.log("\ncoverage: dictionary-ops");
 
 {
   const entries = [{ id: "env-term", match: "exact", value: "zorb", fix: "zap" }, { id: "broken", match: "regex", value: "(", fix: "x" }];
-  const env = { BEC_CONFIG_PATH: "missing.json", BEC_CONFIG_JSON: JSON.stringify({ features: { dictionary: { entries } } }) };
+  const env = { BEC_CONFIG_JSON: JSON.stringify({ features: { dictionary: { entries } } }) };
   const listed = listDictionary({ cwd: project(), env });
   const term = listed.entries.find((entry) => entry.id === "env-term");
   const broken = listed.entries.find((entry) => entry.id === "broken");
@@ -124,6 +124,20 @@ console.log("\ncoverage: dictionary-ops");
   check("a layer file that is not JSON owns no entries", invalidJson.entries.every((entry) => entry.layer === "environment"), invalidJson.entries);
   const noEntries = listDictionary({ cwd: project({ maxRetries: 2 }), env: { BEC_CONFIG_JSON: env.BEC_CONFIG_JSON } });
   check("a layer file with no entries list owns no entries", noEntries.entries.find((entry) => entry.id === "env-term")?.layer === "environment", noEntries.entries);
+}
+
+{
+  const term = (id, fix) => ({ id, match: "exact", value: id, fix });
+  const dir = project({ features: { dictionary: { entries: [term("shared", "project")] } } });
+  writeFileSync(join(dir, "env.json"), JSON.stringify({ features: { dictionary: { entries: [term("shared", "env"), term("pinned", "env")] } } }));
+  const listed = listDictionary({ cwd: dir, env: { BEC_CONFIG_PATH: "env.json" } }).entries;
+  const owner = (id) => listed.find((entry) => entry.id === id);
+  check("the project file owns an entry it shares with the BEC_CONFIG_PATH file", owner("shared")?.layer === "project-claude" && owner("shared").fix === "project", listed);
+  check("the BEC_CONFIG_PATH file owns its own entries", owner("pinned")?.layer === "env-config", listed);
+  const fresh = project();
+  writeFileSync(join(fresh, "env.json"), "{}");
+  const plan = planEdit({ cwd: fresh, env: { BEC_CONFIG_PATH: "env.json" }, edits: [{ op: "set", key: "maxRetries", value: 3 }] });
+  check("the project layer is a new project file, not the BEC_CONFIG_PATH file", plan.layer.id === "project-claude" && !plan.layer.exists, plan.layer);
 }
 
 {
@@ -199,9 +213,9 @@ console.log("\ncoverage: settings");
 
 {
   const home = tempDir();
-  const state = { layers: [{ id: "user-xdg", active: false }, { id: "user-claude", active: false }, { id: "project-override", active: false }, { id: "project-claude", active: false }] };
+  const state = { layers: [{ id: "env-config", active: true }, { id: "user-xdg", active: false }, { id: "user-claude", active: false }, { id: "project-claude", active: false }] };
   check("user resolves to the first user layer when none is in effect", resolveLayer(state, "user").id === "user-xdg", state);
-  check("project resolves to an inactive override before the Claude file", resolveLayer(state, "project", home).id === "project-override", state);
+  check("project resolves to the Claude file, not the BEC_CONFIG_PATH file", resolveLayer(state, "project", home).id === "project-claude", state);
 }
 
 {
