@@ -4,7 +4,7 @@ The `aiWriting` feature ships 47 categories. Each category is one pack file unde
 
 Pick categories with `features.aiWriting.preset`, or replace the preset list with `features.aiWriting.categories`. Both keys are described in [configuration.md](configuration.md). The flagged text and the replacement for every pattern are in [../skills/concise-rules/references/ai-speak-patterns.md](../skills/concise-rules/references/ai-speak-patterns.md).
 
-Scope names: `files` (prose files), `comments` (comment runs in code files), `code` (whole code files, string literals included), `gh` (`gh pr`, `gh issue`, and `gh release` bodies, and MCP tool posts), `commit` (`git commit`, `git tag`, and `git merge` messages), `command` (the full command line), `reply` (the agent's final reply).
+Scope names: `files` (prose files and plans), `comments` (comment runs in code files), `code` (whole code files, string literals included), `gh` (`gh pr`, `gh issue`, and `gh release` titles and bodies, `gh api` bodies, and MCP tool posts), `commit` (`git commit`, `git tag`, `git merge`, `jj`, and `hg` messages), `command` (the full command line), `reply` (the agent's final reply, task text, and questions to the user).
 
 ## Phrase categories
 

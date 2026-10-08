@@ -40,7 +40,7 @@ The layer column refers to the 5 config layers in [configuration.md](configurati
 | `BEC_BYPASS_PHRASES` | phrase list | `bypass.phrases` | 5 |
 | `BEC_BYPASS_PATTERNS` | regex list | `bypass.patterns` | 5 |
 
-Feature ids for `BEC_FEATURE_*`: `emDash`, `aiWriting`, `dictionary`, `comments`, `fileSize`, `prBody`, and `stopHook`.
+Feature ids for `BEC_FEATURE_*`: `emDash`, `aiWriting`, `dictionary`, `comments`, `fileSize`, `prBody`, `stopHook`, and the `scan` switches `codeFiles`, `notebooks`, `heredocWrites`, `shellWrites`, `mcp`, `plans`, `tasks`, and `questions`.
 
 Pattern ids for `BEC_*_PATTERNS`: a category id, a pack id, or `tag:<tag>`. An unknown id is ignored. The category ids are listed in [categories.md](categories.md).
 

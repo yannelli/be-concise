@@ -140,9 +140,21 @@ The 47 categories fall into 5 groups.
 
 The full table, with every category id, its presets, and the scopes it runs in, is in [docs/categories.md](docs/categories.md). The flagged text and the replacement for every pattern are in [skills/concise-rules/references/ai-speak-patterns.md](skills/concise-rules/references/ai-speak-patterns.md).
 
-What gets scanned: prose files (`md`, `mdx`, `markdown`, `txt`, `rst`, `adoc`, `asciidoc`) whole, with fenced blocks, inline code, URLs, and HTML comments blanked first; comment runs in code files, and the whole file for `code`-scope packs such as `hidden-characters`; files that `cat` or `tee` writes from a heredoc; notebook cells; `gh pr`, `gh issue`, and `gh release` bodies, inline, heredoc, or from a body file; `git commit`, `git tag`, and `git merge` messages from `-m`, `--message=`, `-F`, `--trailer`, and the heredoc form; the body or message an MCP tool posts, such as a PR body or a chat message; and the agent's final reply through the `Stop` hook when `replies` is true.
+What gets scanned:
 
-Not scanned: files written by `echo`, `printf`, `sed -i`, or a script, and the agent's text between tool calls. Codex and omp do not check MCP tool calls or notebook edits.
+- Prose files (`md`, `mdx`, `markdown`, `txt`, `rst`, `adoc`, `asciidoc`) whole, with fenced blocks, inline code, URLs, and HTML comments blanked first.
+- Comment runs in code files. Packs with the `code` scope, `hidden-characters` by default, read the whole file, string literals included.
+- Notebook cells: a markdown cell as prose, a code cell as code.
+- Files a shell command writes: a `cat` or `tee` heredoc before the command runs, and any other file the command changed in a git work tree after it runs.
+- `gh pr`, `gh issue`, and `gh release` titles and bodies, inline, heredoc, or from a body file, and `gh api` request bodies.
+- `git commit`, `git tag`, `git merge`, `git notes`, `jj`, and `hg` messages from `-m`, `--message=`, `-F`, `--trailer`, and the heredoc form.
+- Text and files that MCP tools post or write, such as a PR body, a chat message, a doc page, or a pushed file.
+- The plan that `ExitPlanMode` shows for approval, task text, and questions that `AskUserQuestion` asks you.
+- The agent's final reply through the `Stop` hook when `replies` is true.
+
+Each place past Write and Edit has an on-by-default switch under `scan`, listed in [docs/configuration.md](docs/configuration.md).
+
+Not scanned: the agent's text between tool calls, because no hook can return it to the agent; page text in HTML files; and shell writes outside a git work tree. In Codex, shell writes are checked only for `cat` and `tee` heredocs. The omp extension checks neither MCP tools nor shell writes.
 
 ## Cloud agents and environment variables
 

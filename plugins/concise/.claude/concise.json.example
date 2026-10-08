@@ -20,6 +20,16 @@
     "fileSize": true,
     "prBody": true
   },
+  "scan": {
+    "codeFiles": true,
+    "notebooks": true,
+    "heredocWrites": true,
+    "shellWrites": true,
+    "mcp": true,
+    "plans": true,
+    "tasks": true,
+    "questions": true
+  },
   "stopHook": true,
   "softFail": false,
   "styleIgnoreGlobs": [

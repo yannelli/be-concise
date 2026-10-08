@@ -1,5 +1,5 @@
 import { scanComments } from "./comment-scan.mjs";
-import { HEREDOC } from "./pr-body.mjs";
+import { maskHeredocs } from "./pr-body.mjs";
 import { readMessageFile, segmentFrom, unquote } from "./shell-text.mjs";
 
 export const PROSE_EXTENSIONS = ["md", "mdx", "markdown", "txt", "rst", "adoc", "asciidoc"];
@@ -57,33 +57,24 @@ export function proseSpans(text, path) {
 }
 
 const MESSAGE_FLAG = /(?:^|\s)(?:--message(?:=|\s+)|-[A-Za-z]*m\s*)("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g;
-const HEREDOC_G = new RegExp(HEREDOC.source, "g");
-const MASKED_BODY = /\{\{concise-heredoc-(\d+)\}\}/;
 
-function maskHeredocs(command) {
-  const bodies = [];
-  const masked = command.replace(HEREDOC_G, (_full, _tag, body) => {
-    bodies.push(body);
-    return `{{concise-heredoc-${bodies.length - 1}}}`;
-  });
-  return { masked, bodies };
-}
-
-// `git -C dir commit`, `git -c k=v tag`, `git merge`, and `git notes add` all take a message.
-const GIT_MESSAGE_COMMAND = /\bgit(?:\s+(?:-C\s+\S+|-c\s+\S+|--[\w-]+(?:=\S+)?))*\s+(?:commit|tag|merge|notes\s+(?:add|append|edit))\b/;
+// `git -C dir commit`, `git -c k=v tag`, `git merge`, `git notes add`, `jj -R repo describe`, and `hg ci` all take a message.
+const GLOBAL_OPTIONS = String.raw`(?:\s+(?:-[CcR]\s+\S+|--[\w-]+(?:=\S+)?))*`;
+const GIT_MESSAGE_COMMAND = new RegExp(
+  String.raw`\b(?:git${GLOBAL_OPTIONS}\s+(?:commit|tag|merge|notes\s+(?:add|append|edit))|jj${GLOBAL_OPTIONS}\s+(?:describe|desc|commit|new|split)|hg${GLOBAL_OPTIONS}\s+(?:commit|ci))\b`,
+);
 const QUOTED_OR_WORD = String.raw`("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^\s;&|]+)`;
-const GIT_FILE_FLAG = new RegExp(String.raw`(?:^|\s)(?:--file(?:=|\s+)|-[A-Za-z]*F\s*)` + QUOTED_OR_WORD, "g");
+const GIT_FILE_FLAG = new RegExp(String.raw`(?:^|\s)(?:--(?:log)?file(?:=|\s+)|-[A-Za-z]*[Fl]\s*)` + QUOTED_OR_WORD, "g");
 const TRAILER_FLAG = new RegExp(String.raw`(?:^|\s)--trailer(?:=|\s+)` + QUOTED_OR_WORD, "g");
 
-/** Message text from `-m`, `--message`, `-F`/`--file` (a file or a heredoc on stdin), and `--trailer`. */
+/** Message text from `-m`, `--message`, `-F`/`--file` or hg's `-l`/`--logfile` (a file, or `-` for the heredoc), and `--trailer`. */
 export function gitCommitMessages(command, cwd = ".") {
   if (typeof command !== "string" || !GIT_MESSAGE_COMMAND.test(command)) return [];
-  const { masked, bodies } = maskHeredocs(command);
+  const { masked, bodies, bodyIn } = maskHeredocs(command);
   const messages = [];
   for (const m of masked.matchAll(MESSAGE_FLAG)) {
     const quoted = m[1].slice(1, -1);
-    const body = MASKED_BODY.exec(quoted);
-    messages.push(body ? bodies[Number(body[1])] : quoted);
+    messages.push(bodyIn(quoted) ?? quoted);
   }
   const start = masked.search(GIT_MESSAGE_COMMAND);
   const segment = start === -1 ? "" : segmentFrom(masked, start);

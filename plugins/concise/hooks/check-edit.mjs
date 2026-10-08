@@ -1,95 +1,14 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { loadConfig, isIgnored } from "./lib/config.mjs";
 import { scanComments } from "./lib/comment-scan.mjs";
-import { extractPatch, parseApplyPatch } from "./lib/apply-patch.mjs";
-import { heredocWrites, fileFlagPaths } from "./lib/shell-text.mjs";
+import { targetsOf, isExempt } from "./lib/edit-targets.mjs";
 import { bumpAttempt, resetAttempt } from "./lib/state.mjs";
 import { deny, mergeFlag } from "./lib/respond.mjs";
 import { styleDecision, prepareStyle, withPackWarnings } from "./lib/style-check.mjs";
 import { runHook, bypassResult } from "./lib/hook-main.mjs";
 
-const EDIT_TOOLS = ["Write", "Edit", "MultiEdit"];
-
-// Only the text this call writes, so a one-line edit isn't blamed for what's already
-// on disk. Chunks stay separate: joining them could invent a comment run.
-function writtenChunks(toolName, toolInput) {
-  if (toolName === "Write") return [toolInput.content || ""];
-  if (toolName === "Edit") return [toolInput.new_string || ""];
-  return (toolInput.edits || []).map((edit) => edit.new_string || "");
-}
-
-// Claude Code sends Write/Edit/MultiEdit; Codex sends apply_patch (or a shell heredoc
-// carrying one). Both become { path, chunks, wholeFile } targets.
-function targetsOf(input) {
-  const toolName = input.tool_name;
-  const toolInput = input.tool_input || {};
-
-  if (EDIT_TOOLS.includes(toolName)) {
-    if (!toolInput.file_path) return [];
-    return [{ path: toolInput.file_path, chunks: writtenChunks(toolName, toolInput), wholeFile: toolName === "Write" }];
-  }
-
-  if (toolName === "NotebookEdit") return notebookTargets(toolInput);
-
-  let patch = null;
-  if (toolName === "apply_patch") patch = toolInput.command || toolInput.input || "";
-  if (toolName === "Bash") patch = extractPatch(toolInput.command);
-  const shellWrites = toolName === "Bash" ? heredocTargets(toolInput.command, input.cwd) : [];
-  if (!patch) return shellWrites;
-
-  return parseApplyPatch(patch)
-    .map((file) => ({
-      path: resolve(input.cwd || ".", file.path),
-      chunks: file.chunks,
-      wholeFile: file.kind === "add",
-    }))
-    .concat(shellWrites);
-}
-
-// `cat > notes.md <<'EOF'` writes a file that no Write call ever shows. A body file that
-// `gh --body-file` or `git commit -F` reads in the same command is check-bash's to scan.
-function heredocTargets(command, cwd = ".") {
-  const consumed = new Set(fileFlagPaths(command).map((path) => resolve(cwd, path)));
-  return heredocWrites(command)
-    .map((write) => ({ path: resolve(cwd, write.path), chunks: [write.body], wholeFile: !write.append }))
-    .filter((target) => !consumed.has(target.path));
-}
-
-// A cell has no file of its own, so the path gets an extension that picks prose or comment rules.
-function notebookTargets({ notebook_path: path, new_source: source, cell_type: type, cell_id: id, edit_mode: mode }) {
-  if (!path || typeof source !== "string" || mode === "delete") return [];
-  const notebook = readNotebook(path);
-  const cellType = type || notebook?.cells?.find((cell) => cell.id === id)?.cell_type || "code";
-  const ext = cellType === "markdown" ? ".md" : notebook?.metadata?.language_info?.file_extension || ".py";
-  return [{ path: `${path}#${id || "new"}${ext}`, chunks: [source], wholeFile: false }];
-}
-
-function readNotebook(path) {
-  try {
-    return JSON.parse(readFileSync(path, "utf8"));
-  } catch {
-    return null;
-  }
-}
-
-function hasFileMarker(filePath) {
-  try {
-    return readFileSync(filePath, "utf8").includes("concise-ignore-file");
-  } catch {
-    return false;
-  }
-}
-
 function firstLineOf(text) {
   return text.split("\n")[0].trim().slice(0, 60);
-}
-
-// A whole-file write replaces the file, so its new content is the only authority on the marker.
-function isExempt({ path, chunks, wholeFile }) {
-  if (chunks.some((chunk) => chunk.includes("concise-ignore-file"))) return true;
-  return !wholeFile && hasFileMarker(path);
 }
 
 function checkTarget(target, config) {
@@ -125,10 +44,12 @@ function checkTarget(target, config) {
 }
 
 async function decide(input, ctx) {
-  const targets = targetsOf(input);
-  if (targets.length === 0) return {};
+  const found = targetsOf(input);
+  if (found.length === 0) return {};
   const config = loadConfig(input.cwd);
   ctx.config = config;
+  const targets = found.filter((target) => config.scan[target.scan] !== false && !(target.file && isIgnored(target.file, config.ignoreGlobs)));
+  if (targets.length === 0) return {};
   const bypassed = bypassResult(targets.flatMap((target) => target.chunks), config, ctx);
   if (bypassed) return bypassed;
   await prepareStyle(input.cwd, config);
@@ -164,5 +85,9 @@ function check(targets, input, config, ctx) {
   return mergeFlag(flagText, styleDecision(styled, input, config));
 }
 
+// The Begin Patch, `cat *`, and `tee *` rules can match one command together.
+const GATES = [/Begin Patch/, /\bcat\s/, /\btee\s/];
+const overlaps = (input) => GATES.filter((re) => re.test(input.tool_input?.command || "")).length > 1;
+
 // A hook bug must never block real work: runHook turns a throw into an allow.
-await runHook({ hook: "check-edit", event: "PreToolUse" }, decide);
+await runHook({ hook: "check-edit", event: "PreToolUse", overlaps }, decide);

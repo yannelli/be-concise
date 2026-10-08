@@ -71,6 +71,7 @@ const DEFAULTS = {
     "**/*.lock",
   ],
   checks: { comments: true, fileSize: true, prBody: true },
+  scan: { codeFiles: true, notebooks: true, heredocWrites: true, shellWrites: true, mcp: true, plans: true, tasks: true, questions: true },
   stopHook: true,
   context: { enabled: true, perTurn: false },
   subagentStop: { enabled: true, exemptAgentTypes: [] },
@@ -134,6 +135,11 @@ export function loadConfig(cwd, env = process.env) {
     if (typeof config[group][key] === "boolean") continue;
     problems.push({ source: `${group}.${key}`, reason: "expected a boolean" });
     config[group][key] = DEFAULTS[group][key];
+  }
+  for (const [key, on] of Object.entries(DEFAULTS.scan)) {
+    if (typeof config.scan[key] === "boolean") continue;
+    problems.push({ source: `scan.${key}`, reason: "expected a boolean" });
+    config.scan[key] = on;
   }
   if (!Array.isArray(config.subagentStop.exemptAgentTypes) || config.subagentStop.exemptAgentTypes.some((type) => typeof type !== "string")) {
     problems.push({ source: "subagentStop.exemptAgentTypes", reason: "expected an array of strings" });

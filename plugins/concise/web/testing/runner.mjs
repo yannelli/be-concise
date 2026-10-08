@@ -16,7 +16,7 @@ const KNOWN = new Map([
   ['node "${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs"', { name: "check-edit", worker: true }],
   ['node "${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs"', { name: "check-bash", worker: true }],
   ['node "${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.mjs"', { name: "check-reply", worker: true }],
-  ['node "${CLAUDE_PLUGIN_ROOT}/hooks/check-mcp.mjs"', { name: "check-mcp", file: "check-mcp.mjs" }],
+  ['node "${CLAUDE_PLUGIN_ROOT}/hooks/check-tool-text.mjs"', { name: "check-tool-text", file: "check-tool-text.mjs" }],
   ['node "${CLAUDE_PLUGIN_ROOT}/hooks/monitor-filter.mjs"', { name: "test-filter", file: "monitor-filter.mjs" }],
   ['bash "${CLAUDE_PLUGIN_ROOT}/hooks/PreToolUse-test-filter.sh"', { name: "test-filter", file: "PreToolUse-test-filter.sh", shell: true }],
 ]);

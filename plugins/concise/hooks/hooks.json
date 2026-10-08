@@ -32,6 +32,13 @@
                     },
                     {
                         "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(jj *)",
+                        "statusMessage": "concise: checking commit and PR text"
+                    },
+                    {
+                        "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
                         "timeout": 15,
                         "if": "Bash(*Begin Patch*)",
@@ -62,6 +69,13 @@
                         "timeout": 15,
                         "if": "PowerShell(*g*)",
                         "statusMessage": "concise: checking commit and PR text"
+                    },
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
+                        "timeout": 15,
+                        "if": "PowerShell(jj *)",
+                        "statusMessage": "concise: checking commit and PR text"
                     }
                 ]
             },
@@ -70,9 +84,20 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-mcp.mjs\"",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-tool-text.mjs\"",
                         "timeout": 15,
-                        "statusMessage": "concise: checking posted MCP text"
+                        "statusMessage": "concise: checking posted tool text"
+                    }
+                ]
+            },
+            {
+                "matcher": "ExitPlanMode|TaskCreate|TaskUpdate|AskUserQuestion",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-tool-text.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking plan, task, and question text"
                     }
                 ]
             },
@@ -84,6 +109,19 @@
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.mjs\"",
                         "timeout": 15,
                         "statusMessage": "concise: checking subagent report"
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "Bash|PowerShell",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-shell-writes.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking files the command wrote"
                     }
                 ]
             }

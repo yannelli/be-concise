@@ -134,7 +134,7 @@ console.log("\ncontext and optional model hooks");
   const shellHooks = claude.hooks.PreToolUse.find((group) => group.matcher === "Bash").hooks;
   const matches = (condition, command) => new RegExp(`^${condition.slice(5, -1).split("*").map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s\\S]*")}$`).test(command);
   for (const [script, commands] of [
-    ["check-bash.mjs", ["FOO=1 gh pr create --body x", "echo ok && git commit -m x", "echo $(gh issue comment 1 --body x)", "echo `git commit -m x`"]],
+    ["check-bash.mjs", ["FOO=1 gh pr create --body x", "echo ok && git commit -m x", "echo $(gh issue comment 1 --body x)", "echo `git commit -m x`", "jj describe -m x"]],
     ["monitor-filter.mjs", ["pytest", "npm test", "go test ./...", "FOO=1 npx jest", "echo $(vitest)", "echo ok && jest"]],
     ["check-edit.mjs", ["FOO=1 apply_patch <<'PATCH'\n*** Begin Patch\n*** End Patch\nPATCH", "python -c '*** Begin Patch\n*** End Patch'"]],
   ]) {

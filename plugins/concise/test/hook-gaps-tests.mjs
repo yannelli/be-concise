@@ -8,8 +8,10 @@ import { gitCommitMessages } from "../hooks/lib/prose.mjs";
 import { extractBody } from "../hooks/lib/pr-body.mjs";
 import { heredocWrites, fileFlagPaths, readMessageFile, segmentFrom } from "../hooks/lib/shell-text.mjs";
 import { checkText } from "../tools/check.mjs";
+import { loadConfig } from "../hooks/lib/config.mjs";
+import { claim, cleanupSession } from "../hooks/lib/state.mjs";
 
-const CHECK_MCP = join(ROOT, "hooks", "check-mcp.mjs");
+const CHECK_TOOL = join(ROOT, "hooks", "check-tool-text.mjs");
 const ZWSP = "\u200B";
 const dirs = [];
 let seq = 0;
@@ -17,8 +19,8 @@ let seq = 0;
 function project(aiWriting = {}, extra = {}) {
   const dir = mkdtempSync(join(tmpdir(), "concise-gaps-"));
   dirs.push(dir);
-  // softFail is off here because a user config on the test machine can turn it on.
-  withConfig(dir, { softFail: false, features: { aiWriting: { enabled: true, preset: "default", ...aiWriting } }, ...extra });
+  // softFail and mode are set here because a user config on the test machine can change them.
+  withConfig(dir, { softFail: false, features: { aiWriting: { enabled: true, preset: "default", mode: "confirm", ...aiWriting } }, ...extra });
   return dir;
 }
 
@@ -148,10 +150,10 @@ console.log("\nhook gaps: MCP tool bodies");
 
 {
   const dir = project();
-  const mcp = (tool, input) => run(CHECK_MCP, event(dir, tool, input));
+  const mcp = (tool, input) => run(CHECK_TOOL, event(dir, tool, input));
   const pr = mcp("mcp__github__create_pull_request", { title: "x", body: "We delve into the parser and fix it." });
   assertDenied("a GitHub MCP PR body is read", pr);
-  includes("the label names the server and tool", pr, "github create_pull_request body");
+  includes("the label names the server, the tool, and the fields", pr, "github create_pull_request title and body");
   assertDenied("a chat message tool's text is read", mcp("mcp__slack__post_message", { channel: "c", text: "We delve into the outage today." }));
   assertDenied("an issue tool's description is read", mcp("mcp__linear__create_issue", { description: "We delve into the outage today." }));
   assertAllowed("a description on another tool is skipped", mcp("mcp__runpod__create_template", { description: "We delve into the outage today." }));
@@ -160,6 +162,93 @@ console.log("\nhook gaps: MCP tool bodies");
   assertAllowed("concise-ignore skips the body", mcp("mcp__github__add_issue_comment", { body: "We delve into it. concise-ignore" }));
   assertAllowed("a clean body passes", mcp("mcp__github__add_issue_comment", { body: "The parser now keeps the header field." }));
   assertAllowed("a non-MCP tool is skipped", mcp("Bash", { body: "We delve into the parser and fix it." }));
+  assertDenied("an email subject is read", mcp("mcp__gmail__send_email", { to: "a@b.c", subject: "We delve into the outage today" }));
+  assertDenied("a docs payload is read a few levels deep", mcp("mcp__claude_ai_Claude_Docs__update", { ref: { id: "1" }, payload: { text: "We delve into the plan for the release." } }));
+  const file = mcp("mcp__filesystem__write_file", { path: "notes.md", content: "We delve into it.\n" });
+  assertDenied("an MCP file write is read as that file", file);
+  includes("the file finding names the path", file, "notes.md");
+  assertAllowed("an MCP code file write keeps code rules", mcp("mcp__filesystem__write_file", { path: "a.ts", content: 'const a = "We delve into it.";\n' }));
+  assertDenied("MCP file edits are read", mcp("mcp__filesystem__edit_file", { path: "notes.md", edits: [{ oldText: "a", newText: "We delve into it." }] }));
+  assertAllowed("concise-ignore-file skips an MCP file write", mcp("mcp__filesystem__write_file", { path: "notes.md", content: "We delve. concise-ignore-file\n" }));
+  const pushed = mcp("mcp__github__push_files", { files: [{ path: "README.md", content: "Plain text.\n" }], message: "Add readme\n\nCo-authored-by: Claude <noreply@anthropic.com>" });
+  assertDenied("the commit message of an MCP file push is read", pushed);
+  includes("the commit finding names the tool", pushed, "github push_files commit message");
+}
+
+{
+  const dir = project();
+  const sid = `gaps-retries-${process.pid}`;
+  const post = (body) => run(CHECK_TOOL, { tool_name: "mcp__github__add_issue_comment", tool_input: { issue_number: 7, body }, cwd: dir, session_id: sid });
+  assertDenied("a flagged comment is held", post("We delve into the parser today."));
+  assertDenied("a revised comment on the same issue is held again", post("We delve into the parser right now."));
+  const third = post("We delve into the parser this week.");
+  assertAllowed("revisions share a retry counter, so the third goes through", third);
+  includes("the third revision is flagged", third, "Allowed through after 2 nudges");
+}
+
+console.log("\nhook gaps: plans, tasks, and questions");
+
+{
+  const dir = project();
+  const tool = (name, input) => run(CHECK_TOOL, event(dir, name, input));
+  assertDenied("a task subject is read", tool("TaskCreate", { subject: "Delve into the parser errors", description: "Find the cause." }));
+  assertDenied("a task update is read", tool("TaskUpdate", { taskId: "1", description: "We delve into the parser errors." }));
+  const question = { questions: [{ question: "Should we delve into the parser first?", header: "Order", options: [{ label: "Yes", description: "Start there" }, { label: "No", description: "Later" }] }] };
+  assertDenied("a question to the user is read", tool("AskUserQuestion", question));
+  assertAllowed("a clean task passes", tool("TaskCreate", { subject: "Fix the parser header field" }));
+  const plan = tool("ExitPlanMode", { plan: "## Plan\n\nWe delve into the parser first.\n", planFilePath: "/home/u/.claude/plans/p.md" });
+  assertDenied("a plan is read although its file sits under .claude/", plan);
+  includes("the plan finding is labeled", plan, "plan");
+  assertAllowed("scan.plans off skips plans", run(CHECK_TOOL, event(project({}, { scan: { plans: false } }), "ExitPlanMode", { plan: "We delve into the parser first." })));
+  const quiet = project({ replies: false });
+  assertAllowed("the reply switch covers tasks", run(CHECK_TOOL, event(quiet, "TaskCreate", { subject: "Delve into the parser errors" })));
+}
+
+console.log("\nhook gaps: scan switches");
+
+{
+  const off = (scan) => project({}, { scan });
+  const notebook = (dir) => join(dir, "n.ipynb");
+  assertAllowed("scan.codeFiles off skips the whole-file pass", run(CHECK_EDIT, event(off({ codeFiles: false }), "Write", { file_path: "/tmp/a.ts", content: `const a = "x${ZWSP}y";\n` })));
+  const nb = off({ notebooks: false });
+  assertAllowed("scan.notebooks off skips cells", run(CHECK_EDIT, event(nb, "NotebookEdit", { notebook_path: notebook(nb), cell_type: "markdown", new_source: "We delve into the data." })));
+  const hd = off({ heredocWrites: false });
+  assertAllowed("scan.heredocWrites off skips heredoc writes", run(CHECK_EDIT, event(hd, "Bash", { command: "cat > notes.md <<'EOF'\nWe delve into it.\nEOF" })));
+  assertAllowed("scan.mcp off skips MCP posts", run(CHECK_TOOL, event(off({ mcp: false }), "mcp__github__add_issue_comment", { body: "We delve into the parser today." })));
+  assertAllowed("scan.tasks off skips tasks", run(CHECK_TOOL, event(off({ tasks: false }), "TaskCreate", { subject: "Delve into the parser errors" })));
+  assertAllowed("scan.questions off skips questions", run(CHECK_TOOL, event(off({ questions: false }), "AskUserQuestion", { questions: [{ question: "Should we delve into the parser first?" }] })));
+  const ignored = project({}, { ignoreGlobs: ["**/*.ipynb"] });
+  assertAllowed("ignoreGlobs match the notebook's own path", run(CHECK_EDIT, event(ignored, "NotebookEdit", { notebook_path: notebook(ignored), cell_type: "markdown", new_source: "We delve into the data." })));
+  const marked = project();
+  writeFileSync(notebook(marked), JSON.stringify({ cells: [{ id: "a", cell_type: "markdown", source: ["concise-ignore-file"] }] }));
+  assertAllowed("a marker in the notebook file exempts its cells", run(CHECK_EDIT, event(marked, "NotebookEdit", { notebook_path: notebook(marked), cell_type: "markdown", new_source: "We delve into the data." })));
+}
+
+{
+  const config = loadConfig("/nonexistent", { BEC_FEATURE_DISABLE: "notebooks,mcp", BEC_CONFIG_JSON: JSON.stringify({ scan: { tasks: "no" } }) });
+  eq("BEC_FEATURE_DISABLE turns scan switches off", [config.scan.notebooks, config.scan.mcp, config.scan.shellWrites], [false, false, true]);
+  eq("a scan switch that is not a boolean falls back to on", config.scan.tasks, true);
+  eq("the bad switch is reported", config.problems.map((problem) => problem.source), ["scan.tasks"]);
+}
+
+console.log("\nhook gaps: overlapping handlers");
+
+{
+  const dir = project();
+  const sid = `gaps-overlap-${process.pid}`;
+  const call = (script, command, id) => run(script, { tool_name: "Bash", tool_input: { command }, tool_use_id: id, cwd: dir, session_id: sid });
+  const jj = 'jj describe -m "We delve into the bug."';
+  assertDenied("the first run for a jj call decides", call(CHECK_BASH, jj, "toolu_jj"));
+  eq("a second run for the same jj call exits without output", call(CHECK_BASH, jj, "toolu_jj"), {});
+  const piped = "cat <<'EOF' | tee notes.md\nWe delve into it.\nEOF";
+  assertDenied("the first run for a cat and tee call decides", call(CHECK_EDIT, piped, "toolu_tee"));
+  eq("a second run for the same cat and tee call exits without output", call(CHECK_EDIT, piped, "toolu_tee"), {});
+  const commit = 'git commit -m "We delve into the parser."';
+  assertDenied("a call that cannot overlap is not claimed", call(CHECK_BASH, commit, "toolu_git"));
+  includes("so a repeat still runs and confirms", call(CHECK_BASH, commit, "toolu_git"), "Kept after confirmation");
+  eq("a claim is taken once", [claim(sid, "k"), claim(sid, "k")], [true, false]);
+  eq("session cleanup removes claims", [cleanupSession(sid), claim(sid, "k")], [true, true]);
+  cleanupSession(sid);
 }
 
 for (const dir of dirs) rmSync(dir, { recursive: true, force: true });

@@ -7,7 +7,9 @@ const HEREDOC_LINE = /<<[-~]?\s*(['"]?)(\w+)\1([^\n]*)\r?\n([\s\S]*?)\r?\n\t*\2(
 const TARGET = String.raw`("[^"\n]+"|'[^'\n]+'|[^\s;&|<>()]+)`;
 const REDIRECT = new RegExp(String.raw`(?<![\d&])(>>?)\s*` + TARGET);
 const TEE = new RegExp(String.raw`\btee\s+((?:-[a-z]+\s+)*)` + TARGET);
-const FILE_FLAG = new RegExp(String.raw`(?:^|\s)(?:--body-file|--notes-file|--file|-[A-Za-z]*F)(?:=|\s*)` + TARGET, "g");
+const FILE_FLAG = new RegExp(String.raw`(?:^|\s)(?:--(?:body-file|notes-file|file|field|input)(?:=|\s+)|-[A-Za-z]*F(?:=|\s*))` + TARGET, "g");
+// `gh api -F key=value` is a field, and only `key=@path` reads a file.
+const FIELD = /^[\w[\]-]+=(.*)$/s;
 
 export const unquote = (value) => (/^(["']).*\1$/s.test(value) ? value.slice(1, -1) : value);
 
@@ -31,10 +33,15 @@ export function heredocWrites(command) {
   return out;
 }
 
-/** Paths the command passes to `--body-file`, `--notes-file`, `--file`, or `-F`. */
+/** Paths the command passes to `--body-file`, `--notes-file`, `--file`, `-F`, `--input`, or `gh api -F key=@path`. */
 export function fileFlagPaths(command) {
   if (typeof command !== "string") return [];
-  return [...command.matchAll(FILE_FLAG)].map((m) => unquote(m[1]));
+  return [...command.matchAll(FILE_FLAG)].flatMap((m) => {
+    const value = unquote(m[1]);
+    const field = FIELD.exec(value);
+    if (!field) return [value];
+    return field[1].startsWith("@") ? [field[1].slice(1)] : [];
+  });
 }
 
 /** A message file's text: a heredoc write earlier in the same command wins over the file on disk. */

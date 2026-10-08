@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync, mkdirSync, renameSync, opendirSync, unlinkSync, rmdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, renameSync, opendirSync, unlinkSync, rmdirSync, openSync, closeSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
@@ -76,6 +76,18 @@ export function resetAttempt(sessionId, key) {
     if (!(key in state)) return;
     delete state[key];
     writeState(sessionId, state);
+}
+
+/** True for the first process to claim this (session, key). An exclusive create, so parallel hooks agree. */
+export function claim(sessionId, key) {
+  const path = join(sessionPath(sessionId), `${digest(`claim:${key}`)}.json`);
+  try {
+    mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
+    closeSync(openSync(path, "wx", 0o600));
+    return true;
+  } catch (error) {
+    return error.code !== "EEXIST";
+  }
 }
 
 /** True the first time this (session, key) pair is seen, false after that. */
