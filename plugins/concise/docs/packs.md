@@ -167,6 +167,7 @@ export default {
 | `ctx.path` | The file path, or `null` for a reply, commit message, `gh` body, or command. |
 | `ctx.scope` | The scope name the text came from. |
 | `ctx.options` | The pack's `options`, merged with `features.aiWriting.options.<packId>`. |
+| `ctx.raw` | The text before code spans, fences, comments, and URLs are blanked. It has the same length as `ctx.stats.text`, so an index into one is an index into the other. |
 | `ctx.stats.text` | The text being scanned. |
 | `ctx.stats.words()` | `{ text, start, end }` per word. |
 | `ctx.stats.sentences()` | `{ text, start, end }` per sentence. |

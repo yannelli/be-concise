@@ -51,8 +51,8 @@ export function extOf(filePath) {
 export const isProsePath = (filePath) => PROSE_EXTENSIONS.includes(extOf(filePath));
 
 export function proseSpans(text, path) {
-  if (isProsePath(path)) return [{ text: stripCode(text), line: 1 }];
-  return scanComments(text, path).map((run) => ({ text: run.text, line: run.startLine }));
+  if (isProsePath(path)) return [{ text: stripCode(text), raw: text, line: 1 }];
+  return scanComments(text, path).map((run) => ({ text: run.text, raw: run.text, line: run.startLine }));
 }
 
 const MESSAGE_FLAG = /(?:^|\s)(?:--message(?:=|\s+)|-[A-Za-z]*m\s*)("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g;
