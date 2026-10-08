@@ -1,6 +1,6 @@
 # Pattern packs
 
-Every category is one pack file. The built-in packs live under `hooks/lib/patterns/`: `ai/` for writing patterns, `git/` for commit, PR, and review checks, `prose/` for punctuation. A project adds its own packs the same way.
+Most categories are one pack file. A pack whose `category` is a string joins that category, as `closing-offer.json` and `backtick-branches.mjs` join `claude-tells`. The built-in packs live under `hooks/lib/patterns/`: `ai/` for writing patterns, `git/` for commit, PR, and review checks, `prose/` for punctuation. A project adds its own packs the same way.
 
 A `.mjs` pack executes code from the checkout. The hook imports it, so its top-level code and its `detect` function run in the hook process with your permissions on every tool call. Read a `.mjs` pack before you add it. A `.json` pack holds data only.
 
@@ -167,6 +167,7 @@ export default {
 | `ctx.path` | The file path, or `null` for a reply, commit message, `gh` body, or command. |
 | `ctx.scope` | The scope name the text came from. |
 | `ctx.options` | The pack's `options`, merged with `features.aiWriting.options.<packId>`. |
+| `ctx.raw` | The text before code spans, fences, comments, and URLs are blanked. It has the same length as `ctx.stats.text`, so an index into one is an index into the other. |
 | `ctx.stats.text` | The text being scanned. |
 | `ctx.stats.words()` | `{ text, start, end }` per word. |
 | `ctx.stats.sentences()` | `{ text, start, end }` per sentence. |

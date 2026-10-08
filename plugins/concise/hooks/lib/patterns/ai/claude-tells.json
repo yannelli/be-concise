@@ -1,0 +1,23 @@
+{
+  "id": "claude-tells",
+  "feature": "aiWriting",
+  "category": { "id": "claude-tells", "label": "Claude tells", "description": "Phrasing that Claude 5.x models write far more often than people do.", "tags": ["phrase", "claude"] },
+  "source": "Measured on 1.29M words of Opus 5.5 Claude Code replies against 1.13M words of npm READMEs and 87K words of pre-2023 commits; Anthropic's Opus 5.5 and Fable 5.1 prompting guides",
+  "presets": ["default", "ryan", "technical", "all"],
+  "scope": ["files", "comments", "gh", "commit", "reply"],
+  "notes": "Every tier-1 row fired at most 0.02 times per 10,000 words in the README and commit baselines. The status-label row needs a verbless fragment at the start of a line or sentence, so `This is a known limitation, not a bug` stays with the `contrast` pack. The closing offer lives in `closing-offer.json` so it can be excluded alone.",
+  "patterns": [
+    { "regex": "\\b(?:the |this |that |its )?(?:docs?|documentation|README|comment|changelog|spec|plan|proposal|code|tests?|commit|PR|diff|issue|ticket|log|output|page|guide|report|schema|config)s? (?:itself )?(?:admits?|concedes?|confess(?:es)?|lies|pretends?|swears?)\\b", "fix": "say what the text states: `the doc says X`", "show": "`the doc admits`, `the code pretends`, `the test lies`" },
+    { "regex": "\\b(?:admits|concedes|confesses) (?:it|as much)\\b", "fix": "say what the text states", "show": "`admits it`, `concedes as much`" },
+    { "regex": "(?:^|[.!?:]\\s+|[-*]\\s+(?:\\*\\*)?)(?:Pre-?existing|Existing|Intentional|Deliberate|Expected|Cosmetic|Unrelated|Harmless|Benign|Separate|Known|Upstream|Flaky|Latent)\\b[^.!?\\n,]{0,30}(?<hit>,\\s+not\\s+(?:a |an |the )?[\\w-]+)", "flags": "gim", "fix": "cut the `not X` tail, the label already says it", "show": "`Existing bug, not a regression`" },
+    { "regex": "\\bthe (?<hit>big|huge|giant|scary) (?:one|migration|refactor|rewrite|change|fix|bug|risk|issue|problem|question|PR|diff|win|gap|piece|part|item|table|query|file|job|deploy|release|merge|commit|cleanup|update|upgrade)s?\\b", "fix": "cut the size word, or give the size", "show": "`the big migration`, `the huge refactor`" },
+    { "regex": "\\b(?:covers?|covered|exercises?|exercised|hits?|reach(?:es|ed)?|tests?|tested|guards?|skips?|suspect|traced?) (?:this|that|the same|either|each|both|the other) (?:code )?(?<hit>path)\\b", "fix": "name the branch: the function, condition, or flag", "show": "`covers this path`, `hits that path`" },
+    { "phrase": "on purpose", "fix": "put `intentionally` before the verb, or give the reason" },
+    { "regex": ",\\s*(?:by design|as intended|as designed)(?=\\s*[.!?;:)]|\\s*$)", "flags": "gim", "fix": "cut the tag, or give the reason", "show": "`, by design.`, `, as intended.`" },
+    { "regex": ",\\s*(?:with|given|plus) your [^.!?\\n,]{0,40}?\\b(?:note|caveat|point|comment|context|feedback|concern|flag|constraint|correction|request|ask|framing|numbers?|rule|instructions?)\\b", "fix": "put the aside in parentheses, or make it a clause", "show": "`, with your low call volume note`" },
+    { "phrase": "quietly", "fix": "cut it, or say what is not logged or reported" },
+    { "regex": "\\bearns? (?:its|their) (?:keep|place)\\b", "fix": "say what it does", "show": "`earns its keep`, `earns its place`" },
+    { "regex": "\\b(?:a|one) real (?:bug|risk|problem|issue|gap|concern|regression|win|finding)\\b|\\bthe real (?:fix|bug|risk|issue|problem|gap|cause|culprit|cost|blocker|story)\\b", "fix": "cut `real`", "tier": 2, "show": "`a real bug`, `the real gap`, `the real story`" },
+    { "regex": "\\breads (?:well|cleanly|naturally)\\b", "fix": "say what works", "tier": 2, "show": "`reads well`, `reads cleanly`" }
+  ]
+}

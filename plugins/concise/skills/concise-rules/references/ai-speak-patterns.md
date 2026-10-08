@@ -7,6 +7,8 @@ Phrase patterns are case-insensitive. The left column holds the flagged text, th
 
 | Category | Label | Pack | Presets | File |
 |---|---|---|---|---|
+| `claude-tells` | Claude tells | `backtick-branches`, `claude-tells`, `closing-offer` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns.md` |
+| `british-spelling` | British spelling | `british-spelling` | `ryan`, `all` | `ai-speak-patterns.md` |
 | `chatbot` | chatbot phrases | `chatbot` | `default`, `ryan`, `technical`, `minimal`, `all` | `ai-speak-patterns.md` |
 | `closers` | closers | `closers` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns.md` |
 | `contrast` | contrast frames | `contrast` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns.md` |
@@ -16,10 +18,10 @@ Phrase patterns are case-insensitive. The left column holds the flagged text, th
 | `filler` | filler | `filler` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns.md` |
 | `formatting` | formatting | `formatting` | `default`, `ryan`, `all` | `ai-speak-patterns.md` |
 | `hedging` | hedging | `hedging` | `ryan`, `ste`, `all` | `ai-speak-patterns.md` |
-| `inflation` | significance inflation | `inflation` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns.md` |
-| `lexical-diversity` | lexical diversity | `lexical-diversity` | `statistical`, `all` | `ai-speak-patterns.md` |
-| `negative-parallelism` | negative parallelism | `negative-parallelism` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns.md` |
-| `outline-conclusion` | outline-restating conclusions | `outline-conclusion` | `ryan`, `all` | `ai-speak-patterns.md` |
+| `inflation` | significance inflation | `inflation` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns-2.md` |
+| `lexical-diversity` | lexical diversity | `lexical-diversity` | `statistical`, `all` | `ai-speak-patterns-2.md` |
+| `negative-parallelism` | negative parallelism | `negative-parallelism` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns-2.md` |
+| `outline-conclusion` | outline-restating conclusions | `outline-conclusion` | `ryan`, `all` | `ai-speak-patterns-2.md` |
 | `overgeneralization` | overgeneralization | `overgeneralization` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns-2.md` |
 | `paragraph-coherence` | paragraph coherence | `paragraph-coherence` | `ryan`, `statistical`, `all` | `ai-speak-patterns-2.md` |
 | `parallel-bullets` | parallel bullets | `parallel-bullets` | `ryan`, `all` | `ai-speak-patterns-2.md` |
@@ -33,10 +35,10 @@ Phrase patterns are case-insensitive. The left column holds the flagged text, th
 | `ste` | simplified technical english | `ste` | `ste`, `all` | `ai-speak-patterns-2.md` |
 | `structure` | openers and frames | `structure` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns-2.md` |
 | `superficial-analysis` | superficial analysis | `superficial-analysis` | `ryan`, `all` | `ai-speak-patterns-2.md` |
-| `sycophancy` | sycophancy | `sycophancy` | `default`, `ryan`, `technical`, `minimal`, `all` | `ai-speak-patterns-2.md` |
-| `terminal-punctuation` | terminal punctuation uniformity | `terminal-punctuation` | `statistical`, `all` | `ai-speak-patterns-2.md` |
-| `transition-density` | transition density | `transition-density` | `ryan`, `statistical`, `all` | `ai-speak-patterns-2.md` |
-| `transitions` | transitions | `transitions` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns-2.md` |
+| `sycophancy` | sycophancy | `sycophancy` | `default`, `ryan`, `technical`, `minimal`, `all` | `ai-speak-patterns-3.md` |
+| `terminal-punctuation` | terminal punctuation uniformity | `terminal-punctuation` | `statistical`, `all` | `ai-speak-patterns-3.md` |
+| `transition-density` | transition density | `transition-density` | `ryan`, `statistical`, `all` | `ai-speak-patterns-3.md` |
+| `transitions` | transitions | `transitions` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns-3.md` |
 | `undue-emphasis` | undue emphasis | `undue-emphasis` | `ryan`, `all` | `ai-speak-patterns-3.md` |
 | `vague-attribution` | vague attribution | `vague-attribution` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns-3.md` |
 | `vocabulary` | AI frequency words | `vocabulary` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns-3.md` |
@@ -44,13 +46,74 @@ Phrase patterns are case-insensitive. The left column holds the flagged text, th
 | `wordiness` | wordiness | `wordiness` | `ryan`, `ste`, `all` | `ai-speak-patterns-3.md` |
 | `ai-attribution` | AI attribution trailer | `ai-attribution` | `default`, `ryan`, `technical`, `minimal`, `git`, `all` | `ai-speak-patterns-3.md` |
 | `ai-identity` | AI author identity | `ai-identity` | `default`, `ryan`, `technical`, `minimal`, `git`, `all` | `ai-speak-patterns-3.md` |
-| `ai-tool-mention` | AI tool mention | `ai-tool-mention` | `default`, `ryan`, `technical`, `git`, `all` | `ai-speak-patterns-3.md` |
-| `benefit-tail` | benefit tail | `benefit-tail` | `ryan`, `technical`, `git`, `all` | `ai-speak-patterns-3.md` |
-| `canned-review` | canned review | `canned-review` | `default`, `ryan`, `technical`, `git`, `all` | `ai-speak-patterns-3.md` |
+| `ai-tool-mention` | AI tool mention | `ai-tool-mention` | `default`, `ryan`, `technical`, `git`, `all` | `ai-speak-patterns-4.md` |
+| `benefit-tail` | benefit tail | `benefit-tail` | `ryan`, `technical`, `git`, `all` | `ai-speak-patterns-4.md` |
+| `canned-review` | canned review | `canned-review` | `default`, `ryan`, `technical`, `git`, `all` | `ai-speak-patterns-4.md` |
 | `file-narration` | file narration | `file-narration` | `ryan`, `technical`, `git`, `all` | `ai-speak-patterns-4.md` |
 | `praise-sandwich` | praise sandwich | `praise-sandwich` | `ryan`, `git`, `all` | `ai-speak-patterns-4.md` |
+| `hidden-characters` | hidden characters | `hidden-characters` | `default`, `ryan`, `technical`, `git`, `all` | `ai-speak-patterns-4.md` |
 | `smart-punctuation` | smart punctuation | `smart-punctuation` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns-4.md` |
 | `unicode-glyphs` | unicode glyphs | `unicode-glyphs` | `default`, `ryan`, `technical`, `all` | `ai-speak-patterns-4.md` |
+
+## claude-tells
+
+Presets: `default`, `ryan`, `technical`, `all`. Source: Measured on 1.29M words of Opus 5.5 Claude Code replies against 1.13M words of npm READMEs and 87K words of pre-2023 commits; Anthropic's Opus 5.5 and Fable 5.1 prompting guides; Anthropic's Opus 5.5 prompting guide lists "an offer to carry on with something unless the user would prefer otherwise" as a habit to suppress; 1.93 per 10,000 words in Opus 5.5 replies, none in the baselines.
+
+Phrasing that Claude 5.x models write far more often than people do.
+
+| Flagged | Fix |
+|---|---|
+| Phrasing that Claude 5.x models write far more often than people do. | `branches = ["main","master","dev","develop","development","staging","stage","production","prod","release","trunk","next","beta","canary"]` |
+| `the doc admits`, `the code pretends`, `the test lies` | say what the text states: `the doc says X` |
+| `admits it`, `concedes as much` | say what the text states |
+| `Existing bug, not a regression` | cut the `not X` tail, the label already says it |
+| `the big migration`, `the huge refactor` | cut the size word, or give the size |
+| `covers this path`, `hits that path` | name the branch: the function, condition, or flag |
+| `on purpose` | put `intentionally` before the verb, or give the reason |
+| `, by design.`, `, as intended.` | cut the tag, or give the reason |
+| `, with your low call volume note` | put the aside in parentheses, or make it a clause |
+| `quietly` | cut it, or say what is not logged or reported |
+| `earns its keep`, `earns its place` | say what it does |
+| `Want me to ...?` or `Do you want me to ...?` at the end of the text | cut the offer, or name the step that needs approval |
+
+| Flagged (tier 2) | Fix |
+|---|---|
+| `a real bug`, `the real gap`, `the real story` | cut `real` |
+| `reads well`, `reads cleanly` | say what works |
+
+Flags a branch name in backticks after `from`, `into`, `onto`, `against`, or a similar word, or before `branch`. Prose files stay out of scope: docs often set branch names as code by convention. Set `options.branches` to match the repo's branch names.
+
+Every tier-1 row fired at most 0.02 times per 10,000 words in the README and commit baselines. The status-label row needs a verbless fragment at the start of a line or sentence, so `This is a known limitation, not a bug` stays with the `contrast` pack. The closing offer lives in `closing-offer.json` so it can be excluded alone.
+
+Fires only when the offer is the last sentence of the text. A question followed by a reason, such as `Do you want me to delete it? It has two unmerged commits.`, stays unflagged. A setup that asks before every test run can list `closing-offer` in `excludePacks`.
+
+## british-spelling
+
+Presets: `ryan`, `all`. Source: Measured on Claude Code transcripts: Opus 5.5 wrote `behaviour` in 31% of uses, `labelled` in 58%, and `grey` in 77%; npm READMEs used them in 11%, 20%, and 30%.
+
+British spellings in text that otherwise uses American English.
+
+| Flagged | Fix |
+|---|---|
+| `behaviour`, `behaviours`, `behavioural` | behavior |
+| `colour`, `colours`, `coloured` | color |
+| `favour`, `honour`, `neighbour`, `labour`, `flavour`, `humour`, `rumour`, `harbour`, `armour`, `vapour` | drop the `u`: `favor`, `honor`, `neighbor` |
+| `labelled`, `modelling`, `travelled`, `signalled`, `levelled`, `channelled` | one `l`: `labeled`, `modeling` |
+| `centre`, `metre`, `litre`, `fibre`, `theatre` | `-er`: `center`, `meter` |
+| `-ise` and `-isation` forms such as `normalise`, `initialised`, `organisation` | `-ize`, `-ization` |
+| `analyse`, `analysed`, `analysing` | `-yze`: `analyze` |
+| `grey`, `greys`, `greyed`, `greying` | gray |
+| `whilst` | while |
+| `amongst` | among |
+| `programme`, `programmes` | program |
+| `licence[ds]?` | license |
+| `defence`, `offence` | defense, offense |
+| `catalogue[ds]?` | catalog |
+| `artefact`, `artefacts` | artifact |
+| `spelt`, `learnt` | spelled, learned |
+| `per cent` | percent |
+
+A repo that writes British English lists `british-spelling` in `excludePacks`. `cancelled`, `judgement`, `acknowledgement`, `towards`, and `dialogue` are left out because American writers use them too. `analyses` is left out because it is also the plural of `analysis`. Elixir's `@behaviour` attribute sits in code, which the scan skips.
 
 ## chatbot
 
@@ -227,65 +290,3 @@ Qualifiers that leave the claim unowned.
 | `somewhat`, `to some extent` | cut, or measure |
 | `it could be argued`, `it could be said`, `it may be argued`, `it may be said`, `it might be argued`, `it might be said` | state the claim |
 | `potentially` (bare) | cut |
-
-## inflation
-
-Presets: `default`, `ryan`, `technical`, `all`. Source: avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules.
-
-Wording that makes a change sound larger than it is.
-
-| Flagged | Fix |
-|---|---|
-| `marks a significant`, `marks a major`, `marks a new`, `marks a turning` | state what happened |
-| `represents a significant`, `represents a major`, `represents a fundamental` | state what changed |
-| `a significant step forward`, `a major step towards`, `a bold step toward`, `a big step forward`, `step forward for` | state what changed |
-| `turning point`, `sea change`, `paradigm shift`, `game-changer`, `game-changing`, `watershed moment` | state what changed |
-| `groundbreaking` | name the prior art it beats |
-| `first of its kind` | cite the search |
-| `revolutionary`, `revolutionize`, `revolutionizes`, `revolutionized` | describe the change |
-| `the future of` | cut |
-| `unprecedented` | name the precedent, or cut |
-| `redefine the`, `redefine how`, `redefine what`, `redefines the`, `redefines how`, `redefines what`, `reshape the`, `reshapes the`, `reshaping the` | describe the change |
-| `real utility`, `actual value`, `genuine impact`, `true change`, `real results` | drop the adjective |
-| `despite challenges`, `despite these challenges`, `despite the challenges` | name the challenge |
-| `continues to thrive`, `remains resilient` | cite the number |
-
-## lexical-diversity
-
-Presets: `statistical`, `all`.
-
-Flags text that reuses the same words instead of varying vocabulary.
-
-| Flagged | Fix |
-|---|---|
-| Flags text that reuses the same words instead of varying vocabulary. | `minWords = 150`, `minRatio = 0.55`, `segment = 100`, `tailSegment = 50` |
-
-Mean segmental type-token ratio over 100-word segments. Direction of the academic signal is contested, so it stays out of the ryan preset.
-
-## negative-parallelism
-
-Presets: `default`, `ryan`, `technical`, `all`. Source: Wikipedia:Signs of AI writing, WikiProject AI Cleanup catchphrases, tropes.fyi, refine.so.
-
-A chain of two or more negated clauses resolved by one affirmation.
-
-| Flagged | Fix |
-|---|---|
-| `Not X. Not Y. Just Z.` | state the one claim |
-| `no X, no Y, just Z` | state the one claim |
-| `not X, not Y, but Z` | state the one claim |
-| `no X, no Y. Just Z.` | state the one claim |
-| `isn't X. It's not Y. It's Z.` | state the one claim |
-
-The contrast pack owns the single "not X, it's Y" pair. This pack fires only on two or more stacked negations before the resolution.
-
-## outline-conclusion
-
-Presets: `ryan`, `all`. Source: Wikipedia:Signs of AI writing (outline-like conclusions) and tropes.fyi fractal summaries.
-
-A closing paragraph that re-lists the section headings instead of adding a new fact.
-
-| Flagged | Fix |
-|---|---|
-| A closing paragraph that re-lists the section headings instead of adding a new fact. | `minWords = 300`, `minHeadings = 3`, `minOverlap = 3`, `minRatio = 0.6`, `smallDoc = 4`, `maxParagraphWords = 120` |
-
-Needs 300 words, three headings, a closing paragraph that echoes three section titles, and a restatement cue. A closing paragraph that adds a new fact passes.

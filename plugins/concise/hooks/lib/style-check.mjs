@@ -135,7 +135,7 @@ export function styleFindings(text, path, config, scope = "files", hook = null) 
       if (keep(at(hit.line), hit.match)) dictionary.push({ ...hit, line: at(hit.line) });
     }
     if (packs.length === 0) continue;
-    const hits = scanAiWriting(span.text, { packs, allow: resolved.allow, ctx: { path, scope }, problems: runtime });
+    const hits = scanAiWriting(span.text, { packs, allow: resolved.allow, ctx: { path, scope, raw: span.raw }, problems: runtime });
     for (const hit of hits) {
       if (keep(at(hit.line), hit.match)) aiWriting.push({ ...hit, line: at(hit.line) });
     }

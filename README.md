@@ -11,7 +11,7 @@ New here? Start with [plugins/concise/README.md](plugins/concise/README.md).
 - Comment blocks longer than 2 lines in `Write`, `Edit`, `MultiEdit`, and Codex `apply_patch` additions
 - New files longer than 300 lines
 - Inline `gh pr` and `gh issue` bodies with more than 1 prose paragraph or more than 3 sentences in a paragraph
-- Em dashes and 44 categories of AI writing patterns, both off until you turn them on
+- Em dashes and 47 categories of AI writing patterns, both off until you turn them on
 - Output from pytest, `go test`, npm test, Jest, and Vitest; each run's full output is kept in its own log under `$TMPDIR/concise-test-filter-<uid>/<session>/`, and the path is printed with the filtered output
 
 Structured GitHub bodies that use headings and lists are allowed. A denied call includes the exact limit and location. After 2 denied retries for the same target, Concise permits the next attempt and flags it.
@@ -71,7 +71,7 @@ Start a new omp session. omp loads the hooks as an extension at session start, s
 
 - [plugins/concise/README.md](plugins/concise/README.md): the entry point. Quick start, what each check does, the 8 presets, and the escape hatches.
 - [plugins/concise/docs/configuration.md](plugins/concise/docs/configuration.md): every config key with its default, the 5 config layers, `mode`, `allowList`, `bypass`, and logging.
-- [plugins/concise/docs/categories.md](plugins/concise/docs/categories.md): all 44 AI writing categories with an example, a fix, the presets, and the scopes.
+- [plugins/concise/docs/categories.md](plugins/concise/docs/categories.md): all 47 AI writing categories with an example, a fix, the presets, and the scopes.
 - [plugins/concise/docs/environment.md](plugins/concise/docs/environment.md): every `BEC_` variable and 3 worked scenarios, including a cloud agent with no config file.
 - [plugins/concise/docs/packs.md](plugins/concise/docs/packs.md): the pack file format, the 3 pattern kinds, `detect(text, ctx)`, and the validator and renderer commands.
 - [plugins/concise/docs/tools.md](plugins/concise/docs/tools.md): the `concise-config` CLI, the MCP tools, the settings skills, and the writing-sample tuner.

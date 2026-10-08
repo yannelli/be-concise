@@ -218,6 +218,17 @@ console.log("\npacks in the hooks (scope)");
   assertAllowed("a comments-scoped pack stays quiet in prose", run(CHECK_EDIT, writeEvent(c, "doc.md", "We frobnicate it.\n")));
 }
 
+console.log("\npacks in the hooks (code spans through ctx.raw)");
+
+{
+  const c = project({ categories: ["claude-tells"] });
+  const flagged = run(CHECK_BASH, bashEvent(c, "gh pr create --title x --body 'Open a PR from `staging` into `main`.'"));
+  assertDenied("a backticked branch name in a PR body is flagged", flagged);
+  includes("the flagged text keeps its backticks", flagged, "`staging`");
+  const files = "gh pr create --title x --body 'Move the helper from `config.ts` into `utils.ts`.'";
+  assertAllowed("a backticked file name stays quiet", run(CHECK_BASH, bashEvent(c, files)));
+}
+
 for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
 
 const entry = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
