@@ -1,6 +1,6 @@
 # Categories
 
-The `aiWriting` feature ships 44 categories. Each category is one pack file under `hooks/lib/patterns/`. This page lists every category, the presets that turn it on, and the scopes it runs in.
+The `aiWriting` feature ships 47 categories. Each category is one pack file under `hooks/lib/patterns/`, except `claude-tells`, which spans `claude-tells.json`, `closing-offer.json`, and `backtick-branches.mjs`. This page lists every category, the presets that turn it on, and the scopes it runs in.
 
 Pick categories with `features.aiWriting.preset`, or replace the preset list with `features.aiWriting.categories`. Both keys are described in [configuration.md](configuration.md). The flagged text and the replacement for every pattern are in [../skills/concise-rules/references/ai-speak-patterns.md](../skills/concise-rules/references/ai-speak-patterns.md).
 
@@ -12,7 +12,9 @@ Scopes across this group: `files`, `comments`, `gh`, `commit`, `reply`. The scop
 
 | id | What it catches | Flagged example | Fix | Presets | Scopes |
 |---|---|---|---|---|---|
+| `british-spelling` | British spellings in text that otherwise uses American English. | `behaviour` | use the American spelling | `ryan`, `all` | `files`, `comments`, `gh`, `commit`, `reply` |
 | `chatbot` | Assistant boilerplate that belongs to a chat window. | `Great question` | delete the line | `default`, `ryan`, `technical`, `minimal`, `all` | `files`, `comments`, `gh`, `commit`, `reply` |
+| `claude-tells` | Phrasing that Claude 5.x models write far more often than people do. | `still not committed, on purpose` | `still intentionally not committed` | `default`, `ryan`, `technical`, `all` | `files`, `comments`, `gh`, `commit`, `reply` |
 | `closers` | Endings that restate the text instead of stopping. | `In conclusion` | end on the last fact | `default`, `ryan`, `technical`, `all` | `files`, `comments`, `gh`, `commit`, `reply` |
 | `contrast` | Frames that define the subject by what it is not. | `it's not a config change, it's a rewrite` | state the positive claim | `default`, `ryan`, `technical`, `all` | `files`, `comments`, `gh`, `commit`, `reply` |
 | `copula` | Verbs that interpret the subject instead of naming what it does. | `serves as` | say what it does | `ryan`, `ste`, `all` | `files`, `comments`, `gh`, `commit`, `reply` |
@@ -61,10 +63,11 @@ Scopes across this group: `comments`, `gh`, `commit`, `command`, `reply`. The sc
 
 ## Punctuation categories
 
-Scopes across this group: `comments`, `gh`, `commit`, `command`, `reply`. The scope column below gives the scopes for each category.
+Scopes across this group: `files`, `comments`, `gh`, `commit`, `command`, `reply`. The scope column below gives the scopes for each category.
 
 | id | What it catches | Flagged example | Fix | Presets | Scopes |
 |---|---|---|---|---|---|
+| `hidden-characters` | Invisible or look-alike characters that model output and chat UIs leave in text. | a zero-width space | remove the character | `default`, `ryan`, `technical`, `git`, `all` | `files`, `comments`, `gh`, `commit`, `command`, `reply` |
 | `smart-punctuation` | Curly quotes and the ellipsis character typical of text pasted from a chat UI. | a curly apostrophe | use a straight apostrophe | `default`, `ryan`, `technical`, `all` | `comments`, `commit`, `gh`, `command`, `reply` |
 | `unicode-glyphs` | Arrows, box drawing, dingbats, and geometric symbols used in place of plain ASCII or words. | an arrow character | use `->` | `default`, `ryan`, `technical`, `all` | `commit`, `gh`, `command`, `reply` |
 

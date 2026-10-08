@@ -1,6 +1,6 @@
 # Pattern packs
 
-Every category is one pack file. The built-in packs live under `hooks/lib/patterns/`: `ai/` for writing patterns, `git/` for commit, PR, and review checks, `prose/` for punctuation. A project adds its own packs the same way.
+Most categories are one pack file. A pack whose `category` is a string joins that category, as `closing-offer.json` and `backtick-branches.mjs` join `claude-tells`. The built-in packs live under `hooks/lib/patterns/`: `ai/` for writing patterns, `git/` for commit, PR, and review checks, `prose/` for punctuation. A project adds its own packs the same way.
 
 A `.mjs` pack executes code from the checkout. The hook imports it, so its top-level code and its `detect` function run in the hook process with your permissions on every tool call. Read a `.mjs` pack before you add it. A `.json` pack holds data only.
 

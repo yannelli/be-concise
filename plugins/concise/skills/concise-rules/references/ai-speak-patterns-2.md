@@ -5,6 +5,68 @@ Built from the packs in `hooks/lib/patterns`. Each section names its own source.
 
 The category index is in `ai-speak-patterns.md`.
 
+## inflation
+
+Presets: `default`, `ryan`, `technical`, `all`. Source: avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules.
+
+Wording that makes a change sound larger than it is.
+
+| Flagged | Fix |
+|---|---|
+| `marks a significant`, `marks a major`, `marks a new`, `marks a turning` | state what happened |
+| `represents a significant`, `represents a major`, `represents a fundamental` | state what changed |
+| `a significant step forward`, `a major step towards`, `a bold step toward`, `a big step forward`, `step forward for` | state what changed |
+| `turning point`, `sea change`, `paradigm shift`, `game-changer`, `game-changing`, `watershed moment` | state what changed |
+| `groundbreaking` | name the prior art it beats |
+| `first of its kind` | cite the search |
+| `revolutionary`, `revolutionize`, `revolutionizes`, `revolutionized` | describe the change |
+| `the future of` | cut |
+| `unprecedented` | name the precedent, or cut |
+| `redefine the`, `redefine how`, `redefine what`, `redefines the`, `redefines how`, `redefines what`, `reshape the`, `reshapes the`, `reshaping the` | describe the change |
+| `real utility`, `actual value`, `genuine impact`, `true change`, `real results` | drop the adjective |
+| `despite challenges`, `despite these challenges`, `despite the challenges` | name the challenge |
+| `continues to thrive`, `remains resilient` | cite the number |
+
+## lexical-diversity
+
+Presets: `statistical`, `all`.
+
+Flags text that reuses the same words instead of varying vocabulary.
+
+| Flagged | Fix |
+|---|---|
+| Flags text that reuses the same words instead of varying vocabulary. | `minWords = 150`, `minRatio = 0.55`, `segment = 100`, `tailSegment = 50` |
+
+Mean segmental type-token ratio over 100-word segments. Direction of the academic signal is contested, so it stays out of the ryan preset.
+
+## negative-parallelism
+
+Presets: `default`, `ryan`, `technical`, `all`. Source: Wikipedia:Signs of AI writing, WikiProject AI Cleanup catchphrases, tropes.fyi, refine.so.
+
+A chain of two or more negated clauses resolved by one affirmation.
+
+| Flagged | Fix |
+|---|---|
+| `Not X. Not Y. Just Z.` | state the one claim |
+| `no X, no Y, just Z` | state the one claim |
+| `not X, not Y, but Z` | state the one claim |
+| `no X, no Y. Just Z.` | state the one claim |
+| `isn't X. It's not Y. It's Z.` | state the one claim |
+
+The contrast pack owns the single "not X, it's Y" pair. This pack fires only on two or more stacked negations before the resolution.
+
+## outline-conclusion
+
+Presets: `ryan`, `all`. Source: Wikipedia:Signs of AI writing (outline-like conclusions) and tropes.fyi fractal summaries.
+
+A closing paragraph that re-lists the section headings instead of adding a new fact.
+
+| Flagged | Fix |
+|---|---|
+| A closing paragraph that re-lists the section headings instead of adding a new fact. | `minWords = 300`, `minHeadings = 3`, `minOverlap = 3`, `minRatio = 0.6`, `smallDoc = 4`, `maxParagraphWords = 120` |
+
+Needs 300 words, three headings, a closing paragraph that echoes three section titles, and a restatement cue. A closing paragraph that adds a new fact passes.
+
 ## overgeneralization
 
 Presets: `default`, `ryan`, `technical`, `all`. Source: Wikipedia:Signs of AI writing and WikiProject AI Cleanup catchphrases.
@@ -228,65 +290,3 @@ A significance claim with no evidence behind it.
 | `speaks volumes about` | state the fact |
 | `carries significant weight`, `carries considerable weight`, `carries real weight` | name the weight, or cut |
 | `highlighting its importance` | state the fact, drop the tail |
-
-## sycophancy
-
-Presets: `default`, `ryan`, `technical`, `minimal`, `all`. Source: avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules.
-
-Praise aimed at the reader instead of the work.
-
-| Flagged | Fix |
-|---|---|
-| `You're right` (sentence-initial) | cut, state the fix |
-| `you're absolutely right` | cut |
-| `what a great`, `what a fantastic`, `what a wonderful` | cut |
-| `Great point`, `Great idea`, `Great catch`, `Excellent observation`, `Excellent suggestion` | cut |
-| `That's a great point`, `That's an excellent point`, `That's a fantastic idea`, `That's a really good observation`, `That's an insightful observation` | cut |
-| `I completely understand`, `I completely agree`, `I totally understand`, `I totally agree` | cut |
-| `thank you for sharing`, `thank you for bringing this`, `thank you for pointing`, `thank you for the clarification`, `thank you for your patience` | cut |
-| `thanks for sharing`, `thanks for pointing`, `thanks for flagging` | cut |
-| `You raise a great point`, `You raise an excellent point`, `You raise a good point`, `You raise a valid point`, `You raise an important point` | cut |
-| `I apologize for the confusion`, `I apologize for the oversight`, `I apologize for the inconvenience`, `I apologize for any confusion`, `I apologize for any oversight`, `I apologize for any inconvenience`, `apologies for the confusion`, `my apologies` | state the correction |
-
-## terminal-punctuation
-
-Presets: `statistical`, `all`.
-
-Flags list items that all carry a trailing period even though they read as short fragments.
-
-| Flagged | Fix |
-|---|---|
-| Flags list items that all carry a trailing period even though they read as short fragments. | `minWords = 0`, `minItems = 8`, `minBlocks = 2`, `maxItemWords = 8` |
-
-List items only. Every declarative sentence ends in a period, so sentence-level uniformity carries no signal.
-
-## transition-density
-
-Presets: `ryan`, `statistical`, `all`.
-
-Flags text where too many sentences open on a transition or connector word.
-
-| Flagged | Fix |
-|---|---|
-| Flags text where too many sentences open on a transition or connector word. | `minWords = 150`, `minSentences = 8`, `maxDensity = 0.3` |
-
-Document-wide connector rate. The transitions pack flags single openers; this one flags the habit.
-
-## transitions
-
-Presets: `default`, `ryan`, `technical`, `all`. Source: avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules.
-
-Connectors and scene setters that add length without adding a fact.
-
-| Flagged | Fix |
-|---|---|
-| `Moreover`, `Furthermore`, `Additionally` (sentence-initial) | cut, or "and", "also" |
-| `Notably`, `Importantly`, `Interestingly`, `Surprisingly` (sentence-initial) | cut |
-| `in today's` | name the context or cut |
-| `in an era where`, `in an era of` | cut |
-| `in the evolving world of`, `in the evolving field of`, `in the changing world of`, `in the changing field of`, `in the rapidly evolving world of`, `in the rapidly evolving field of`, `in the rapidly changing world of`, `in the rapidly changing field of` | lead with the point |
-| `worth noting`, `it's worth noting`, `it is worth noting` | state the fact |
-| `when it comes to` | name the thing |
-| `here's what's interesting`, `here's what caught my eye`, `here's what stood out`, `here's the interesting part` | state the fact |
-| `that said`, `that being said` | cut, or "but" |
-| `Certainly`, `Undoubtedly`, `Without a doubt` | cut |

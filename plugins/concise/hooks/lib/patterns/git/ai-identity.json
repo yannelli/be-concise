@@ -5,7 +5,7 @@
   "source": "Group G research: claude-code#72477, VS Code #314311, Cursor forum #168258, gemini-cli #11447",
   "presets": ["default", "ryan", "technical", "minimal", "git", "all"],
   "scope": ["command"],
-  "notes": "Bare first names such as `Claude`, `Devin`, and `Gemini` sit at tier 2, so a person who sets their own identity with a personal email produces one hit and stays quiet. A repo that commits as a bot on purpose lists `ai-identity` in `excludePacks`.",
+  "notes": "Bare first names such as `Claude`, `Devin`, and `Gemini` sit at tier 2, so a person who sets their own identity with a personal email produces one hit and stays quiet. A repo that intentionally commits as a bot lists `ai-identity` in `excludePacks`.",
   "patterns": [
     { "regex": "--author=(['\"])[^'\"]*(?:Claude Code|OpenAI Codex|GitHub Copilot|Cursor Agent|OpenHands)[^'\"]*\\1", "fix": "use a human author name", "show": "`--author=` naming an AI tool" },
     { "regex": "--author=(['\"])[^'\"]*(?:noreply@anthropic\\.com|noreply@openai\\.com|codex@openai\\.com|copilot@github\\.com|cursoragent@cursor\\.com|openhands@all-hands\\.dev)[^'\"]*\\1", "fix": "use a human email address", "show": "`--author=` holding an AI tool email" },

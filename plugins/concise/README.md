@@ -88,7 +88,7 @@ To keep it, send the identical write again to confirm. To fix it, read <plugin>/
 | File length | A new file over 300 lines, on `Write` or `*** Add File` | `[concise] /tmp/demo/big.js would be 305 lines (limit 300).` |
 | PR and issue bodies | A `gh` body over 1 prose paragraph, or a paragraph over 3 sentences | `[concise] PR/issue body is too verbose: a paragraph has 4 sentences (limit 3)` |
 | Em dashes | `U+2014`, plus `U+2013` when `enDash` is true, plus `--` between word characters when `doubleHyphen` is true | `The parser runs first — then it rejects the file.` |
-| AI writing patterns | 44 categories of phrasing, commit hygiene, punctuation, and text statistics | `We delve into the parser.` |
+| AI writing patterns | 47 categories of phrasing, commit hygiene, punctuation, and text statistics | `We delve into the parser.` |
 | Dictionary | Terms you list in `features.dictionary.entries` | `[concise:dictionary:blacklist] 1 match at line 3: "blacklisted" (denylist).` |
 
 A bulleted `## Summary` body is never flagged as a verbose PR body. Only unstructured prose is.
@@ -110,7 +110,7 @@ After 2 denied retries on the same target, the hook allows the action and flags 
 | `minimal` | A team that only wants chat boilerplate gone | 4 categories: `chatbot`, `sycophancy`, `ai-identity`, and `ai-attribution`. |
 | `git` | Commit messages, PR bodies, and reviews | 7 commit, PR, and review categories. |
 | `statistical` | A writing audit over long documents | 10 text statistics categories. |
-| `all` | Every rule, `ste` included | 44 categories. |
+| `all` | Every rule, `ste` included | 47 categories. |
 
 Pick one:
 
@@ -128,14 +128,14 @@ Setting `features.aiWriting.categories` to a list of category ids replaces the p
 
 ## Categories
 
-The 44 categories fall into 5 groups.
+The 47 categories fall into 5 groups.
 
 | Group | Count | Flagged example | Fix |
 |---|---|---|---|
-| Phrase categories | 14 | `In conclusion` (`closers`) | End on the last fact. |
+| Phrase categories | 16 | `In conclusion` (`closers`) | End on the last fact. |
 | Rhetorical categories | 11 | `studies show` (`vague-attribution`) | Cite the study. |
 | Commit and review categories | 7 | `Co-authored-by: Claude` (`ai-attribution`) | Drop the trailer. |
-| Punctuation categories | 2 | an arrow character (`unicode-glyphs`) | Use `->`. |
+| Punctuation categories | 3 | an arrow character (`unicode-glyphs`) | Use `->`. |
 | Text statistics categories | 10 | passive voice over 30% of sentences (`passive-voice`) | Name the actor. |
 
 The full table, with every category id, its presets, and the scopes it runs in, is in [docs/categories.md](docs/categories.md). The flagged text and the replacement for every pattern are in [skills/concise-rules/references/ai-speak-patterns.md](skills/concise-rules/references/ai-speak-patterns.md).

@@ -1,0 +1,20 @@
+{
+  "id": "hidden-characters",
+  "feature": "aiWriting",
+  "category": { "id": "hidden-characters", "label": "hidden characters", "description": "Invisible or look-alike characters that model output and chat UIs leave in text.", "tags": ["punctuation", "watermark"] },
+  "source": "Opus 5.5 replies (U+2011 at 0.33 per 10,000 words), Microsoft known issue on LLM hyphens (Apr 2026), OpenAI U+202F reports (2025), Trojan Source bidi controls, Wikipedia:Signs of AI writing",
+  "presets": ["default", "ryan", "technical", "git", "all"],
+  "scope": ["files", "comments", "gh", "commit", "command", "reply"],
+  "notes": "Anthropic's text watermark adds no characters, so this pack cannot see it. U+00A0 is left out: npm READMEs carry it 5.6 times per 10,000 words. A zero-width joiner inside an emoji sequence and tag characters after the black flag (subdivision flags) stay unflagged. A right-to-left project lists `hidden-characters` in `excludePacks` or drops the bidi row with its own pack.",
+  "patterns": [
+    { "regex": "[\\u200B\\u200C\\u2060\\u180E]", "flags": "gu", "fix": "remove the zero-width character", "show": "a zero-width space, zero-width non-joiner, word joiner, or Mongolian vowel separator" },
+    { "regex": "(?<!\\p{Extended_Pictographic}[\\u{1F3FB}-\\u{1F3FF}\\uFE0F]?)\\u200D|\\u200D(?!\\p{Extended_Pictographic})", "flags": "gu", "fix": "remove the zero-width joiner", "show": "a zero-width joiner outside an emoji sequence" },
+    { "regex": "(?<=[\\s\\S])\\uFEFF", "flags": "gu", "fix": "remove the byte order mark", "show": "a byte order mark after the first character" },
+    { "regex": "[\\u00AD\\u2011]", "flags": "gu", "fix": "use `-`, or remove the soft hyphen", "show": "a soft hyphen or non-breaking hyphen" },
+    { "regex": "[\\u202F\\u2007]", "flags": "gu", "fix": "use a plain space", "show": "a narrow no-break space or figure space" },
+    { "regex": "(?<!\\u{1F3F4}[\\u{E0020}-\\u{E007E}]*)[\\u{E0000}-\\u{E007F}]", "flags": "gu", "fix": "remove the tag character, it can hide text", "show": "a Unicode tag character" },
+    { "regex": "[\\uFE00-\\uFE0D\\u{E0100}-\\u{E01EF}]", "flags": "gu", "fix": "remove the variation selector, it can hide data", "show": "a variation selector other than the emoji and text selectors" },
+    { "regex": "[\\u202A-\\u202E\\u2066-\\u2069\\u200E\\u200F]", "flags": "gu", "fix": "remove the bidi control", "show": "a bidirectional control character" },
+    { "regex": "cite(?:turn\\d+(?:search|news|view|file|image)\\d+)+|:?contentReference\\[oaicite:\\d+\\](?:\\{index=\\d+\\})?", "fix": "remove the citation residue", "show": "`citeturn0search0`, `contentReference[oaicite:0]`" }
+  ]
+}

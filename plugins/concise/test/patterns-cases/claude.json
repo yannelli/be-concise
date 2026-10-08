@@ -1,0 +1,30 @@
+{
+  "positive": {
+    "claude-tells": "The big migration can lose call data during the deploy.",
+    "british-spelling": "The plugin falls back to the old behaviour.",
+    "hidden-characters": "Test intake with a made\u2011up case."
+  },
+  "nearMiss": {
+    "claude-tells": "The migration can lose call data during the deploy.",
+    "british-spelling": "The plugin falls back to the old behavior.",
+    "hidden-characters": "Test intake with a made-up case."
+  },
+  "presets": {
+    "default": [
+      "claude-tells",
+      "hidden-characters"
+    ],
+    "ryan": [
+      "claude-tells",
+      "british-spelling",
+      "hidden-characters"
+    ],
+    "technical": [
+      "claude-tells",
+      "hidden-characters"
+    ],
+    "git": [
+      "hidden-characters"
+    ]
+  }
+}

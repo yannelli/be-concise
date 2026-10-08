@@ -1,6 +1,6 @@
 ---
 name: concise-tune
-description: Tune the concise plugin settings to match samples of the user's own writing. Use when the user shares writing samples, asks concise to match their style, or says concise flags text they write on purpose.
+description: Tune the concise plugin settings to match samples of the user's own writing. Use when the user shares writing samples, asks concise to match their style, or says concise flags text they write intentionally.
 ---
 
 # Tune concise from writing samples
