@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdir, mkdtemp, realpath, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { configuration, saveConfiguration, validateConfig, validateFilter } from "../plugins/concise/web/configuration.mjs";
 
 async function fixture(t) {
@@ -30,15 +30,35 @@ test("validation rejects malformed values for each typed setting", () => {
   assert.doesNotThrow(() => validateConfig({ log: { path: null } }));
 });
 
-test("configuration lists XDG and override layers and hides token variables", async (t) => {
+test("configuration lists XDG and BEC_CONFIG_PATH layers and hides token variables", async (t) => {
   const { root, cwd, env } = await fixture(t);
   const xdg = join(root, "xdg");
   const state = configuration(cwd, { ...env, XDG_CONFIG_HOME: xdg, BEC_CONFIG_PATH: "custom.json", BEC_MONITOR_TOKEN: "secret", BEC_SOFT_FAIL: "0" });
   const layer = (id) => state.layers.find((item) => item.id === id);
   assert.equal(layer("user-xdg").path, join(xdg, "concise", "concise.json"));
-  assert.equal(layer("project-override").path, join(cwd, "custom.json"));
-  assert.equal(layer("project-override").active, true);
+  assert.deepEqual(state.layers.map((item) => item.id), ["env-config", "user-xdg", "user", "user-claude", "user-codex", "project-claude", "project-codex"]);
+  assert.equal(layer("env-config").path, join(cwd, "custom.json"));
+  assert.equal(layer("env-config").label, "BEC_CONFIG_PATH");
+  assert.equal(layer("env-config").active, false);
   assert.deepEqual(state.environment, { BEC_CONFIG_PATH: "custom.json", BEC_SOFT_FAIL: "0" });
+});
+
+test("layers follow the merge order and list a shared BEC_CONFIG_PATH file once", async (t) => {
+  const { root, cwd, env } = await fixture(t);
+  const write = async (path) => { await mkdir(dirname(path), { recursive: true }); await writeFile(path, "{}"); return path; };
+  const user = await write(join(root, "home", ".config", "concise", "concise.json"));
+  await write(join(cwd, ".claude", "concise.json"));
+  await write(join(cwd, "custom.json"));
+  const active = (extra) => configuration(cwd, { ...env, ...extra }).layers.filter((item) => item.active).map((item) => item.id);
+  assert.deepEqual(active({ BEC_CONFIG_PATH: "custom.json" }), ["env-config", "user", "project-claude"]);
+  assert.deepEqual(active({ BEC_CONFIG_PATH: user }), ["user", "project-claude"]);
+  assert.deepEqual(active({ BEC_CONFIG_PATH: "custom.json", BEC_CONFIG_PATH_ONLY: "1" }), ["env-config"]);
+  const claude = await write(join(root, "home", ".claude", "concise.json"));
+  const state = configuration(cwd, { ...env, BEC_CONFIG_PATH: claude });
+  assert.deepEqual(state.layers.map((item) => [item.id, item.active]).slice(0, 4),
+    [["env-config", true], ["user", true], ["user-codex", false], ["project-claude", true]]);
+  const missing = configuration(cwd, { ...env, BEC_CONFIG_PATH: ".codex/concise.json" }).layers.map((item) => item.id);
+  assert.deepEqual(missing, ["user", "user-claude", "user-codex", "project-claude", "project-codex"]);
 });
 
 test("unreadable layers report their error and refuse saves", async (t) => {

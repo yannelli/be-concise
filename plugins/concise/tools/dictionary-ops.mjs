@@ -8,7 +8,6 @@ const object = (value) => value !== null && typeof value === "object" && !Array.
 const LIST_FIELDS = { hooks: HOOKS, scopes: SCOPES };
 
 function layerEntries(layer) {
-  if (!layer.exists) return [];
   try {
     const entries = readValue(JSON.parse(layer.text), "features.dictionary.entries");
     return Array.isArray(entries) ? entries : [];

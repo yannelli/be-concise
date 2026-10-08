@@ -1,8 +1,8 @@
 import { existsSync, readFileSync, realpathSync, statSync, mkdirSync, writeFileSync, renameSync, rmSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
-import { defaultConfig, loadConfig, projectConfigPath, userConfigPath } from "../hooks/lib/config.mjs";
-import { readEnv, parseSize } from "../hooks/lib/env.mjs";
+import { configFiles, defaultConfig, loadConfig } from "../hooks/lib/config.mjs";
+import { parseSize } from "../hooks/lib/env.mjs";
 import { entryProblem } from "../hooks/lib/dictionary.mjs";
 
 export const problem = (message, status = 400) => Object.assign(new Error(message), { status });
@@ -64,22 +64,24 @@ function layer(id, label, path, active = false) {
 
 export function configuration(cwd, env) {
   const home = env.HOME || env.USERPROFILE;
-  const user = userConfigPath(env);
-  const project = projectConfigPath(cwd, readEnv(env));
-  const candidates = [
+  const files = configFiles(cwd, env);
+  const others = [
     ...(env.XDG_CONFIG_HOME ? [["user-xdg", "User (XDG)", join(env.XDG_CONFIG_HOME, "concise", "concise.json")]] : []),
     ...(home ? [
       ["user", "User", join(home, ".config", "concise", "concise.json")],
       ["user-claude", "User (Claude)", join(home, ".claude", "concise.json")],
       ["user-codex", "User (Codex)", join(home, ".codex", "concise.json")],
     ] : []),
-    ...(readEnv(env).configPath ? [["project-override", "Project (BEC_CONFIG_PATH)", resolve(cwd, readEnv(env).configPath)]] : []),
     ["project-claude", "Project (Claude)", join(cwd, ".claude", "concise.json")],
     ["project-codex", "Project (Codex)", join(cwd, ".codex", "concise.json")],
   ];
+  // The BEC_CONFIG_PATH file comes first, as it loads first. A missing file yields its path to a user or project id.
+  const ownLayer = files.env && (existsSync(files.env) || !others.some(([, , path]) => path === files.env));
+  const candidates = [...(ownLayer ? [["env-config", "BEC_CONFIG_PATH", files.env]] : []), ...others];
+  const loaded = [files.env, files.user, files.project];
   const seen = new Set();
   const layers = candidates.filter(([, , path]) => !seen.has(path) && seen.add(path)).map(([id, label, path]) =>
-    layer(id, label, path, path === user || path === (project ? resolve(cwd, project) : null)));
+    layer(id, label, path, loaded.includes(path) && existsSync(path)));
   const filterLayers = home ? ["claude", "codex"].map((host) =>
     layer(`filter-${host}`, `Test filter (${host})`, join(home, `.${host}`, "test-filter.conf"), true)) : [];
   return { defaults: defaultConfig(), effective: loadConfig(cwd, env), layers, filterLayers,

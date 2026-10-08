@@ -141,6 +141,16 @@ test("playground uses the config snapshot and isolates user environment, logging
   assert.equal(existsSync(shellMarker), false);
 });
 
+test("playground previews ignore the project config file", async (t) => {
+  const cwd = await fixture(t);
+  const projectLog = join(cwd, "project.log");
+  await mkdir(join(cwd, ".claude"));
+  await writeFile(join(cwd, ".claude", "concise.json"), JSON.stringify({ features: { emDash: { enabled: false } }, log: { enabled: true, path: projectLog } }));
+  const result = await runTest({ cwd, config: dashConfig(), text: "This \u2014 wording." });
+  assert.equal(result.hooks[0].decision, "deny");
+  assert.equal(existsSync(projectLog), false);
+});
+
 test("playground rejects unknown session IDs and replaces raw session and cwd fields", async (t) => {
   const cwd = await fixture(t);
   await assert.rejects(runTest({ cwd, session: "../../outside" }), /Unknown playground session/);

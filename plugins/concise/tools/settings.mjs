@@ -47,8 +47,6 @@ export function resolveLayer(state, name = "project", cwd = process.cwd()) {
   const active = group.find((layer) => layer.active);
   if (active) return active;
   if (name === "user") return group[0];
-  const override = group.find((layer) => layer.id === "project-override");
-  if (override) return override;
   const codexOnly = existsSync(join(cwd, ".codex")) && !existsSync(join(cwd, ".claude"));
   return group.find((layer) => layer.id === (codexOnly ? "project-codex" : "project-claude"));
 }

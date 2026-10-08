@@ -9,12 +9,13 @@ Value formats:
 - Path lists split on the platform path delimiter (`:` on Linux and macOS, `;` on Windows).
 - A `BEC_ALLOW_*` or `BEC_BYPASS_*` value that starts with `[` is parsed as a JSON array, and any other value as a comma list.
 
-The layer column refers to the 5 config layers in [configuration.md](configuration.md). Layer 2 sits under the user file and the project file. Layer 5 sits over both.
+The layer column refers to the 5 config layers in [configuration.md](configuration.md). Layer 2 sits under the `BEC_CONFIG_PATH` file, the user file, and the project file. Layer 5 sits over all three.
 
 | Variable | Value | Effect | Layer |
 | --- | --- | --- | --- |
 | `BEC_CONFIG_JSON` | JSON object | a whole config layer | 2 |
-| `BEC_CONFIG_PATH` | path | the project config file to read | 4 |
+| `BEC_CONFIG_PATH` | path | a config file read under the user file and the project file; a relative path resolves against the cwd | 3 |
+| `BEC_CONFIG_PATH_ONLY` | boolean | skips the user file and the project file, so only the `BEC_CONFIG_PATH` file applies | 3, 4 |
 | `BEC_FEATURE_ENABLE` | id list | turns features and checks on | 2 |
 | `BEC_FEATURE_DISABLE` | id list | turns features and checks off | 2 |
 | `BEC_FEATURE_ALWAYS_ENABLE` | id list | turns features and checks on over the config files | 5 |

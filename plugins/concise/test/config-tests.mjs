@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { delimiter, dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { ok, bad, summary } from "./lib.mjs";
-import { loadConfig, defaultConfig } from "../hooks/lib/config.mjs";
+import { configFiles, loadConfig, defaultConfig } from "../hooks/lib/config.mjs";
 import { readEnv, parseSize } from "../hooks/lib/env.mjs";
 
 const dirs = [];
@@ -66,6 +66,7 @@ console.log("config: env parsing");
   const vars = readEnv(env);
   eq("BEC_CONFIG_JSON parses to an object", vars.configJson, { maxRetries: 4 });
   eq("BEC_CONFIG_PATH kept as a path", vars.configPath, "/tmp/x.json");
+  eq("BEC_CONFIG_PATH_ONLY is off when unset", vars.configPathOnly, false);
   eq("BEC_FEATURE_ENABLE splits on commas", vars.featureEnable, ["aiWriting", "emDash"]);
   eq("BEC_FEATURE_DISABLE parses", vars.featureDisable, ["comments"]);
   eq("BEC_FEATURE_ALWAYS_ENABLE parses", vars.alwaysEnableFeatures, ["prBody"]);
@@ -119,9 +120,31 @@ console.log("\nconfig: layers");
   eq("env overrides set softFail", config.softFail, true);
   eq("no problems on clean layers", config.problems, []);
 
-  const pinned = writeJson(join(project, "other.json"), { maxFileLines: 55 });
-  eq("BEC_CONFIG_PATH replaces the project file", loadConfig(project, { ...env, BEC_CONFIG_PATH: pinned }).maxFileLines, 55);
+  const pinned = writeJson(join(project, "other.json"), { maxFileLines: 55, maxCommentLines: 3, maxRetries: 6 });
+  const withPath = loadConfig(project, { ...env, BEC_CONFIG_PATH: pinned });
+  eq("the project file merges over the BEC_CONFIG_PATH file", withPath.maxFileLines, 120);
+  eq("the user file merges over the BEC_CONFIG_PATH file", withPath.maxCommentLines, 5);
+  eq("the BEC_CONFIG_PATH file merges over BEC_CONFIG_JSON", withPath.maxRetries, 6);
+  eq("a relative BEC_CONFIG_PATH resolves against the cwd", loadConfig(project, { BEC_CONFIG_PATH: "other.json" }).maxRetries, 6);
+  const only = loadConfig(project, { ...env, BEC_CONFIG_PATH: pinned, BEC_CONFIG_PATH_ONLY: "1" });
+  eq("BEC_CONFIG_PATH_ONLY skips the user and project files", [only.maxFileLines, only.maxCommentLines], [55, 3]);
   eq("loadConfig with one argument still reads the project file", loadConfig(project).maxFileLines, 120);
+}
+
+{
+  const home = temp("concise-same-home-");
+  const project = temp("concise-same-proj-");
+  const user = writeJson(join(home, ".config", "concise", "concise.json"), { features: { aiWriting: { enablePatterns: ["filler"] } } });
+  writeJson(join(project, ".claude", "concise.json"), { features: { aiWriting: { disablePatterns: ["filler"] } } });
+  const env = { HOME: home, BEC_CONFIG_PATH: user };
+  eq("a project file merges over a BEC_CONFIG_PATH that names the user file", ai(loadConfig(project, env)).enablePatterns, []);
+  eq("a BEC_CONFIG_PATH that names the user file loads in the user place", configFiles(project, env).env, null);
+  eq("a missing BEC_CONFIG_PATH is still reported as the env file", configFiles(project, { BEC_CONFIG_PATH: "gone.json" }).env, join(project, "gone.json"));
+  const broken = temp("concise-same-broken-");
+  const local = writeJson(join(broken, ".claude", "concise.json"), "{ not json");
+  symlinkSync(local, join(broken, "linked.json"));
+  const problems = loadConfig(broken, { BEC_CONFIG_PATH: "linked.json" }).problems.map((problem) => problem.source);
+  eq("a BEC_CONFIG_PATH link to the project file loads that file once", problems, [local]);
 }
 
 console.log("\nconfig: features and patterns");
