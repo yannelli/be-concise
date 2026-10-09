@@ -217,7 +217,7 @@ export async function togglePack({ cwd, env, id, enabled, target: targetId = "pr
   return { id, enabled, active, target: targetId, layer, warning };
 }
 
-function compareVersions(a, b) {
+export function compareVersions(a, b) {
   const left = a.split(".").map(Number);
   const right = b.split(".").map(Number);
   for (let i = 0; i < 3; i += 1) {
@@ -227,8 +227,10 @@ function compareVersions(a, b) {
   return 0;
 }
 
+export const pluginVersion = () => JSON.parse(readFileSync(resolve(HERE, "../.claude-plugin/plugin.json"), "utf8")).version;
+
 async function checkRelease(releasesUrl) {
-  const version = JSON.parse(readFileSync(resolve(HERE, "../.claude-plugin/plugin.json"), "utf8")).version;
+  const version = pluginVersion();
   const result = { version, latest: null, url: null, updateAvailable: false, error: null };
   try {
     const release = JSON.parse(await fetchText(new URL(releasesUrl), "application/vnd.github+json"));

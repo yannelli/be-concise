@@ -1,19 +1,32 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { startServer } from "../plugins/concise/web/server.mjs";
+import { update } from "../plugins/concise/web/update.mjs";
 
 const help = `Usage: concise-web [--cwd PATH | --all] [--port PORT] [--remote] [--no-open]
+       concise-web update [--check]
 
 Starts the Concise configuration, playground, and live hook console.
 Defaults: current directory, available localhost port, open browser.
 Use --all to serve every project the hooks have registered under ~/.config/concise/projects.
 Use --remote to accept this machine's IPv4 addresses and Tailscale hostnames.
 
+update installs the latest npm release, updates the plugin in Claude Code,
+Codex, and omp, and restarts consoles that run as a systemd user service.
+Use --check to report what would change without changing it.
+
 From the repository: node bin/concise-web.mjs
 Install from npm: npm install -g @yannelli/be-concise
 `;
 
 function parse(args) {
+  if (args[0] === "update") {
+    for (const arg of args.slice(1)) {
+      if (arg === "--help" || arg === "-h") return { help: true };
+      if (arg !== "--check") throw new Error(`Unknown option: ${arg}`);
+    }
+    return { update: { check: args.includes("--check") } };
+  }
   const options = {};
   let open = true;
   for (let i = 0; i < args.length; i++) {
@@ -39,7 +52,9 @@ function parse(args) {
 try {
   const args = parse(process.argv.slice(2));
   if (args.help) process.stdout.write(help);
-  else {
+  else if (args.update) {
+    if (!await update(args.update)) process.exitCode = 1;
+  } else {
     const consoleServer = await startServer(args.options);
     const address = `${consoleServer.browserUrl}/#token=${consoleServer.token}`;
     const network = consoleServer.networkUrls.map((url) => `Network console: ${url}/#token=${consoleServer.token}\n`).join("");

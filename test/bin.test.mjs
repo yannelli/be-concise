@@ -88,6 +88,22 @@ test("argument and startup errors exit 1 with a message", async (t) => {
   assert.match(missing.stderr, /^concise-web: ENOENT/);
 });
 
+test("update parses its options and exits 1 when a step fails", async (t) => {
+  const space = await fixture(t);
+  const help = await run(["update", "-h"], space).exited;
+  assert.equal(help.code, 0);
+  assert.match(help.stdout, /\n {7}concise-web update \[--check\]\n/);
+  const bogus = await run(["update", "--bogus"], space).exited;
+  assert.deepEqual([bogus.code, bogus.stdout, bogus.stderr], [1, "", "concise-web: Unknown option: --bogus\n"]);
+  const check = await run(["update", "--check"], space).exited;
+  assert.equal(check.code, 0);
+  assert.match(check.stdout, /^Package: .+ is a git checkout, skipped\. Update it with git pull\.\n$/);
+  await space.tool("claude", `#!/bin/sh\n[ "$2" = list ] && echo concise@be-concise\n[ "$2" = update ] && { echo "Error: denied" >&2; exit 1; }\nexit 0\n`);
+  const failed = await run(["update"], space).exited;
+  assert.equal(failed.code, 1);
+  assert.match(failed.stdout, /\nclaude: update failed: Error: denied\n$/);
+});
+
 test("a signal sent as soon as the console line prints removes the registry file", async (t) => {
   const space = await fixture(t);
   const app = run(["--no-open", "--cwd", space.cwd], space);

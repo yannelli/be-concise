@@ -12,7 +12,7 @@ import { defaultConfig } from "../hooks/lib/config.mjs";
 import { runTest, disposeTests } from "./testing/runner.mjs";
 import { configuration, saveConfiguration, validateConfig, problem } from "./configuration.mjs";
 import { createHub } from "./hub.mjs";
-import { RELEASES_URL, addPack, checkUpdates, packSources, packTargets, removePack, togglePack, updatePack } from "./packs.mjs";
+import { RELEASES_URL, addPack, checkUpdates, packSources, packTargets, pluginVersion, removePack, togglePack, updatePack } from "./packs.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const LIMIT = 2 * 1024 * 1024;
@@ -244,7 +244,7 @@ export async function startServer({ cwd = process.cwd(), port = 0, remote = fals
   for (const origin of networkUrls) allowedOrigins.set(new URL(origin).host, origin);
   if (proxyOrigin) allowedOrigins.set(new URL(proxyOrigin).host, proxyOrigin);
   const registryPath = hub ? hubPath(env) : monitorPath(cwd, env);
-  try { register(registryPath, { url, token, pid: process.pid }, hub ? "for all projects" : "for this project"); }
+  try { register(registryPath, { url, token, pid: process.pid, version: pluginVersion() }, hub ? "for all projects" : "for this project"); }
   catch (err) { hub?.close(); server.close(); throw err; }
   return {
     url, browserUrl: proxyOrigin || url, networkUrls, token, cwd, registryPath, hub: Boolean(hub), projectsDir: hub?.dir ?? null,

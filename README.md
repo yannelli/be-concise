@@ -95,6 +95,14 @@ concise-web --cwd /path/to/project
 
 `npm install -g .` installs it from a checkout.
 
+Update the console and the plugin with one command:
+
+```sh
+concise-web update
+```
+
+The command installs the latest npm release. Then it updates `concise@be-concise` in each of Claude Code, Codex, and omp that has the plugin installed. It restarts each running console on another version when that console is the main process of a systemd user unit, and prints a restart hint for other consoles. `--check` reports what would change and changes nothing. From a git checkout, the command skips the npm step; use `git pull` for the checkout.
+
 The command starts a localhost server on an available port and opens the browser. Use `--port 4317` to select a port or `--no-open` to print the URL without opening it. `npm run web` also starts the console from the repository.
 
 `concise-web --all` serves every project the hooks have registered under `~/.config/concise/projects`, with a project switcher in the sidebar that groups projects by git repository and labels worktrees. Projects whose directory no longer exists are hidden until you choose "Show N missing". Each hook call registers its project there and appends its record to `~/.local/state/concise/projects/<hash>/records.jsonl`, so the hub shows history from before it started and keeps working while it is down. Set `"monitor": { "persist": false }` or `BEC_MONITOR_PERSIST=0` to keep the registry entry without the record file.
