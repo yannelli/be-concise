@@ -1,6 +1,6 @@
 {
     "name": "concise",
-    "version": "0.16.3",
+    "version": "0.16.4",
     "description": "Checks the agent's own writing before it lands: long comments, oversized new files, padded PR and issue bodies, and optional em dash and AI writing rules.",
     "author": {
         "name": "Ryan Yannelli",
