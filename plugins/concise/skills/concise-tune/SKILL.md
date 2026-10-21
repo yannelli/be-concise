@@ -37,7 +37,7 @@ To collect commit messages or PR bodies, write one file per item:
 mkdir -p /tmp/concise-commits
 git log --author="$(git config user.email)" --no-merges -n 50 --format=%H | while read -r sha; do git log -1 --format=%B "$sha" > "/tmp/concise-commits/$sha.txt"; done
 mkdir -p /tmp/concise-prs
-gh pr list --author @me --state all --limit 30 --json number,body | node -e 'const fs = require("fs"); for (const pr of JSON.parse(fs.readFileSync(0, "utf8"))) fs.writeFileSync(`/tmp/concise-prs/${pr.number}.md`, pr.body || "")'
+gh pr list --author @me --state all --limit 30 --json number --jq '.[].number' | while read -r number; do gh pr view "$number" --json body --jq .body > "/tmp/concise-prs/$number.md"; done
 ```
 
 Show the user the sample list and the word count before you go on.
