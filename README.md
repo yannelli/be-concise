@@ -120,7 +120,7 @@ Codex and omp load the same hooks through their own manifests. The section "How 
 **Stores on your computer.**
 
 - `~/.config/concise/projects/`: one entry for each project, with its path and git repository name.
-- `~/.local/state/concise/projects/<hash>/records.jsonl`: each hook call with its full request and response. The request can hold any text that the agent wrote or read, so keep this file private. It rotates at 5 MiB and keeps 5 files. To stop it, set `"monitor": { "persist": false }` or `BEC_MONITOR_PERSIST=0`. `BEC_MONITOR_DISABLED=1` also stops the project entry.
+- `~/.local/state/concise/projects/<hash>/records.jsonl`: each hook call with its full request and response, written only when you set `"monitor": { "persist": true }` or `BEC_MONITOR_PERSIST=1`, or while `concise-web --all` runs. The request can hold any text that the agent wrote or read, so keep this file private. It rotates at 5 MiB and keeps 5 files. `BEC_MONITOR_DISABLED=1` stops it and the project entry.
 - `~/.cache/concise/concise.log`: only when you turn logging on.
 - Session state under the system temp folder. The `SessionEnd` hook removes it.
 

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { request } from "node:http";
 import { tmpdir, userInfo } from "node:os";
@@ -23,12 +24,24 @@ export function hubPath(env = process.env) {
   return join(monitorDir(env), "hub.json");
 }
 
-/** Registers the project and appends the record to its file, unless persistence is off. */
+/** True while a `concise-web --all` console is registered and its process runs. */
+function hubRunning(env) {
+  try {
+    const { pid } = JSON.parse(readFileSync(hubPath(env), "utf8"));
+    if (!Number.isInteger(pid) || pid <= 0) return false;
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    return err.code === "EPERM";
+  }
+}
+
+/** Registers the project, and appends the record to its file when persistence is on or a hub console runs. */
 function persistRecord(record, env, persist) {
   try {
     if (typeof record.cwd !== "string") return;
     registerProject(record.cwd, env);
-    if (persist ?? parseBool(env.BEC_MONITOR_PERSIST) ?? true) appendProjectRecord(record, env);
+    if ((persist ?? parseBool(env.BEC_MONITOR_PERSIST) ?? false) || hubRunning(env)) appendProjectRecord(record, env);
   } catch {}
 }
 

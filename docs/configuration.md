@@ -41,7 +41,7 @@ Copy `.claude/concise.json.example` to `.claude/concise.json` (Claude Code) or `
 | `log.maxFiles` | `5` | Rotated files kept. |
 | `log.rotate` | `"size"` | `size`, `daily`, or `both`. |
 | `log.format` | `"json"` | `json` or `plaintext`. |
-| `monitor.persist` | `true` | Appends each hook record, with its request and response, to the project's record file for `concise-web --all`. |
+| `monitor.persist` | `false` | Appends each hook record, with its request and response, to the project's record file. When it is off, the hook appends records only while `concise-web --all` runs. |
 | `features.emDash.enabled` | `false` | Runs the dash check. |
 | `features.emDash.enDash` | `true` | Flags the en dash (`U+2013`) as well. |
 | `features.emDash.doubleHyphen` | `false` | Flags `--` between word characters or between spaces. |
@@ -246,4 +246,4 @@ Format `json` writes one JSON object per line. Format `plaintext` writes `ts hoo
 
 ## monitor
 
-Every hook call registers its project in `~/.config/concise/projects/<folder>-<hash>.json` (`$XDG_CONFIG_HOME` when set) with the real path, the name, the first and last time seen, the path of its record file, and the git repository that holds it (`repo`: name, root, worktree name, and subdirectory, or `null`). The repo is read from `.git` files without running git, so a deleted worktree keeps its label. With `monitor.persist` on, the hook also appends the full record, including the tool request and the hook response, to `~/.local/state/concise/projects/<hash>/records.jsonl` (`$XDG_STATE_HOME` when set). The file rotates at 5 MiB and keeps 5 copies. `concise-web --all` reads the registry and follows every record file. `"monitor": { "persist": false }`, or `BEC_MONITOR_PERSIST=0`, keeps the registry entry and skips the record. `BEC_MONITOR_DISABLED=1` skips both and the console feed. Without a home directory the hook writes neither.
+Every hook call registers its project in `~/.config/concise/projects/<folder>-<hash>.json` (`$XDG_CONFIG_HOME` when set) with the real path, the name, the first and last time seen, the path of its record file, and the git repository that holds it (`repo`: name, root, worktree name, and subdirectory, or `null`). The repo is read from `.git` files without running git, so a deleted worktree keeps its label. When `monitor.persist` is on, or while `concise-web --all` runs, the hook also appends the full record, including the tool request and the hook response, to `~/.local/state/concise/projects/<hash>/records.jsonl` (`$XDG_STATE_HOME` when set). The file rotates at 5 MiB and keeps 5 copies. `concise-web --all` reads the registry and follows every record file. It shows records from before it started only when `monitor.persist` is on. `BEC_MONITOR_DISABLED=1` skips the registry, the record, and the console feed. Without a home directory the hook writes neither.
