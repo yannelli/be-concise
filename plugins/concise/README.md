@@ -97,6 +97,33 @@ Every check reads the text being written, not the file on disk. An existing lice
 
 After 2 denied retries on the same target, the hook allows the action and flags it: `systemMessage` reaches the user and `additionalContext` reaches the agent in both hosts. A passing check resets that counter.
 
+## Where it works
+
+| App | What loads |
+|---|---|
+| Claude Code | The hooks, the MCP server, and the 3 skills. |
+| Cowork | The hooks and the 3 skills. The MCP server loads when the session runs on your computer. The hooks need Node.js, Bash, and `jq` on `PATH`. |
+| claude.ai chat | The 3 skills only. Chat ignores hooks and local MCP servers, so chat does not check or block text. |
+
+Codex and omp load the same hooks through their own manifests. See [How the hosts share one hook set](#how-the-hosts-share-one-hook-set).
+
+## What it runs, stores, and sends
+
+**Reads.** The text of each call it checks: file writes and edits, shell commands, MCP tool input, plans, tasks, questions, and the agent's last reply. It also reads `concise.json` config files from the project and from `~/.config/concise/`, `~/.claude/`, or `~/.codex/`.
+
+**Runs.** `node` for each hook and for the MCP server. `git` to find the files a shell command changed. `bash` and `grep` for the test output filter. A `.mjs` pack that you add runs in the hook process with your permissions.
+
+**Changes commands.** The test output filter rewrites test commands, such as `pytest`, `npm test`, `go test`, `jest`, and `vitest`, so that their output goes through a filter. The full output goes to a private folder under `$TMPDIR`, and the hook prints its path. Put `NOFILTER=1` in a command to skip the filter.
+
+**Stores on your computer.**
+
+- `~/.config/concise/projects/`: one entry for each project, with its path and git repository name.
+- `~/.local/state/concise/projects/<hash>/records.jsonl`: each hook call with its full request and response. The request can hold any text that the agent wrote or read, so keep this file private. It rotates at 5 MiB and keeps 5 files. To stop it, set `"monitor": { "persist": false }` or `BEC_MONITOR_PERSIST=0`. `BEC_MONITOR_DISABLED=1` also stops the project entry.
+- `~/.cache/concise/concise.log`: only when you turn logging on.
+- Session state under the system temp folder. The `SessionEnd` hook removes it.
+
+**Sends.** The hooks and the MCP server send nothing off your computer. When the `concise-web` console runs, each hook also posts its record to the console on `127.0.0.1`. The console is a separate npm command that you start yourself, from [`@yannelli/be-concise`](https://github.com/yannelli/be-concise#readme). It fetches the pack URLs that you enter, checks `api.github.com` for releases when you select **Check for updates**, and its `update` command runs `npm` and the `plugin` commands of your agent CLI.
+
 ## Presets
 
 `features.aiWriting.preset` picks the categories that run.
@@ -267,4 +294,4 @@ The suite runs the Claude Code cases, then `test/codex-tests.mjs`, which feeds `
 
 ## License
 
-[MIT](../../LICENSE)
+[MIT](LICENSE)
