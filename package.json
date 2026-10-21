@@ -1,6 +1,6 @@
 {
     "name": "@yannelli/be-concise",
-    "version": "0.15.1",
+    "version": "0.16.0",
     "description": "Local configuration and hook console for Concise",
     "license": "MIT",
     "repository": {
