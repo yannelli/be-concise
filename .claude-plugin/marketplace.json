@@ -12,7 +12,7 @@
             "name": "concise",
             "source": "./plugins/concise",
             "description": "Checks the agent's own writing before it lands: long comments, oversized new files, padded PR and issue bodies, and optional em dash and AI writing rules.",
-            "version": "0.16.2",
+            "version": "0.16.3",
             "author": {
                 "name": "Ryan Yannelli",
                 "email": "ryanyannelli@gmail.com",
