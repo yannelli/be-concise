@@ -1,0 +1,13 @@
+{
+  "default": { "description": "High-precision packs.", "allow": [] },
+  "ryan": { "description": "Everything except STE.", "allow": [] },
+  "technical": {
+    "description": "default without formatting, with common engineering words allowed.",
+    "allow": ["robust", "comprehensive", "seamless", "ecosystem", "leverage", "facilitate", "underpin", "streamline"]
+  },
+  "ste": { "description": "Simplified Technical English word choices and the plain-word packs.", "allow": [] },
+  "minimal": { "description": "Chatbot boilerplate and sycophancy only.", "allow": [] },
+  "all": { "description": "Every pack.", "allow": [] },
+  "git": { "description": "Commit, PR, and review hygiene only.", "allow": [] },
+  "statistical": { "description": "Text statistics only.", "allow": [] }
+}

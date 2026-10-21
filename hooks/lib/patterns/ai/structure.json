@@ -1,0 +1,17 @@
+{
+  "id": "structure",
+  "feature": "aiWriting",
+  "category": { "id": "structure", "label": "openers and frames", "description": "Openers and frames that delay the point.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules",
+  "presets": ["default", "ryan", "technical", "all"],
+  "patterns": [
+    { "regex": "^(?:But )?(?:what|so why|why) (?:does this mean|should you care|does (?:it|this) matter)\\b", "fix": "answer it", "flags": "gim", "show": "`What does this mean`, `So why should you care`, `Why does it matter` as an opener" },
+    { "regex": "^\\s*(?:picture this|run the numbers|think about it|consider this)[.:]", "fix": "state the fact", "flags": "gim", "show": "`Picture this.`, `Run the numbers.`, `Think about it.`, `Consider this:` as a line-initial fragment" },
+    { "regex": "^\\s*(?:three|four|five|six|seven|ten|\\d+) (?:key )?(?:takeaways|things (?:to know|you need)|reasons|ways|tips)\\b", "fix": "drop the count, lead with the finding", "flags": "gim", "show": "`Three key takeaways`, `5 things to know`, `Four reasons`, `10 ways`, `Six tips` (line-initial)" },
+    { "regex": "^\\s*(?:let me (?:think|break this down|walk through this) step by step|here['’]s my thought process|to approach this systematically|breaking this down:)", "fix": "cut, give the result", "flags": "gim", "show": "`Let me think step by step`, `Let me break this down step by step`, `Let me walk through this step by step`, `Here's my thought process`, `To approach this systematically`, `Breaking this down:`" },
+    { "regex": "(?<=^|[.!?]\\s)Enter [A-Z]\\w+\\.", "fix": "name it in a plain sentence", "flags": "gm", "show": "`Enter Redis.` and the rest of the reveal form" },
+    { "phrase": "(?:have you )?ever wondered|what if I told you", "fix": "state the fact" },
+    { "phrase": "(?:imagine|picture|envision) a (?:world|future|scenario) (?:where|in which)", "fix": "state the fact", "show": "`Imagine a world where`, `Picture a future in which`, `Envision a scenario where`" },
+    { "opening": "you're asking about|to answer your question|the question of whether", "fix": "answer", "show": "`You're asking about`, `To answer your question`, `The question of whether` (sentence-initial)" }
+  ]
+}

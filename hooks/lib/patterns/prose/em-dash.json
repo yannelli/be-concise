@@ -1,0 +1,12 @@
+{
+  "id": "em-dash",
+  "feature": "emDash",
+  "category": { "id": "em-dash", "label": "em dash", "description": "Dash characters used where a comma, colon, or period reads better.", "tags": ["punctuation"] },
+  "source": "Ryan Yannelli's house rules",
+  "notes": "Gated by features.emDash.enabled. The en dash and double hyphen patterns follow features.emDash.enDash and features.emDash.doubleHyphen.",
+  "patterns": [
+    { "id": "em", "regex": "—", "flags": "g", "fix": "comma, period, colon, parentheses, or two sentences", "show": "an em dash" },
+    { "id": "en", "option": "enDash", "regex": "–", "flags": "g", "fix": "comma, period, colon, parentheses, or two sentences", "show": "an en dash" },
+    { "id": "double-hyphen", "option": "doubleHyphen", "regex": "(?<=\\w)--(?=\\w)|(?<=\\s)--(?=\\s)", "flags": "g", "fix": "comma, period, colon, parentheses, or two sentences", "show": "a double hyphen" }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "closers",
+  "feature": "aiWriting",
+  "category": { "id": "closers", "label": "closers", "description": "Endings that restate the text instead of stopping.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules",
+  "presets": ["default", "ryan", "technical", "all"],
+  "patterns": [
+    { "opening": "ultimately", "fix": "cut", "show": "`Ultimately` (sentence-initial)" },
+    { "opening": "as we move forward|moving forward", "fix": "cut", "show": "`As we move forward`, `Moving forward` (sentence-initial)" },
+    { "phrase": "in conclusion|in summary|to summarize|to sum up", "fix": "cut, end on the last fact" },
+    { "phrase": "at the end of the day|only time will tell|stay tuned|exciting times|happy coding|thank me later", "fix": "cut" },
+    { "phrase": "the future (?:looks|is) bright|the possibilities are endless", "fix": "cut" },
+    { "phrase": "one thing is (?:certain|clear)", "fix": "state it" },
+    { "phrase": "worth (?:reading|a look|a read|exploring|checking out|your time)", "fix": "say why" },
+    { "phrase": "the (?:journey|adventure) (?:begins|continues|is just beginning)", "fix": "cut" },
+    { "phrase": "the (?:bottom line|key takeaway|takeaway here)", "fix": "state it" },
+    { "phrase": "(?:I|we) look forward to", "fix": "cut, or state the next step and date" }
+  ]
+}

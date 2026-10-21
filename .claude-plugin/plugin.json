@@ -1,0 +1,26 @@
+{
+    "$schema": "https://www.schemastore.org/claude-code-plugin-manifest.json",
+    "name": "concise",
+    "displayName": "Concise",
+    "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions, plus optional em dash and AI writing pattern packs (pluggable, env-controlled), and nudges Claude to trim them before you see the bloated version.",
+    "version": "0.15.1",
+    "author": {
+        "name": "Ryan Yannelli",
+        "email": "ryanyannelli@gmail.com",
+        "url": "https://github.com/yannelli"
+    },
+    "homepage": "https://ryanyannelli.com/projects/be-concise",
+    "repository": "https://github.com/yannelli/be-concise",
+    "license": "MIT",
+    "keywords": [
+        "concise",
+        "hooks",
+        "comments",
+        "verbosity",
+        "pr-description"
+    ],
+    "icon": "./assets/icon.svg",
+    "documentationUrl": "https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/INDEX.md",
+    "supportUrl": "https://github.com/yannelli/be-concise/issues",
+    "privacyPolicyUrl": "https://github.com/yannelli/be-concise/blob/main/plugins/concise/PRIVACY.md"
+}

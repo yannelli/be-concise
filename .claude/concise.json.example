@@ -1,0 +1,111 @@
+{
+  "maxCommentLines": 2,
+  "maxFileLines": 300,
+  "maxPrBodyParagraphs": 1,
+  "maxPrBodySentences": 3,
+  "maxRetries": 2,
+  "ignoreGlobs": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/*.generated.*",
+    "**/*.min.js",
+    "**/package-lock.json",
+    "**/*.lock"
+  ],
+  "checks": {
+    "comments": true,
+    "fileSize": true,
+    "prBody": true
+  },
+  "scan": {
+    "codeFiles": true,
+    "notebooks": true,
+    "heredocWrites": true,
+    "shellWrites": true,
+    "mcp": true,
+    "plans": true,
+    "tasks": true,
+    "questions": true
+  },
+  "stopHook": true,
+  "softFail": false,
+  "styleIgnoreGlobs": [
+    "**/.claude/**",
+    "**/.codex/**",
+    "**/.agent/**",
+    "**/.agents/**",
+    "**/.cursor/**",
+    "**/.cursorrules",
+    "**/.windsurf/**",
+    "**/.windsurfrules",
+    "**/.gemini/**",
+    "**/.roo/**",
+    "**/.clinerules",
+    "**/.clinerules/**",
+    "**/.kiro/**",
+    "**/.continue/**",
+    "**/.aider*",
+    "**/.opencode/**",
+    "**/.amazonq/**",
+    "**/.junie/**",
+    "**/.trae/**",
+    "**/.augment/**",
+    "**/.github/copilot-instructions.md",
+    "**/.github/instructions/**",
+    "**/.github/prompts/**",
+    "**/.github/agents/**",
+    "**/CLAUDE.md",
+    "**/CLAUDE.local.md",
+    "**/AGENTS.md",
+    "**/GEMINI.md"
+  ],
+  "allowList": {
+    "phrases": [],
+    "patterns": []
+  },
+  "bypass": {
+    "phrases": [],
+    "patterns": []
+  },
+  "log": {
+    "enabled": false,
+    "path": null,
+    "maxSize": "5m",
+    "maxFiles": 5,
+    "rotate": "size",
+    "format": "json"
+  },
+  "monitor": {
+    "persist": true
+  },
+  "features": {
+    "emDash": {
+      "enabled": false,
+      "enDash": true,
+      "doubleHyphen": false,
+      "mode": "confirm",
+      "replies": true
+    },
+    "aiWriting": {
+      "enabled": false,
+      "preset": "default",
+      "categories": null,
+      "allow": [],
+      "mode": "confirm",
+      "replies": true,
+      "packs": [],
+      "excludePacks": [],
+      "enablePatterns": [],
+      "disablePatterns": [],
+      "options": {}
+    },
+    "dictionary": {
+      "enabled": true,
+      "mode": "confirm",
+      "entries": []
+    }
+  }
+}

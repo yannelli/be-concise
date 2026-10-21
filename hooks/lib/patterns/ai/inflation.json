@@ -1,0 +1,22 @@
+{
+  "id": "inflation",
+  "feature": "aiWriting",
+  "category": { "id": "inflation", "label": "significance inflation", "description": "Wording that makes a change sound larger than it is.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules",
+  "presets": ["default", "ryan", "technical", "all"],
+  "patterns": [
+    { "phrase": "marks a (?:significant|major|new|turning)", "fix": "state what happened" },
+    { "phrase": "represents a (?:significant|major|fundamental)", "fix": "state what changed" },
+    { "phrase": "a (?:significant|major|important|bold|big) step (?:forward|towards|toward)|step forward for", "fix": "state what changed", "show": "`a significant step forward`, `a major step towards`, `a bold step toward`, `a big step forward`, `step forward for`" },
+    { "phrase": "turning point|sea change|paradigm shift|game-chang(?:er|ing)|watershed moment", "fix": "state what changed" },
+    { "phrase": "groundbreaking", "fix": "name the prior art it beats" },
+    { "phrase": "first of its kind", "fix": "cite the search" },
+    { "phrase": "revolutionary|revolutioniz(?:e|es|ed)", "fix": "describe the change" },
+    { "phrase": "the future of", "fix": "cut" },
+    { "phrase": "unprecedented", "fix": "name the precedent, or cut" },
+    { "phrase": "redefines? (?:the|how|what)|reshap(?:e|es|ing) the", "fix": "describe the change" },
+    { "phrase": "(?:real|actual|true) (?:utility|value|impact|change|results)|genuine (?:utility|value|impact|results)", "fix": "drop the adjective", "show": "`real utility`, `actual value`, `genuine impact`, `true change`, `real results`" },
+    { "phrase": "despite (?:these |the )?challenges", "fix": "name the challenge" },
+    { "phrase": "continues to thrive|remains resilient", "fix": "cite the number" }
+  ]
+}

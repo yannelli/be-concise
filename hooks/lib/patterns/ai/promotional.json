@@ -1,0 +1,21 @@
+{
+  "id": "promotional",
+  "feature": "aiWriting",
+  "category": { "id": "promotional", "label": "promotional language", "description": "Marketing language for a technical change.", "tags": ["rhetorical"] },
+  "source": "Wikipedia:Manual of Style/Words to watch (peacock terms) and Wikipedia:Signs of AI writing",
+  "presets": ["default", "ryan", "technical", "all"],
+  "scope": ["files", "gh", "commit", "reply"],
+  "notes": "`outstanding` reports only in a praise frame, so the plain technical sense in `outstanding requests` stays clean.",
+  "patterns": [
+    { "regex": "\\bunlock(?:s|ed|ing)?\\s+(?:(?:the|its|your|our|full|true|real|entire)\\s+){0,2}(?:power|potential|value)\\b", "fix": "name what changes", "show": "`unlocks the full potential`, `unlock value`" },
+    { "phrase": "supercharge(?:s|d)?", "fix": "improve, or name the effect" },
+    { "phrase": "effortless(?:ly)?", "fix": "simple, or name the steps" },
+    { "phrase": "legendary|iconic|visionary", "fix": "cut, or cite the achievement" },
+    { "phrase": "acclaimed|celebrated|award-winning", "fix": "name the award" },
+    { "phrase": "industry-leading", "fix": "name the metric" },
+    { "regex": "\\b(?:(?:is|was|are|were|remains?|looks?|truly|simply|absolutely)\\s+outstanding|outstanding\\s+(?:work|job|results?|performance|quality|support|service|experience|value|contribution))\\b", "fix": "name the metric", "show": "`outstanding` as praise, as in `outstanding work`" },
+    { "phrase": "landmark|next-level|top-tier|turnkey", "fix": "name the change" },
+    { "phrase": "one-stop shop", "fix": "say what it does" },
+    { "phrase": "take it to the next level", "fix": "state the improvement" }
+  ]
+}

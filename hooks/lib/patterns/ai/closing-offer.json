@@ -1,0 +1,12 @@
+{
+  "id": "closing-offer",
+  "feature": "aiWriting",
+  "category": "claude-tells",
+  "source": "Anthropic's Opus 5.5 prompting guide lists \"an offer to carry on with something unless the user would prefer otherwise\" as a habit to suppress; 1.93 per 10,000 words in Opus 5.5 replies, none in the baselines",
+  "presets": ["default", "ryan", "technical", "all"],
+  "scope": ["gh", "reply"],
+  "notes": "Fires only when the offer is the last sentence of the text. A question followed by a reason, such as `Do you want me to delete it? It has two unmerged commits.`, stays unflagged. A setup that asks before every test run can list `closing-offer` in `excludePacks`.",
+  "patterns": [
+    { "regex": "(?:^|[.!?]\\s+)(?<hit>(?:Do you |Would you )?(?:want|like) me to\\b[^?\\n]{0,160}\\?)\\s*$", "flags": "gi", "fix": "cut the offer, or name the step that needs approval", "show": "`Want me to ...?` or `Do you want me to ...?` at the end of the text" }
+  ]
+}

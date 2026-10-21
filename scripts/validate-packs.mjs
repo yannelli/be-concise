@@ -1,0 +1,123 @@
+#!/usr/bin/env node
+import { readdirSync, readFileSync, existsSync, statSync } from "node:fs";
+import { isAbsolute, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import { loadPacks, validatePack, compilePattern, BUILTIN_DIR, SCOPES } from "../hooks/lib/packs.mjs";
+
+const NO_CWD = "/nonexistent-concise-cwd";
+const PRESETS_FILE = join(BUILTIN_DIR, "presets.json");
+
+function readPresetNames() {
+  try {
+    return Object.keys(JSON.parse(readFileSync(PRESETS_FILE, "utf8")));
+  } catch {
+    return [];
+  }
+}
+
+function filesIn(dir) {
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...filesIn(path));
+    else if (/\.(json|mjs)$/.test(entry.name) && path !== PRESETS_FILE) out.push(path);
+  }
+  return out;
+}
+
+function argFiles(args, cwd) {
+  const out = [];
+  for (const arg of args) {
+    const path = isAbsolute(arg) ? arg : resolve(cwd, arg);
+    if (!existsSync(path)) out.push({ path, missing: true });
+    else if (statSync(path).isDirectory()) out.push(...filesIn(path).map((p) => ({ path: p })));
+    else out.push({ path });
+  }
+  return out;
+}
+
+async function readPack(path) {
+  if (path.endsWith(".mjs")) return (await import(pathToFileURL(path).href)).default;
+  return JSON.parse(readFileSync(path, "utf8"));
+}
+
+function checkFields(pack, path, builtin, presetNames, add) {
+  const isAi = pack.feature === "aiWriting";
+  if (builtin && isAi && !Array.isArray(pack.presets)) add(path, "a built-in aiWriting pack must declare presets");
+  for (const name of pack.presets || []) if (!presetNames.includes(name)) add(path, `unknown preset ${name}`);
+  for (const scope of pack.scope || []) if (!SCOPES.includes(scope)) add(path, `unknown scope ${scope}`);
+  if (pack.notes !== undefined && typeof pack.notes !== "string") add(path, "notes must be a string");
+  if (pack.source !== undefined && typeof pack.source !== "string") add(path, "source must be a string");
+  const patterns = Array.isArray(pack.patterns) ? pack.patterns : [];
+  patterns.forEach((entry, i) => {
+    if (entry.show !== undefined && typeof entry.show !== "string") add(path, `pattern ${i} show must be a string`);
+    try {
+      compilePattern(entry);
+    } catch (err) {
+      add(path, `pattern ${i} does not compile: ${err.message}`); // coverage-ignore: validatePack rejects these first
+    }
+  });
+  return patterns.length;
+}
+
+function checkExclusive(packs, add) {
+  const seen = new Map();
+  for (const pack of packs) {
+    for (const entry of pack.patterns) {
+      const key = `${entry.re.source}\0${entry.re.flags}`;
+      const other = seen.get(key);
+      if (other && other.id !== pack.id) add(pack.path, `pattern ${entry.re.source} is also in ${other.id}`);
+      else seen.set(key, pack);
+    }
+  }
+}
+
+async function main(args) {
+  const problems = [];
+  const add = (path, reason) => problems.push(`${path}: ${reason}`);
+  const presetNames = readPresetNames();
+  if (!presetNames.length) add(PRESETS_FILE, "no presets defined");
+  const { packs, problems: loadErrors } = await loadPacks({ cwd: NO_CWD });
+  for (const problem of loadErrors) add(problem.path, problem.reason);
+
+  const ids = new Map();
+  let count = 0;
+  let patterns = 0;
+  for (const pack of packs) {
+    ids.set(pack.id, pack.path);
+    count += 1;
+    patterns += checkFields(pack, pack.path, true, presetNames, add);
+  }
+  checkExclusive(packs, add);
+
+  for (const { path, missing } of argFiles(args, process.cwd())) {
+    if (missing) {
+      add(path, "no such file or directory");
+      continue;
+    }
+    let raw = null;
+    try {
+      raw = await readPack(path);
+    } catch (err) {
+      add(path, err.message);
+      continue;
+    }
+    const check = validatePack(raw, path);
+    if (!check.ok) {
+      add(path, check.reason);
+      continue;
+    }
+    if (ids.has(raw.id)) add(path, `duplicate id ${raw.id}, already in ${ids.get(raw.id)}`);
+    ids.set(raw.id, path);
+    count += 1;
+    patterns += checkFields(raw, path, false, presetNames, add);
+  }
+
+  for (const line of problems) console.log(line);
+  if (problems.length) return 1;
+  console.log(`ok: ${count} packs, ${patterns} patterns`);
+  return 0;
+}
+
+const entry = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
+if (import.meta.url === entry) process.exit(await main(process.argv.slice(2)));

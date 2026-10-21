@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "concise": {
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/tools/mcp-server.mjs"]
+        }
+    }
+}

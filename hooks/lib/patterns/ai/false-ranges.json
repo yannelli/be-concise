@@ -1,0 +1,16 @@
+{
+  "id": "false-ranges",
+  "feature": "aiWriting",
+  "category": { "id": "false-ranges", "label": "false ranges", "description": "A \"from X to Y\" span whose endpoints share no real scale.", "tags": ["rhetorical"] },
+  "source": "tropes.fyi directory and the agent-toolkit signs-of-ai-writing mirror",
+  "presets": ["default", "ryan", "technical", "all"],
+  "scope": ["files", "comments", "gh", "reply"],
+  "notes": "A plain two-point range stays unflagged, so numeric and version ranges pass. The chained form skips a span that holds a digit or a parenthesis, and skips a third `to` that opens a purpose clause, so `from 0 to 1000 to pick a victim` and `from left to right to reduce the list` stay clean. Only the marked forms and chained word spans report.",
+  "patterns": [
+    { "regex": "\\beverything from\\b[^.!?\\n]{3,80}?\\bto\\b", "fix": "list the specific items", "show": "`everything from X to Y`" },
+    { "regex": "\\banything from\\b[^.!?\\n]{3,80}?\\bto\\b", "fix": "list the specific items", "show": "`anything from X to Y`" },
+    { "regex": "\\b(?:runs?|running) the (?:full )?gamut from\\b[^.!?\\n]{3,80}?\\bto\\b", "fix": "name the actual range", "show": "`runs the gamut from X to Y`" },
+    { "regex": "\\bthe full spectrum of\\b[^.!?\\n]{3,80}?\\bfrom\\b[^.!?\\n]{1,40}?\\bto\\b", "fix": "name the actual range", "show": "`the full spectrum of X from A to B`" },
+    { "regex": "(?<!everything |anything )\\bfrom\\b(?:(?!\\bto\\b)[^.!?\\n,()\\d]){3,40}?\\bto\\b(?:(?!\\bto\\b)[^.!?\\n,()\\d]){3,40}?\\bto\\b(?!\\s+(?:be|get|make|do|see|find|use|allow|ensure|avoid|create|set|check|give|provide|reduce|prevent|decide|determine|keep|help|handle|produce|return|build|support|enable|start|stop|run|read|write|add|remove|show|convert|apply|match|test|compare|store|load|save|call|split|join|filter|sort|count|update|delete|select|form|reflect|represent|indicate|include|cover|refer|work|move|change|improve|fix)\\b)[^.!?\\n,()\\d]{1,40}", "fix": "split into a list", "show": "`from A to B to C`" }
+  ]
+}

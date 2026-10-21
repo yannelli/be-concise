@@ -1,0 +1,208 @@
+{
+    "description": "Detects verbose comments, oversized files, padded PR/issue descriptions, and (when enabled) em dashes and AI writing patterns in prose, comments, commit messages, and replies; denies the tool call, or blocks the reply on Stop, with a reason so the agent revises before the text lands. Works in Claude Code and Codex.",
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": "Write|Edit|MultiEdit|apply_patch|NotebookEdit",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking written text"
+                    }
+                ]
+            },
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(*g*)",
+                        "statusMessage": "concise: checking commit and PR text"
+                    },
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(jj *)",
+                        "statusMessage": "concise: checking commit and PR text"
+                    },
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(*Begin Patch*)",
+                        "statusMessage": "concise: checking patch text"
+                    },
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(cat *)",
+                        "statusMessage": "concise: checking heredoc file writes"
+                    },
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-edit.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(tee *)",
+                        "statusMessage": "concise: checking heredoc file writes"
+                    }
+                ]
+            },
+            {
+                "matcher": "PowerShell",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
+                        "timeout": 15,
+                        "if": "PowerShell(*g*)",
+                        "statusMessage": "concise: checking commit and PR text"
+                    },
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
+                        "timeout": 15,
+                        "if": "PowerShell(jj *)",
+                        "statusMessage": "concise: checking commit and PR text"
+                    }
+                ]
+            },
+            {
+                "matcher": "mcp__.*",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-tool-text.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking posted tool text"
+                    }
+                ]
+            },
+            {
+                "matcher": "ExitPlanMode|TaskCreate|TaskUpdate|AskUserQuestion",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-tool-text.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking plan, task, and question text"
+                    }
+                ]
+            },
+            {
+                "matcher": "SubagentHandback",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking subagent report"
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "Bash|PowerShell",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-shell-writes.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking files the command wrote"
+                    }
+                ]
+            },
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/post-test-filter.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(*t*)",
+                        "statusMessage": "concise: filtering test output"
+                    }
+                ]
+            }
+        ],
+        "Stop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking reply"
+                    }
+                ]
+            }
+        ],
+        "SessionStart": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-context.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: loading rules"
+                    }
+                ],
+                "matcher": "startup|resume|clear|compact|fork"
+            }
+        ],
+        "SubagentStart": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-context.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: loading rules"
+                    }
+                ]
+            }
+        ],
+        "UserPromptSubmit": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-context.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: loading rules"
+                    }
+                ]
+            }
+        ],
+        "SubagentStop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.mjs\"",
+                        "timeout": 15,
+                        "statusMessage": "concise: checking subagent reply"
+                    }
+                ]
+            }
+        ],
+        "SessionEnd": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-end.mjs\"",
+                        "timeout": 1,
+                        "statusMessage": "concise: clearing session state"
+                    }
+                ]
+            }
+        ]
+    }
+}

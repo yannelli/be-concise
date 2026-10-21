@@ -1,0 +1,18 @@
+{
+  "id": "superficial-analysis",
+  "feature": "aiWriting",
+  "category": { "id": "superficial-analysis", "label": "superficial analysis", "description": "A significance claim with no evidence behind it.", "tags": ["rhetorical"] },
+  "source": "Wikipedia:Signs of AI writing and tropes.fyi directory",
+  "presets": ["ryan", "all"],
+  "scope": ["files", "gh", "reply"],
+  "patterns": [
+    { "phrase": "this (?:is important|matters) because", "fix": "state the fact" },
+    { "phrase": "has significant implications (?:for|on)", "fix": "name the implication" },
+    { "phrase": "(?:cannot|can't) be overstated", "fix": "state the fact plainly" },
+    { "phrase": "underscores its (?:importance|significance)", "fix": "state the fact" },
+    { "phrase": "goes a long way (?:toward|in|to)", "fix": "cut, state the result" },
+    { "phrase": "speaks volumes about", "fix": "state the fact" },
+    { "phrase": "carries (?:significant|considerable|real) weight", "fix": "name the weight, or cut" },
+    { "regex": "\\b(?:underscoring|highlighting|cementing|solidifying|reinforcing)\\s+(?:its|his|her|their|the)\\s+(?:importance|significance|legacy|status|place)\\b", "fix": "state the fact, drop the tail", "show": "`highlighting its importance`" }
+  ]
+}

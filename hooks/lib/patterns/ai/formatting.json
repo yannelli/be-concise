@@ -1,0 +1,15 @@
+{
+  "id": "formatting",
+  "feature": "aiWriting",
+  "category": { "id": "formatting", "label": "formatting", "description": "Emoji and bold runs used as structure.", "tags": ["formatting"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT), Ryan Yannelli's house rules, Pangram signs-of-ai-writing",
+  "presets": ["default", "ryan", "all"],
+  "scope": ["files", "gh", "commit", "reply"],
+  "notes": "A code check in ai-patterns.mjs reports three or more bold spans in one paragraph or list item; no pattern row covers it. The pack applies one scope to every pattern, so the line-initial emoji rule also runs on commit messages and flags a gitmoji prefix such as a sparkle before `feat:`. A repo on that convention puts the glyph in `allowList.patterns`, or ships its own `formatting` pack with a `scope` that leaves out `commit`.",
+  "patterns": [
+    { "regex": "^#{1,6}\\s.*?(?<hit>\\p{Emoji_Presentation}|\\p{Extended_Pictographic}\\uFE0F)", "fix": "remove", "flags": "gmu", "show": "an emoji in a heading" },
+    { "regex": "(?<hit>\\p{Emoji_Presentation}|\\p{Extended_Pictographic}\\uFE0F)[ \\t]*$", "fix": "remove", "flags": "gmu", "show": "an emoji ending a line" },
+    { "regex": "^(?:[-*+]\\s*)?(?<hit>\\p{Emoji_Presentation}|\\p{Extended_Pictographic}\\uFE0F)\\s", "fix": "remove", "flags": "gmu", "show": "an emoji starting a line" },
+    { "regex": "(?<hit>\\p{Emoji_Presentation}|\\p{Extended_Pictographic}\\uFE0F)\\s*:", "fix": "remove", "flags": "gu", "show": "an emoji before a colon" }
+  ]
+}

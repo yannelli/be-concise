@@ -1,0 +1,23 @@
+{
+  "id": "filler",
+  "feature": "aiWriting",
+  "category": { "id": "filler", "label": "filler", "description": "Openers and asides that carry no fact.", "tags": ["phrase"] },
+  "source": "avoid-ai-writing by Conor Bronsdon (MIT) and Ryan Yannelli's house rules",
+  "presets": ["default", "ryan", "technical", "all"],
+  "patterns": [
+    { "opening": "honestly", "fix": "cut" },
+    { "phrase": "genuinely|truly|quite frankly|to be honest|real talk|at its core|here's the thing", "fix": "cut" },
+    { "phrase": "let's be (?:clear|honest)", "fix": "cut" },
+    { "phrase": "a genuine (?:improvement|step|shift|change|concern|interest)", "fix": "cut" },
+    { "phrase": "(?:it's|it is) important to (?:note|remember|understand)", "fix": "state the point" },
+    { "phrase": "worth (?:flagging|mentioning|remembering)", "fix": "state the point" },
+    { "phrase": "let's (?:unpack|dive in|explore|take a look|break (?:this|it) down|examine|get started)", "fix": "start with the point" },
+    { "phrase": "straightforward", "fix": "cut, or say what the steps are" },
+    { "phrase": "a powerful example", "fix": "the example" },
+    { "phrase": "this (?:highlights|speaks to)", "fix": "state the fact" },
+    { "phrase": "the broader takeaway", "fix": "state it" },
+    { "phrase": "(?:a (?:stark |powerful |timely )?|an important )reminder (?:that|of)", "fix": "state the fact" },
+    { "phrase": "I recently had the pleasure of", "fix": "say what happened" },
+    { "regex": "\\bwhether you['’]re .{1,40}? or ", "fix": "name the audience or cut", "show": "`whether you're X or Y`" }
+  ]
+}

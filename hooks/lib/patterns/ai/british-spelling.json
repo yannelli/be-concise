@@ -1,0 +1,28 @@
+{
+  "id": "british-spelling",
+  "feature": "aiWriting",
+  "category": { "id": "british-spelling", "label": "British spelling", "description": "British spellings in text that otherwise uses American English.", "tags": ["phrase", "claude"] },
+  "source": "Measured on Claude Code transcripts: Opus 5.5 wrote `behaviour` in 31% of uses, `labelled` in 58%, and `grey` in 77%; npm READMEs used them in 11%, 20%, and 30%",
+  "presets": ["ryan", "all"],
+  "scope": ["files", "comments", "gh", "commit", "reply"],
+  "notes": "A repo that writes British English lists `british-spelling` in `excludePacks`. `cancelled`, `judgement`, `acknowledgement`, `towards`, and `dialogue` are left out because American writers use them too. `analyses` is left out because it is also the plural of `analysis`. Elixir's `@behaviour` attribute sits in code, which the scan skips.",
+  "patterns": [
+    { "regex": "\\bbehaviour(?:s|al|ally)?\\b", "fix": "behavior", "show": "`behaviour`, `behaviours`, `behavioural`" },
+    { "regex": "\\bcolour(?:s|ed|ing|ful)?\\b", "fix": "color", "show": "`colour`, `colours`, `coloured`" },
+    { "regex": "\\b(?:fav|hon|neighb|lab|flav|hum|rum|harb|arm|vap)our(?:s|ed|ing|ite|ites|able|hood)?\\b", "fix": "drop the `u`: `favor`, `honor`, `neighbor`", "show": "`favour`, `honour`, `neighbour`, `labour`, `flavour`, `humour`, `rumour`, `harbour`, `armour`, `vapour`" },
+    { "regex": "\\b(?:label|model|travel|signal|fuel|level|tunnel|channel)l(?:ed|ing)\\b", "fix": "one `l`: `labeled`, `modeling`", "show": "`labelled`, `modelling`, `travelled`, `signalled`, `levelled`, `channelled`" },
+    { "regex": "\\b(?:cent|met|lit|fib|theat)re(?:s|d)?\\b", "fix": "`-er`: `center`, `meter`", "show": "`centre`, `metre`, `litre`, `fibre`, `theatre`" },
+    { "regex": "\\b(?:de)?(?:organi|recogni|reali|initiali|seriali|normali|optimi|minimi|maximi|prioriti|customi|finali|synchroni|saniti|authori|summari|categori|tokeni|visuali|standardi|generali|characteri|memori|parameteri|containeri|virtuali|centrali|capitali|emphasi|apologi|materiali|speciali|stabili|anonymi|randomi|locali|internationali|critici|digiti|moderni|personali)s(?:e|es|ed|ing|ation|ations|er|ers)\\b", "fix": "`-ize`, `-ization`", "show": "`-ise` and `-isation` forms such as `normalise`, `initialised`, `organisation`" },
+    { "regex": "\\b(?:analy|paraly|cataly)s(?:e|ed|ing)\\b", "fix": "`-yze`: `analyze`", "show": "`analyse`, `analysed`, `analysing`" },
+    { "phrase": "grey(?:s|ed|ing)?", "fix": "gray" },
+    { "phrase": "whilst", "fix": "while" },
+    { "phrase": "amongst", "fix": "among" },
+    { "phrase": "programmes?", "fix": "program" },
+    { "phrase": "licence[ds]?", "fix": "license" },
+    { "phrase": "defence|offence", "fix": "defense, offense" },
+    { "phrase": "catalogue[ds]?", "fix": "catalog" },
+    { "phrase": "artefacts?", "fix": "artifact" },
+    { "phrase": "spelt|learnt", "fix": "spelled, learned" },
+    { "phrase": "per cent", "fix": "percent" }
+  ]
+}

@@ -1,0 +1,249 @@
+# Configuration
+
+Copy `.claude/concise.json.example` to `.claude/concise.json` (Claude Code) or `.codex/concise.json` (Codex) in your project, then edit the keys below. If both files exist, `.claude/concise.json` wins.
+
+## Every key and its default
+
+| Key | Default | What it does |
+|---|---|---|
+| `maxCommentLines` | `2` | Line limit for one contiguous comment run. |
+| `maxFileLines` | `300` | Line limit for a new file. |
+| `maxPrBodyParagraphs` | `1` | Prose paragraph limit for a `gh` body. |
+| `maxPrBodySentences` | `3` | Sentence limit for one paragraph of a `gh` body. |
+| `maxRetries` | `2` | Denials on one target before the hook allows and flags it. |
+| `ignoreGlobs` | 9 globs | Paths exempt from every check. |
+| `checks.comments` | `true` | Runs the comment length check. |
+| `checks.fileSize` | `true` | Runs the file length check. |
+| `checks.prBody` | `true` | Runs the `gh` body check. |
+| `scan.codeFiles` | `true` | Runs `code`-scope packs and dictionary entries over whole code files, string literals included. |
+| `scan.notebooks` | `true` | Checks notebook cells that `NotebookEdit` writes. |
+| `scan.heredocWrites` | `true` | Checks files that `cat` or `tee` writes from a heredoc, before the command runs. |
+| `scan.shellWrites` | `true` | Checks the lines a shell command added to files in a git work tree, after it runs. |
+| `scan.mcp` | `true` | Checks the text and files that MCP tools post or write. |
+| `scan.plans` | `true` | Checks the plan that `ExitPlanMode` shows for approval. |
+| `scan.tasks` | `true` | Checks `TaskCreate` and `TaskUpdate` text. |
+| `scan.questions` | `true` | Checks `AskUserQuestion` questions and options. |
+| `stopHook` | `true` | Runs reply checks on `Stop` and `SubagentStop`. |
+| `context.enabled` | `true` | Sends resolved rules at startup, resume, compaction, and subagent creation. |
+| `context.perTurn` | `false` | Also sends rules on `UserPromptSubmit`. |
+| `subagentStop.enabled` | `true` | Checks subagent replies when `stopHook` is enabled. |
+| `subagentStop.exemptAgentTypes` | `[]` | Agent types exempt from subagent reply checks. |
+| `testFilter.codexPostToolUse` | `false` | Opts Codex into filtering completed test output instead of rewriting the command. |
+| `softFail` | `false` | Turns every deny, ask, and block into a flagged allow. |
+| `styleIgnoreGlobs` | 28 globs | Paths exempt from the style checks only. |
+| `allowList.phrases` | `[]` | Phrases that drop a finding on the line that holds them. |
+| `allowList.patterns` | `[]` | Regex strings that drop a finding on the line they match. |
+| `bypass.phrases` | `[]` | Phrases that exempt the whole tool call. |
+| `bypass.patterns` | `[]` | Regex strings that exempt the whole tool call. |
+| `log.enabled` | `false` | Writes one record per hook invocation. |
+| `log.path` | `null` | Log file path. `null` uses `~/.cache/concise/concise.log`. |
+| `log.maxSize` | `"5m"` | Size that triggers rotation. |
+| `log.maxFiles` | `5` | Rotated files kept. |
+| `log.rotate` | `"size"` | `size`, `daily`, or `both`. |
+| `log.format` | `"json"` | `json` or `plaintext`. |
+| `monitor.persist` | `true` | Appends each hook record, with its request and response, to the project's record file for `concise-web --all`. |
+| `features.emDash.enabled` | `false` | Runs the dash check. |
+| `features.emDash.enDash` | `true` | Flags the en dash (`U+2013`) as well. |
+| `features.emDash.doubleHyphen` | `false` | Flags `--` between word characters or between spaces. |
+| `features.emDash.mode` | `"confirm"` | `confirm`, `ask`, or `deny`. |
+| `features.emDash.replies` | `true` | Scans the agent's final reply. |
+| `features.aiWriting.enabled` | `false` | Runs the AI writing check. |
+| `features.aiWriting.preset` | `"default"` | One of the 8 preset names. |
+| `features.aiWriting.categories` | `null` | An explicit category list that replaces the preset's list. |
+| `features.aiWriting.allow` | `[]` | Words or phrases that are never flagged. |
+| `features.aiWriting.mode` | `"confirm"` | `confirm`, `ask`, or `deny`. |
+| `features.aiWriting.replies` | `true` | Scans the agent's final reply. |
+| `features.aiWriting.packs` | `[]` | Extra pack files or directories. |
+| `features.aiWriting.excludePacks` | `[]` | Pack ids to drop. |
+| `features.aiWriting.enablePatterns` | `[]` | Category ids, pack ids, or `tag:<tag>` to add. |
+| `features.aiWriting.disablePatterns` | `[]` | Category ids, pack ids, or `tag:<tag>` to drop. |
+| `features.aiWriting.options` | `{}` | Script pack thresholds, keyed by pack id. |
+| `features.dictionary.enabled` | `true` | Runs the dictionary check. It does no work until it has an entry. |
+| `features.dictionary.mode` | `"confirm"` | `confirm`, `ask`, or `deny`. |
+| `features.dictionary.entries` | `[]` | Terms to flag, each with its own match rule and fix. See [dictionary](#dictionary). |
+
+The default `ignoreGlobs` list: `**/node_modules/**`, `**/vendor/**`, `**/dist/**`, `**/build/**`, `**/.next/**`, `**/*.generated.*`, `**/*.min.js`, `**/package-lock.json`, `**/*.lock`.
+
+## The five layers
+
+The hook reads config from 5 layers, lowest first. A higher layer replaces a scalar key.
+
+1. The built-in defaults.
+2. `BEC_CONFIG_JSON`, then the baseline variables `BEC_FEATURE_ENABLE`, `BEC_FEATURE_DISABLE`, `BEC_ENABLE_PATTERNS`, `BEC_DISABLE_PATTERNS`, and `BEC_LOAD_LIB_PATHS`.
+3. The `BEC_CONFIG_PATH` file, then the user config. The user config is the first of `$XDG_CONFIG_HOME/concise/concise.json`, `~/.config/concise/concise.json`, `~/.claude/concise.json`, `~/.codex/concise.json`.
+4. Project config: `<cwd>/.claude/concise.json`, else `<cwd>/.codex/concise.json`.
+5. The override variables: the `ALWAYS` forms, `BEC_HOOK_SOFT_FAIL`, `BEC_DISABLE_STOP_HOOK`, the `BEC_LOG_*` set, the `BEC_ALLOW_*` set, and the `BEC_BYPASS_*` set.
+
+A project file overrides `BEC_FEATURE_ENABLE`. `BEC_FEATURE_ALWAYS_ENABLE` overrides the project file. The variables are listed in [environment.md](environment.md).
+
+Of the three config files, the `BEC_CONFIG_PATH` file loads first. The user file merges over it, then the project file merges over both, so the project file wins a conflict. A relative `BEC_CONFIG_PATH` resolves against the cwd. When `BEC_CONFIG_PATH` names the user file or the project file, the hook reads that file once, in the user or project place. `BEC_CONFIG_PATH_ONLY=1` skips the user file and the project file.
+
+## Merge rules per key
+
+- Unioned across layers, duplicates dropped, order kept: `styleIgnoreGlobs`, `allowList.phrases`, `allowList.patterns`, `bypass.phrases`, `bypass.patterns`, `features.aiWriting.allow`, `features.aiWriting.packs`, `features.aiWriting.excludePacks`.
+- Replaced by the higher layer: `ignoreGlobs`, `features.aiWriting.categories`.
+- Merged one level deep: `features`, `checks`, `log`, `monitor`, `context`, `subagentStop`, `testFilter`, and `features.aiWriting.options` per pack id.
+- Merged by `id`: `features.dictionary.entries`. A higher entry replaces a lower entry with the same `id` in place, and new ids go at the end. `{ "id": "x", "enabled": false }` in a higher layer switches off entry `x`.
+- `enablePatterns` and `disablePatterns` end as two final lists. Inside one layer, an id in both goes to disable. A higher enable removes the id from a lower disable, and a higher disable removes it from a lower enable.
+
+A config file or a `BEC_CONFIG_JSON` value that does not parse as a JSON object is skipped. The other layers still apply, and the hook reports the skipped layer once per session in a `systemMessage`.
+
+## checks, scan, and stopHook
+
+Each core check has its own switch under `checks`: `comments`, `fileSize`, and `prBody`, all `true` by default. Setting one to `false` skips that check and leaves the style checks running.
+
+```json
+{
+  "checks": { "comments": true, "fileSize": false, "prBody": true },
+  "stopHook": false
+}
+```
+
+Each place the style checks read beyond Write and Edit has a switch under `scan`, all `true` by default. Setting one to `false` stops the style checks there and leaves the rest running. The README lists what each one covers.
+
+`scan.shellWrites` runs on `PostToolUse`, so the text is already on disk and the findings come back next to the command output. It reads files whose mtime falls inside the command's run time, at most 20 per command, and reports each finding once per session. It compares the work tree with the git index: older unstaged lines in a changed file are reported once too, and a change the command also staged is missed.
+
+```json
+{
+  "scan": { "shellWrites": false, "tasks": false }
+}
+```
+
+`"stopHook": false` skips `Stop` and `SubagentStop` reply checks before reading transcripts. `SubagentStop` uses `last_assistant_message`, then `agent_transcript_path`. Retry and confirmation state is separate for each session and agent. `SessionEnd` removes that session's state within a bounded cleanup window.
+
+## Lifecycle context and host hooks
+
+`SessionStart` sends the resolved limits, enabled style checks, and escape hatches on `startup`, `resume`, `clear`, and `compact`, and in Claude Code on `fork`. `SubagentStart` sends the same rules. Set `context.perTurn` to `true` for reminders on `UserPromptSubmit`. Configuration errors are reported even when reminders are disabled.
+
+Claude reads `hooks/hooks.json`, with broad `if` filters for shell commands. Codex reads `hooks/codex.json`, which uses command hooks without Claude's `if` fields. Both hosts send lifecycle records to the existing monitor, and both show a `concise: ...` status line while a hook runs.
+
+In Claude Code auto mode, a subagent hands its report back through the `SubagentHandback` tool. A `PreToolUse` hook on that tool runs the subagent reply check over the report and denies the handback with the findings, so the subagent revises before the parent sees it. `SubagentStop` skips Claude's internal agents, such as prompt suggestions, which arrive with an empty `agent_type` when the session runs without `--agent`. [Claude hook events](https://code.claude.com/docs/en/hooks)
+
+Claude Code filters test output after the command ends. A `PostToolUse` hook on `Bash` replaces `stdout` through `updatedToolOutput` with the filtered text and empties `stderr`; the saved log holds both. Claude Code sends only passing runs to `PostToolUse`, so a failed run keeps its full output. The hook returns no permission decision and never changes the command. [Claude PostToolUse decision control](https://code.claude.com/docs/en/hooks)
+
+Codex keeps the existing test command rewrite by default. Set `testFilter.codexPostToolUse` to `true` to try filtering completed results. The post hook preserves failed output, the exit status, and a path to the available raw output. It uses `continue: false` feedback so nested code-mode promises can resolve. Direct calls, code-mode calls, and completed background polls must pass live host smoke checks before changing the default. [Codex PostToolUse contract](https://learn.chatgpt.com/docs/hooks#posttooluse)
+
+Filtering requires a structured response with an exit status. Codex CLI 0.153.2 sends raw text without that status, so the post hook leaves its output unchanged. Text printed by a test is not treated as exit metadata.
+
+## Optional Claude model checks
+
+Generate one optional evaluator from the current project configuration, using the installed plugin path:
+
+```sh
+node /path/to/concise/scripts/model-check-settings.mjs --evaluator prompt --cwd /path/to/project > /tmp/concise-model-settings.json
+claude --settings /tmp/concise-model-settings.json
+```
+
+Use `--evaluator agent` for an agent evaluator. The default, `off`, generates no model hooks. Each generated settings file selects one evaluator for `Stop` and `SubagentStop`; load one file per session. Regenerate it after changing Concise configuration or environment overrides.
+
+The evaluator checks reply padding with the resolved rules, bypasses, soft-fail setting, and agent exemptions. It allows a reply when `stop_hook_active` is true. Prompt checks have a 15-second timeout; agent checks have 30 seconds. These checks use model judgment. They are absent from the shipped manifests. Codex skips `prompt` and `agent` handlers. [Claude model hooks](https://code.claude.com/docs/en/hooks#prompt-based-hooks), [Codex hook types](https://learn.chatgpt.com/docs/hooks)
+
+## mode
+
+`mode` is set per feature, under `features.emDash.mode`, `features.aiWriting.mode`, and `features.dictionary.mode`. It takes `confirm`, `ask`, or `deny`. When more than one feature fires on one call, the strictest mode wins (`deny` over `ask` over `confirm`) and one message carries every part.
+
+`confirm` is the default. The flow:
+
+1. The first write carrying a finding is denied. The reason names the file, the line, the flagged text, the category, the fix, and a reference path.
+2. To keep the text, send the identical write again. The hook allows it and reports `[concise] Kept after confirmation: <summary>` in a `systemMessage` and in `additionalContext`.
+3. To fix the text, send different text. The hook checks the new text from the start.
+4. A third identical write starts a new episode and is denied again.
+
+`ask` uses Claude Code's native permission prompt and also sends the finding to the agent. Codex does not support that hook decision, so Concise denies the call and tells the agent to revise or request your approval. After approval, the agent retries with `concise-ignore`; repeating the unchanged call stays denied. On `Stop`, `ask` behaves as `confirm`.
+
+`deny` denies until `maxRetries` is passed, then allows the write and flags it, the same as the 3 core checks.
+
+## dictionary
+
+`features.dictionary.entries` lists terms to flag. Each entry fires in the same hooks, with the same confirm flow, as the other style checks.
+
+```json
+{
+  "features": {
+    "dictionary": {
+      "entries": [
+        { "id": "blacklist", "match": "startsWith", "value": "blacklist", "fix": "denylist" },
+        { "id": "hope-helps", "match": "endsWith", "on": "line", "value": "Hope this helps!", "fix": "end on the last fact", "hooks": ["stop", "subagentStop"] },
+        { "id": "ticket", "match": "regex", "value": "\\bJIRA-\\d+\\b", "fix": "link the ticket", "scopes": ["commit", "gh"] }
+      ]
+    }
+  }
+}
+```
+
+| Field | Required | Values |
+|---|---|---|
+| `id` | yes | Lowercase letters, digits, and hyphens. The deny tag is `[concise:dictionary:<id>]`. |
+| `match` | yes | `exact`, `contains`, `startsWith`, `endsWith`, or `regex`. |
+| `value` | yes | The term, the phrase, or the regular expression. |
+| `fix` | yes | What to write instead. The deny shows it. |
+| `on` | no | `word` (default), `line`, or `text`. `regex` ignores it. |
+| `caseSensitive` | no | `false` by default. |
+| `flags` | no | Regex flags for `regex` entries. Default `i`. The scanner adds `g` and `d` and drops `y`. |
+| `hooks` | no | `edit`, `bash`, `stop`, `subagentStop`. Absent means all 4. |
+| `scopes` | no | `files`, `comments`, `code`, `gh`, `commit`, `command`, `reply`. Absent means every scope except `command` and `code`. |
+| `enabled` | no | `false` switches the entry off. A switched-off entry needs only its `id`. |
+
+How `on` changes the match:
+
+- `word`: `exact` matches the whole word or phrase. `startsWith`, `endsWith`, and `contains` match inside a word and report the whole word. A word edge is any character other than a letter, a digit, or `_`, so `C++` and `#tag` work as values.
+- `line`: the value is compared with each line, with leading and trailing spaces ignored. In a code comment, the comment marker is ignored as well.
+- `text`: the value is compared with the whole scanned span: a prose file, one comment run, a commit message, a `gh` body, or a reply.
+
+For `regex`, a named group `(?<hit>...)` sets the part the deny quotes.
+
+The hooks map to the text they scan: `edit` covers file writes, edits, and patches; `bash` covers `git commit` messages and `gh` bodies; `stop` covers the final reply; `subagentStop` covers subagent replies and `SubagentHandback` reports. `concise-ignore`, `concise-ignore-file`, `allowList`, `bypass`, `ignoreGlobs`, and `styleIgnoreGlobs` apply to dictionary findings. `features.aiWriting.allow` does not.
+
+An entry that does not validate is skipped, and the hook reports it once per session. The settings console and `concise-config` refuse to save it. The feature id for `BEC_FEATURE_*` is `dictionary`.
+
+## allowList and bypass
+
+`allowList.phrases` and `allowList.patterns` drop single findings. A finding is dropped when its matched text or its whole source line contains a phrase (case-insensitive) or matches a pattern (a regex string, compiled with the `i` flag). Both lists cover em dashes and every AI writing category. A pattern that does not compile is skipped and reported once per session.
+
+```json
+{
+  "allowList": { "phrases": ["load-bearing"], "patterns": ["^Fixes #\\d+"] }
+}
+```
+
+That config keeps the word `load-bearing` and any line starting with `Fixes #` followed by digits.
+
+`bypass.phrases` and `bypass.patterns` exempt the whole tool call. When the written chunks, the full `Bash` command, or the reply text holds a phrase or matches a pattern, the hook allows the call with the flag `[concise] Allowed by bypass phrase "<phrase>"` and runs no other check. `concise-ignore` and `concise-ignore-file` keep their narrower behavior.
+
+```json
+{
+  "bypass": { "phrases": ["concise-bypass"], "patterns": ["^WIP:"] }
+}
+```
+
+That config skips every check on a write that holds the text `concise-bypass`, and on a `git commit` whose message starts with `WIP:`.
+
+## softFail
+
+`"softFail": true`, or `BEC_HOOK_SOFT_FAIL=1`, turns every deny, every ask, and every `Stop` block into an allow that carries the same text, prefixed `[concise] soft-fail:`. On `PreToolUse` the text goes to `systemMessage` and to `additionalContext`; on `Stop` it goes to `systemMessage`. Retry counters and pending confirmation hashes are left as they are, so turning soft fail off resumes the normal flow mid-session.
+
+## ignoreGlobs and styleIgnoreGlobs
+
+`ignoreGlobs` exempts a path from every check. `styleIgnoreGlobs` exempts a path from the style checks, and the comment and file length checks still apply. The default `styleIgnoreGlobs` list covers agent instruction files:
+
+`**/.claude/**`, `**/.codex/**`, `**/.agent/**`, `**/.agents/**`, `**/.cursor/**`, `**/.cursorrules`, `**/.windsurf/**`, `**/.windsurfrules`, `**/.gemini/**`, `**/.roo/**`, `**/.clinerules`, `**/.clinerules/**`, `**/.kiro/**`, `**/.continue/**`, `**/.aider*`, `**/.opencode/**`, `**/.amazonq/**`, `**/.junie/**`, `**/.trae/**`, `**/.augment/**`, `**/.github/copilot-instructions.md`, `**/.github/instructions/**`, `**/.github/prompts/**`, `**/.github/agents/**`, `**/CLAUDE.md`, `**/CLAUDE.local.md`, `**/AGENTS.md`, `**/GEMINI.md`.
+
+A higher config layer adds to this list. A reply, a commit message, a `gh` body, and a command text are scanned under a virtual path, so neither list applies to them.
+
+## log
+
+`"log": { "enabled": true }`, or `BEC_LOG_ENABLED=1`, writes one record per hook invocation. The default path is `~/.cache/concise/concise.log`, with `os.tmpdir()/concise/concise.log` as the fallback when the home directory cannot be written. A `log.path` whose directory cannot be created turns logging off.
+
+Fields per record: `ts`, `hook`, `event`, `tool`, `session`, `cwd`, `key`, `scope`, `decision` (`allow`, `flag`, `deny`, `ask`, `block`, `bypass`, or `error`), `mode`, `softFail`, `findings` (`category`, `match`, and `line`, capped at 20), `counts`, `durationMs`, and `error`. A field with no value is `null`.
+
+One record from a denied em dash write:
+
+```json
+{"ts":"2026-09-04T04:03:23.197Z","hook":"check-edit","event":"PreToolUse","tool":"Write","session":"doc-6","cwd":"/tmp/demo","key":"style:/tmp/demo/notes.md","scope":"files","decision":"deny","mode":"confirm","softFail":false,"findings":[{"category":"emDash","match":"parser runs first — then it rejects th","line":1}],"counts":{"emDash":1,"aiWriting":0},"durationMs":12,"error":null}
+```
+
+Format `json` writes one JSON object per line. Format `plaintext` writes `ts hook tool decision key summary`, with `-` for an empty cell. Rotation `size` renames the file to `.1` through `.<maxFiles>` once it passes `maxSize` and drops the oldest. Rotation `daily` writes `concise.YYYY-MM-DD.log` beside the configured path and keeps `maxFiles` of them. Rotation `both` does both. A write failure is swallowed and the hook still answers.
+
+## monitor
+
+Every hook call registers its project in `~/.config/concise/projects/<folder>-<hash>.json` (`$XDG_CONFIG_HOME` when set) with the real path, the name, the first and last time seen, the path of its record file, and the git repository that holds it (`repo`: name, root, worktree name, and subdirectory, or `null`). The repo is read from `.git` files without running git, so a deleted worktree keeps its label. With `monitor.persist` on, the hook also appends the full record, including the tool request and the hook response, to `~/.local/state/concise/projects/<hash>/records.jsonl` (`$XDG_STATE_HOME` when set). The file rotates at 5 MiB and keeps 5 copies. `concise-web --all` reads the registry and follows every record file. `"monitor": { "persist": false }`, or `BEC_MONITOR_PERSIST=0`, keeps the registry entry and skips the record. `BEC_MONITOR_DISABLED=1` skips both and the console feed. Without a home directory the hook writes neither.
