@@ -10,6 +10,8 @@ import { EXCLUDED, KEPT_ASSETS, PLUGIN, buildTree, included } from "../scripts/d
 
 const execute = promisify(execFile);
 const SCRIPT = fileURLToPath(new URL("../scripts/directory-tree.mjs", import.meta.url));
+// The directory listing drops relative links, so the plugin README links to GitHub.
+const REPO_PLUGIN_URL = "https://github.com/yannelli/be-concise/blob/main/plugins/concise/";
 
 async function temp(t) {
   const directory = await mkdtemp(join(tmpdir(), "concise-directory-tree-"));
@@ -78,8 +80,9 @@ test("the tree is self-contained text with no approvals", async (t) => {
     if (file.endsWith(".md")) {
       const prose = text.replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
       for (const [, link] of prose.matchAll(/\[[^\]\n]*\]\(([^)\s#]+)[^)]*\)/g)) {
-        if (/^[a-z]+:/i.test(link)) continue;
-        const target = relative(out, resolve(out, dirname(file), link));
+        const local = link.startsWith(REPO_PLUGIN_URL) ? link.slice(REPO_PLUGIN_URL.length) : link;
+        if (/^[a-z]+:/i.test(local)) continue;
+        const target = relative(out, resolve(out, local === link ? dirname(file) : "", local));
         assert.ok(files.some((path) => path === target || path.startsWith(`${target}/`)), `${file} links ${link}`);
       }
     }
