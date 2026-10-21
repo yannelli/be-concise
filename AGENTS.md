@@ -4,7 +4,8 @@
 
 - Create feature branches from `main`, using `<type>/<short-description>`.
 - Target `main` for PRs and use a merge commit with the PR title as its subject. The repository permits merge commits for PRs.
-- `main` is the default branch and the only long-lived branch. Each merge into `main` runs the release workflow, which publishes a stable release when a commit calls for a version bump.
+- `main` is the default branch and the only branch you work on. Each merge into `main` runs the release workflow, which publishes a stable release when a commit calls for a version bump.
+- `claude-directory` is generated. On each release, the workflow rebuilds it from `plugins/concise` with `scripts/directory-tree.mjs`, and Anthropic's directory reads it. Never edit, branch from, or merge it. Read [.agents/docs/claude-directory.md](.agents/docs/claude-directory.md) before you change what the tree holds.
 - Release automation owns version files, release notes, and tags. Do not edit versions or create release tags manually.
 - The release workflow publishes `@yannelli/be-concise` to npm through trusted publishing. Read [.agents/docs/INDEX.md](.agents/docs/INDEX.md) before changing release or publishing behavior.
 

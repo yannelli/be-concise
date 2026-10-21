@@ -25,7 +25,7 @@ The Claude Code and Codex features the concise manifests use, as the host docs d
 | `${CLAUDE_PLUGIN_ROOT}` in plugin skill text | yes | not documented | `skills/*/SKILL.md`, with a relative path for Codex |
 | `interface.composerIcon` and `interface.logo` | n/a | yes | `.codex-plugin/plugin.json` |
 | `displayName`, `homepage`, `repository`, and `keywords` | yes | n/a | `.claude-plugin/plugin.json` |
-| Directory listing fields `icon`, `documentationUrl`, and `supportUrl`, which Anthropic's directory reads and Claude Code ignores (checked 2026-10-21) | yes | n/a | `.claude-plugin/plugin.json` |
+| Directory listing fields `icon`, `documentationUrl`, `supportUrl`, and `privacyPolicyUrl`, which Anthropic's directory reads and Claude Code ignores (checked 2026-10-21) | yes | n/a | `.claude-plugin/plugin.json` |
 | Marketplace `description` | yes | n/a | `.claude-plugin/marketplace.json` |
 
 The hooks docs say a handler defined in more than one settings file runs once. They do not say whether two handlers in one plugin with the same command and different `if` rules both run for one call. When their rules can overlap, `check-edit` and `check-bash` claim the call's `tool_use_id`, so a second run exits without output.
