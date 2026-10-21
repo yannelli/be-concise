@@ -1,7 +1,7 @@
 # Host features
 
 Created: 2026-10-05
-Last updated: 2026-10-08
+Last updated: 2026-10-21
 
 The Claude Code and Codex features the concise manifests use, as the host docs described them on 2026-10-05 (2026-10-08 for the `NotebookEdit`, `PowerShell`, MCP, task, question, and `PostToolUse` rows), and the omp features the omp extension uses, as of 2026-10-07. Read the sources again before you change a manifest or `omp/extension.mjs`.
 
@@ -23,6 +23,9 @@ The Claude Code and Codex features the concise manifests use, as the host docs d
 | Plugin MCP server file with `${CLAUDE_PLUGIN_ROOT}` in `args` | yes | no: see below | `.mcp.json` (Claude Code), `.codex-mcp.json` (Codex) |
 | `${CLAUDE_PLUGIN_ROOT}` in plugin skill text | yes | not documented | `skills/*/SKILL.md`, with a relative path for Codex |
 | `interface.composerIcon` and `interface.logo` | n/a | yes | `.codex-plugin/plugin.json` |
+| `displayName`, `homepage`, `repository`, and `keywords` | yes | n/a | `.claude-plugin/plugin.json` |
+| Directory listing fields `icon`, `documentationUrl`, and `supportUrl`, which Anthropic's directory reads and Claude Code ignores (checked 2026-10-21) | yes | n/a | `.claude-plugin/plugin.json` |
+| Marketplace `description` | yes | n/a | `.claude-plugin/marketplace.json` |
 
 The hooks docs say a handler defined in more than one settings file runs once. They do not say whether two handlers in one plugin with the same command and different `if` rules both run for one call. When their rules can overlap, `check-edit` and `check-bash` claim the call's `tool_use_id`, so a second run exits without output.
 
@@ -77,6 +80,9 @@ Gaps: omp has no subagent stop event, so subagent replies are not checked. The e
 - Claude Code hooks: https://code.claude.com/docs/en/hooks
 - Claude Code skills: https://code.claude.com/docs/en/skills
 - Claude Code plugins reference: https://code.claude.com/docs/en/plugins-reference
+- Claude Code plugin manifest reference: https://code.claude.com/docs/en/plugins/manifest-reference
+- Anthropic directory pre-submission checklist: https://claude.com/docs/plugins/pre-submission-checklist
+- Plugin support by app: https://claude.com/docs/plugins/platform-support
 - Codex hooks: https://learn.chatgpt.com/docs/hooks
 - Codex plugins: https://developers.openai.com/plugins/build/plugins
 - Codex MCP: https://developers.openai.com/codex/mcp
