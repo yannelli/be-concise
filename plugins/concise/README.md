@@ -124,7 +124,7 @@ Codex and omp load the same hooks through their own manifests. The section "How 
 - `~/.cache/concise/concise.log`: only when you turn logging on.
 - Session state under the system temp folder. The `SessionEnd` hook removes it.
 
-**Sends.** The hooks and the MCP server send nothing off your computer. When the `concise-web` console runs, each hook also posts its record to the console on `127.0.0.1`. The console is a separate npm command that you start yourself, from [`@yannelli/be-concise`](https://github.com/yannelli/be-concise#readme). It fetches the pack URLs that you enter, checks `api.github.com` for releases when you select **Check for updates**, and its `update` command runs `npm` and the `plugin` commands of your agent CLI.
+**Sends.** The hooks and the MCP server send nothing off your computer. When you ask the `concise-tune` skill to collect writing samples, it can run `gh pr list` and `gh pr view`, which read your own PR bodies from GitHub with your `gh` login. The skill sends no other data off your computer. When the `concise-web` console runs, each hook also posts its record to the console on `127.0.0.1`. The console is a separate npm command that you start yourself, from [`@yannelli/be-concise`](https://github.com/yannelli/be-concise#readme). It fetches the pack URLs that you enter, checks `api.github.com` for releases when you select **Check for updates**, and its `update` command runs `npm` and the `plugin` commands of your agent CLI.
 
 The full policy, with every stored file and how long it stays, is in [PRIVACY.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/PRIVACY.md).
 

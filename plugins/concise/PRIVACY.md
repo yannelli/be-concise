@@ -26,6 +26,8 @@ The record file can hold any text that the agent wrote or read, including person
 
 The hooks and the MCP server make no network calls, except one: when the `concise-web` console runs, each hook posts its record to the console on `127.0.0.1`. That post does not leave your computer.
 
+When you ask the `concise-tune` skill to collect writing samples, it can run `gh pr list` and `gh pr view`, which read your own PR bodies from GitHub with your `gh` login. The skill sends no other data off your computer.
+
 The `concise-web` console runs only when you start it. It makes these network calls:
 
 - It fetches the pack URLs that you enter.
