@@ -1,6 +1,6 @@
 import { mergeEntries } from "./dictionary.mjs";
 
-const AI_UNION_KEYS = ["allow", "packs", "excludePacks"];
+const AI_UNION_FIELDS = ["allow", "packs", "excludePacks"];
 
 const FEATURE_TARGETS = {
   emDash: ["features", "emDash", "enabled"],
@@ -48,7 +48,7 @@ function mergeOptions(base = {}, layer) {
 
 function mergeAiWriting(base = {}, layer = {}) {
   const out = { ...base, ...layer };
-  for (const key of AI_UNION_KEYS) out[key] = unionList(base[key], layer[key]);
+  for (const key of AI_UNION_FIELDS) out[key] = unionList(base[key], layer[key]);
   out.options = mergeOptions(base.options, layer.options);
   const merged = mergePatternLists(
     { enable: base.enablePatterns, disable: base.disablePatterns },

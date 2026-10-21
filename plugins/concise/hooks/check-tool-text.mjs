@@ -19,7 +19,7 @@ const BUILT_IN = {
   TaskUpdate: { scan: "tasks", label: "task", keys: ["subject", "description", "activeForm"], scope: "reply" },
   AskUserQuestion: { scan: "questions", label: "question", keys: ["question", "label", "description"], scope: "reply" },
 };
-const PATH_KEYS = ["path", "file_path", "filePath"];
+const PATH_FIELDS = ["path", "file_path", "filePath"];
 const MIN_LENGTH = 20;
 const MAX_DEPTH = 4;
 
@@ -40,7 +40,7 @@ function collect(value, keys, out = [], depth = 0) {
 function fileTargets(input) {
   const out = [];
   for (const item of [input, ...(Array.isArray(input.files) ? input.files : [])]) {
-    const path = PATH_KEYS.map((key) => item?.[key]).find((value) => typeof value === "string" && value);
+    const path = PATH_FIELDS.map((key) => item?.[key]).find((value) => typeof value === "string" && value);
     if (!path) continue;
     const edits = (Array.isArray(item.edits) ? item.edits : []).map((edit) => edit?.newText).filter((text) => typeof text === "string");
     if (typeof item.content === "string") out.push({ path, chunks: [item.content], wholeFile: true });

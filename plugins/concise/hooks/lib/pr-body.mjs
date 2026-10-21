@@ -42,11 +42,11 @@ const API_CALL = /\bgh\s+api\b/g;
 const WORD = String.raw`((?:"(?:[^"\\]|\\.)*"|'[^']*'|\\.|[^\s"'\\])+)`;
 const API_FIELD = new RegExp(String.raw`(?:^|\s)(-[fF]|--(?:raw-)?field)(?:=|\s+)` + WORD, "g");
 const API_INPUT = new RegExp(String.raw`(?:^|\s)--input(?:=|\s+)` + WORD);
-const API_KEYS = ["body", "message", "description", "title"];
+const BODY_FIELDS = ["body", "message", "description", "title"];
 
 function jsonFields(text) {
   try {
-    return Object.entries(JSON.parse(text)).filter(([key, value]) => API_KEYS.includes(key) && typeof value === "string").map(([, value]) => value);
+    return Object.entries(JSON.parse(text)).filter(([key, value]) => BODY_FIELDS.includes(key) && typeof value === "string").map(([, value]) => value);
   } catch {
     return [];
   }
@@ -62,7 +62,7 @@ export function apiFields(command, cwd = ".") {
     const read = (path) => (path === "-" ? bodyIn(segment) : readMessageFile(path, { cwd, command }));
     for (const [, flag, word] of segment.matchAll(API_FIELD)) {
       const [key, value = ""] = unquote(word).split(/=(.*)/s);
-      if (!API_KEYS.includes(key)) continue;
+      if (!BODY_FIELDS.includes(key)) continue;
       // Only the typed `-F` form reads `@file`; a raw `-f` value is literal text.
       const typed = flag === "-F" || flag === "--field";
       out.push(typed && value.startsWith("@") ? read(value.slice(1)) : bodyIn(value) ?? unquote(value));

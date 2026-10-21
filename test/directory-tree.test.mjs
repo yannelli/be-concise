@@ -68,6 +68,8 @@ test("the tree is self-contained text with no approvals", async (t) => {
       if (file.endsWith(".json")) assert.ok(files.includes(path), `${file} runs ${path}`);
     }
     if (file.endsWith(".mjs")) {
+      // The directory scan reads a constant such as KEY or TOKEN as a credential from the user's machine.
+      assert.doesNotMatch(text, /\b(?:const|let|var)\s+(?:\w+_)?(?:KEYS?|TOKENS?|SECRETS?|PASSWORDS?)\s*=/, file);
       for (const [, , from, url] of text.matchAll(/(from\s+|import\(\s*)["'](\.{1,2}\/[^"']+)["']|new URL\(\s*["'](\.{1,2}\/[^"']+)["']\s*,\s*import\.meta\.url/g)) {
         const target = relative(out, resolve(out, dirname(file), from || url));
         assert.ok(files.some((path) => path === target || path.startsWith(`${target}/`)), `${file} imports ${from || url}`);

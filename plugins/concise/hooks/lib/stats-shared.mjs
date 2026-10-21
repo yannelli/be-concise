@@ -1,6 +1,6 @@
 import { words } from "./text-stats.mjs";
 
-const TOKEN = /^[a-z][a-z'’-]*$/;
+const WORD = /^[a-z][a-z'’-]*$/;
 
 export const STOPWORDS = new Set([
   "a", "an", "the", "and", "or", "but", "of", "to", "in", "on", "at", "for", "with", "is", "are",
@@ -10,10 +10,10 @@ export const STOPWORDS = new Set([
 
 /** The token rule the statistical packs share: lowercase, letters only, no bare numbers. */
 export function tokensOf(stats) {
-  return stats.words().map((w) => w.text.toLowerCase()).filter((t) => TOKEN.test(t));
+  return stats.words().map((w) => w.text.toLowerCase()).filter((t) => WORD.test(t));
 }
 
-export const tokensIn = (text) => words(text).map((w) => w.text.toLowerCase()).filter((t) => TOKEN.test(t));
+export const tokensIn = (text) => words(text).map((w) => w.text.toLowerCase()).filter((t) => WORD.test(t));
 
 export const wordCount = (text) => words(text).length;
 
