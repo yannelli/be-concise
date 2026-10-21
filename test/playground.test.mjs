@@ -91,8 +91,8 @@ test("playground shows each Bash hook response without executing the command or 
   const marker = join(cwd, "executed");
   const command = `npm test && touch '${marker}'`;
   const result = await runTest({ cwd, config: defaultConfig(), kind: "Bash", text: command });
-  assert.deepEqual(result.hooks.map((hook) => hook.hook), ["test-filter", "check-bash", "check-edit"]);
-  assert.ok(result.hooks[0].response.hookSpecificOutput.updatedInput.command.includes("TF_CMD="));
+  assert.deepEqual(result.hooks.map((hook) => hook.hook), ["check-bash", "check-edit"]);
+  assert.ok(result.hooks.every((hook) => !hook.response.hookSpecificOutput?.updatedInput && hook.response.hookSpecificOutput?.permissionDecision !== "allow"));
   assert.ok(result.hooks.every((hook) => hook.request.tool_input.command === command && hook.exitCode === 0));
   assert.equal(existsSync(marker), false);
 });
@@ -100,10 +100,10 @@ test("playground shows each Bash hook response without executing the command or 
 test("playground continues through matching Bash hooks after a denial", async (t) => {
   const cwd = await fixture(t);
   const result = await runTest({ cwd, config: dashConfig(), kind: "Bash", text: "git commit -m 'This — message.'" });
-  assert.equal(result.hooks.length, 3);
-  assert.equal(result.hooks[1].decision, "deny");
-  assert.equal(result.hooks[2].hook, "check-edit");
-  assert.equal(result.hooks[2].exitCode, 0);
+  assert.equal(result.hooks.length, 2);
+  assert.equal(result.hooks[0].decision, "deny");
+  assert.equal(result.hooks[1].hook, "check-edit");
+  assert.equal(result.hooks[1].exitCode, 0);
   assert.ok(result.matches.some((match) => match.scope === "commit"));
 });
 
@@ -124,7 +124,6 @@ test("playground uses the config snapshot and isolates user environment, logging
   const shellMarker = join(cwd, "sourced");
   const startup = join(cwd, "startup.sh");
   await writeFile(startup, `touch '${shellMarker}'\n`);
-  await writeFile(join(home, ".claude", "test-filter.conf"), "FILTER_LINES=23\nFILTER_PATTERN='timeout'\n");
   const externalLog = join(cwd, "external.log");
   const statePath = join(cwd, "concise-state-external.json");
   await writeFile(statePath, "unchanged");
@@ -136,8 +135,7 @@ test("playground uses the config snapshot and isolates user environment, logging
   assert.equal(existsSync(externalLog), false);
   assert.equal(await readFile(statePath, "utf8"), "unchanged");
   const bash = await runTest({ cwd, env, config, kind: "Bash", text: "npm test" });
-  assert.match(bash.hooks[0].response.hookSpecificOutput.updatedInput.command, /TF_LINES=23/);
-  assert.match(bash.hooks[0].response.hookSpecificOutput.updatedInput.command, /TF_PATTERN=timeout/);
+  assert.ok(bash.hooks.every((hook) => hook.exitCode === 0));
   assert.equal(existsSync(shellMarker), false);
 });
 

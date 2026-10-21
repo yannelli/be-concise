@@ -21,9 +21,16 @@ function check(name, condition, detail) {
 
 function post(input, overrides) {
   const result = run(POST, input, { ...env, ...overrides });
-  for (const match of result.stopReason?.matchAll(/cat '([^']+)'/g) || []) logs.add(dirname(match[1]));
+  const text = result.stopReason || result.hookSpecificOutput?.updatedToolOutput?.stdout;
+  for (const match of text?.matchAll(/cat '([^']+)'/g) || []) logs.add(dirname(match[1]));
   return result;
 }
+
+const claudeResponse = (stdout, extra = {}) => ({ stdout, stderr: "", interrupted: false, isImage: false, noOutputExpected: false, ...extra });
+const claudeEvent = (command = "npm test", response = claudeResponse("PASS example.test.js\n1 passed\n")) => ({
+  ...bashEvent(setup({}), command), hook_event_name: "PostToolUse", tool_response: response,
+});
+const replaced = (result) => result.hookSpecificOutput?.updatedToolOutput;
 
 console.log("\nPostToolUse filter contracts (fixtures)");
 
@@ -37,7 +44,7 @@ console.log("\nPostToolUse filter contracts (fixtures)");
   const claude = { ...preEvent, turn_id: undefined };
   const rewrite = run(PRE, claude, env);
   check("Claude retains pre rewriting when Codex post filtering is enabled", rewrite.hookSpecificOutput?.updatedInput?.command.includes("TF_CMD="), rewrite);
-  assertEmpty("Claude post output is unchanged", post({ ...event(), turn_id: undefined }));
+  assertEmpty("a Codex-shaped response is unchanged in Claude Code", post({ ...event(), turn_id: undefined }));
   check("explicit Codex wiring enables post filtering", post({ ...event(), turn_id: undefined }, { CONCISE_HOOK_HOST: "codex" }).continue === false);
 }
 
@@ -91,6 +98,38 @@ console.log("\nPostToolUse filter contracts (fixtures)");
     assertEmpty("pending or unknown response payloads pass through", post(event("npm test", response)));
   }
   assertEmpty("unassociated poll payloads pass through", post({ ...event(), tool_name: "write_stdin", tool_input: { session_id: 99 } }));
+}
+
+console.log("\nPostToolUse filter in Claude Code (fixtures)");
+
+{
+  const output = "noise\nNOTE first\ncontext line\nNOTE second\nlast\n";
+  const input = claudeEvent("FILTER_PATTERN='^NOTE' FILTER_LINES=2 FILTER_CONTEXT=1 FILTER_TAIL=1 npm test", claudeResponse(output, { stderr: "warn line" }));
+  const result = post(input);
+  const updated = replaced(result);
+  check("Claude Code filters by default with updatedToolOutput and no decision", result.hookSpecificOutput?.hookEventName === "PostToolUse" && result.continue === undefined && result.decision === undefined && result.hookSpecificOutput.permissionDecision === undefined, result);
+  check("the replacement keeps the Bash output shape", updated && updated.stderr === "" && updated.interrupted === false && updated.isImage === false && updated.noOutputExpected === false, updated);
+  check("the replacement applies the pattern, context, cap, and tail", updated?.stdout.includes("runner=js exit=0") && updated.stdout.includes("NOTE first\ncontext line") && !updated.stdout.includes("NOTE second") && !updated.stdout.includes("noise"), updated);
+  const paths = [...(updated?.stdout.matchAll(/cat '([^']+)'/g) || [])].map((match) => match[1]);
+  check("stdout and stderr are saved before replacement", paths[0] && readFileSync(paths[0], "utf8") === `${output}warn line`, paths);
+  const colored = "\u001b[31mFAIL\u001b[0m example\nfull diagnostic\n";
+  check("failure evidence in a passing run survives", replaced(post(claudeEvent("FILTER_LINES=0 FILTER_TAIL=0 npm test", claudeResponse(colored))))?.stdout.includes(colored));
+}
+
+{
+  for (const command of ["NOFILTER=1 npm test", "ls -la", "npm test > out.log"]) {
+    assertEmpty(`Claude Code post filter skips ${command}`, post(claudeEvent(command)));
+  }
+  for (const [name, response] of [
+    ["an interrupted run", claudeResponse("partial\n", { interrupted: true })],
+    ["image output", claudeResponse("", { isImage: true })],
+    ["an empty run", claudeResponse("")],
+    ["a non-string stdout", { stdout: 3, stderr: "" }],
+    ["a missing response", null],
+  ]) {
+    assertEmpty(`Claude Code post filter leaves ${name}`, post(claudeEvent("npm test", response)));
+  }
+  assertEmpty("Claude Code post filter ignores PowerShell", post({ ...claudeEvent(), tool_name: "PowerShell" }));
 }
 
 for (const directory of logs) rmSync(directory, { recursive: true, force: true });

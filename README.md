@@ -12,7 +12,7 @@ New here? Start with [plugins/concise/README.md](plugins/concise/README.md).
 - New files longer than 300 lines
 - Inline `gh pr` and `gh issue` bodies with more than 1 prose paragraph or more than 3 sentences in a paragraph
 - Em dashes and 47 categories of AI writing patterns, both off until you turn them on
-- Output from pytest, `go test`, npm test, Jest, and Vitest; each run's full output is kept in its own log under `$TMPDIR/concise-test-filter-<uid>/<session>/`, and the path is printed with the filtered output
+- Output from pytest, `go test`, npm test, Jest, and Vitest; each run's full output is kept in its own log under `$TMPDIR`, and the path is printed with the filtered output. Claude Code filters a passing run after it ends and leaves failed runs whole. Codex and omp rewrite the command so the filter runs with it
 
 Structured GitHub bodies that use headings and lists are allowed. A denied call includes the exact limit and location. After 2 denied retries for the same target, Concise permits the next attempt and flags it.
 

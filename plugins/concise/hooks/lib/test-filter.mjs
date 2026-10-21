@@ -34,6 +34,14 @@ export function completedOutput(response) {
   return { output: output + (stderr ? `${output && !output.endsWith("\n") ? "\n" : ""}${stderr}` : ""), exitCode };
 }
 
+/** Claude Code fires PostToolUse only after Bash exits 0, so its response carries no exit code. */
+export function claudeOutput(response) {
+  if (!response || typeof response !== "object" || Array.isArray(response)) return null;
+  if (typeof response.stdout !== "string" || response.interrupted || response.isImage) return null;
+  if (!response.stdout && !response.stderr) return null;
+  return completedOutput({ ...response, exit_code: 0 });
+}
+
 function grepOutput(output, args) {
   const result = spawnSync("grep", args, {
     input: output, encoding: "utf8", timeout: 5000,

@@ -50,7 +50,7 @@ export function activityView(ctx) {
     panel("Event stream", el("div", {}, el("div", { class: "activity-filters" },
       ctx.state?.hub ? field("Project", choice("project", [["selected", "Selected project"], ["all", "All projects"]])) : null,
       field("Source", choice("source", [["all", "All sources"], ["live", "Live hooks"], ["test", "Playground"]])),
-      field("Decision", choice("decision", [["all", "All decisions"], ...["allow", "flag", "deny", "ask", "block", "bypass", "rewrite", "error"]])),
+      field("Decision", choice("decision", [["all", "All decisions"], ...["allow", "flag", "deny", "ask", "block", "bypass", "rewrite", "filter", "error"]])),
       field("Hook", choice("hook", [["all", "All hooks"], ...hooks])),
       field("Session", textFilter("session", "Filter by session")), field("Search", textFilter("search", "Search payloads…"))),
       el("div", { class: "stream-toolbar" }, count, el("div", { class: "row" }, badge("Live stream", "success"), clear)), records),

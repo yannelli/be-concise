@@ -18,13 +18,6 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/monitor-filter.mjs\"",
-                        "timeout": 15,
-                        "if": "Bash(*t*)",
-                        "statusMessage": "concise: preparing test output filter"
-                    },
-                    {
-                        "type": "command",
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-bash.mjs\"",
                         "timeout": 15,
                         "if": "Bash(*g*)",
@@ -122,6 +115,18 @@
                         "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-shell-writes.mjs\"",
                         "timeout": 15,
                         "statusMessage": "concise: checking files the command wrote"
+                    }
+                ]
+            },
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/post-test-filter.mjs\"",
+                        "timeout": 15,
+                        "if": "Bash(*t*)",
+                        "statusMessage": "concise: filtering test output"
                     }
                 ]
             }

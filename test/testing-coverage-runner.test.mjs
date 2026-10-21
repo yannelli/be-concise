@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
-import { chmod, mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import fsPromises, { chmod, mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import { delimiter, join } from "node:path";
-import test, { after } from "node:test";
+import test, { after, mock } from "node:test";
 import { defaultConfig } from "../plugins/concise/hooks/lib/config.mjs";
 import { disposeTests, runTest } from "../plugins/concise/web/testing/runner.mjs";
 
@@ -15,6 +16,16 @@ async function fixture(t) {
   const cwd = await mkdtemp(join(tmpdir(), "concise-runner-test-"));
   t.after(() => rm(cwd, { recursive: true, force: true }));
   return { cwd, env: { ...process.env, HOME: cwd, USERPROFILE: cwd } };
+}
+
+/** Claude Code's manifest no longer runs the test filter before Bash, so these tests list it themselves. */
+function withTestFilter(t) {
+  const hooks = { PreToolUse: [{ matcher: "Bash", hooks: [{ type: "command", command: 'node "${CLAUDE_PLUGIN_ROOT}/hooks/monitor-filter.mjs"' }] }] };
+  const readFile = fsPromises.readFile;
+  mock.method(fsPromises, "readFile", (path, ...rest) =>
+    String(path).endsWith(join("hooks", "hooks.json")) ? Promise.resolve(JSON.stringify({ hooks })) : readFile(path, ...rest));
+  syncBuiltinESMExports();
+  t.after(() => { mock.restoreAll(); syncBuiltinESMExports(); });
 }
 
 function dashConfig() {
@@ -83,6 +94,7 @@ test("runTest labels bypassed calls and runs check-reply for subagent handbacks"
 
 test("runTest copies the test filter config from USERPROFILE and works without a home", async (t) => {
   const { cwd } = await fixture(t);
+  withTestFilter(t);
   const { HOME, USERPROFILE, ...rest } = process.env;
   await mkdir(join(cwd, ".codex"));
   await writeFile(join(cwd, ".codex", "test-filter.conf"), "FILTER_LINES=23\n");
@@ -101,6 +113,7 @@ test("runTest rejects a test filter config it cannot read", async (t) => {
 
 test("runTest reports invalid hook responses, internal errors, and context-only flags", async (t) => {
   const { cwd, env } = await fixture(t);
+  withTestFilter(t);
   const filter = async (name, script) => {
     const PATH = await fakeBash(cwd, name, script);
     const result = await runTest({ cwd, env: { ...env, PATH }, config: defaultConfig(), kind: "Bash", text: "npm test" });

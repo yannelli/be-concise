@@ -135,11 +135,16 @@ console.log("\ncontext and optional model hooks");
   const matches = (condition, command) => new RegExp(`^${condition.slice(5, -1).split("*").map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s\\S]*")}$`).test(command);
   for (const [script, commands] of [
     ["check-bash.mjs", ["FOO=1 gh pr create --body x", "echo ok && git commit -m x", "echo $(gh issue comment 1 --body x)", "echo `git commit -m x`", "jj describe -m x"]],
-    ["monitor-filter.mjs", ["pytest", "npm test", "go test ./...", "FOO=1 npx jest", "echo $(vitest)", "echo ok && jest"]],
     ["check-edit.mjs", ["FOO=1 apply_patch <<'PATCH'\n*** Begin Patch\n*** End Patch\nPATCH", "python -c '*** Begin Patch\n*** End Patch'"]],
   ]) {
     for (const command of commands) assert.ok(shellHooks.some((hook) => hook.command.includes(script) && matches(hook.if, command)), command);
   }
+  const postHooks = claude.hooks.PostToolUse.find((group) => group.matcher === "Bash").hooks;
+  for (const command of ["pytest", "npm test", "go test ./...", "FOO=1 npx jest", "echo $(vitest)", "echo ok && jest"]) {
+    assert.ok(postHooks.some((hook) => hook.command.includes("post-test-filter.mjs") && matches(hook.if, command)), command);
+  }
+  const preCommands = Object.values(claude.hooks).flat().flatMap((group) => group.hooks.map((hook) => hook.command));
+  assert.ok(!preCommands.some((command) => command.includes("monitor-filter.mjs")), "Claude Code never rewrites and approves a test command");
   ok("host manifests wire lifecycle hooks, status messages, the handback check, and the MCP server");
 }
 
