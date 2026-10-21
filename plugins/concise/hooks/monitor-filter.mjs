@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { loadConfig } from "./lib/config.mjs";
 import { bypassMatch, runHook } from "./lib/hook-main.mjs";
-import { filterScript, isCodexFilter } from "./lib/test-filter.mjs";
+import { isCodexFilter } from "./lib/test-filter.mjs";
+
+// Codex and omp only: rewrites a test command and approves it. Claude Code filters after the run.
+const rewriteScript = fileURLToPath(new URL("./PreToolUse-test-filter.sh", import.meta.url));
 
 await runHook({ hook: "test-filter", event: "PreToolUse" }, (input, ctx) => {
   const config = loadConfig(input.cwd);
@@ -12,7 +16,7 @@ await runHook({ hook: "test-filter", event: "PreToolUse" }, (input, ctx) => {
     ctx.decision = "bypass";
     return {};
   }
-  const result = spawnSync("bash", [filterScript], {
+  const result = spawnSync("bash", [rewriteScript], {
     input: JSON.stringify(input), encoding: "utf8", timeout: 5000,
   });
   if (result.error) throw result.error;
