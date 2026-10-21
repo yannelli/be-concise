@@ -228,8 +228,10 @@ test("hub console lists registered projects and follows their record files", asy
   await Promise.all([home, alpha, beta].map((dir) => mkdir(dir)));
   const env = { PATH: process.env.PATH, HOME: home, XDG_CACHE_HOME: join(root, "cache") };
   const record = (cwd, hook) => ({ cwd, hook, decision: "allow", request: {}, response: {} });
-  await publishMonitor(record(alpha, "check-edit"), { env });
-  await publishMonitor(record(beta, "check-bash"), { env });
+  // Records from before the hub starts persist only with persistence on; once it runs, every record does.
+  await publishMonitor(record(alpha, "check-edit"), { env, persist: true });
+  await publishMonitor(record(beta, "check-bash"), { env, persist: true });
+  await publishMonitor(record(beta, "check-plan"), { env });
   const server = await startServer({ all: true, env });
   t.after(() => server.close());
   const api = (path, options = {}) => fetch(`${server.url}${path}`, {

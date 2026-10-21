@@ -233,12 +233,12 @@ console.log("\nconfig: lists and problems");
 }
 
 {
-  eq("monitor defaults", defaultConfig().monitor, { persist: true });
+  eq("monitor defaults", defaultConfig().monitor, { persist: false });
   const dir = temp("concise-monitor-");
-  eq("BEC_MONITOR_PERSIST=0 turns persistence off", loadConfig(dir, { BEC_MONITOR_PERSIST: "0" }).monitor.persist, false);
-  writeJson(join(dir, ".claude", "concise.json"), { monitor: { persist: false } });
-  eq("a project file turns persistence off", loadConfig(dir, {}).monitor.persist, false);
-  eq("the env override wins over the project file", loadConfig(dir, { BEC_MONITOR_PERSIST: "1" }).monitor.persist, true);
+  eq("BEC_MONITOR_PERSIST=1 turns persistence on", loadConfig(dir, { BEC_MONITOR_PERSIST: "1" }).monitor.persist, true);
+  writeJson(join(dir, ".claude", "concise.json"), { monitor: { persist: true } });
+  eq("a project file turns persistence on", loadConfig(dir, {}).monitor.persist, true);
+  eq("the env override wins over the project file", loadConfig(dir, { BEC_MONITOR_PERSIST: "0" }).monitor.persist, false);
 }
 
 {
