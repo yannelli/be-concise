@@ -113,7 +113,7 @@ Codex and omp load the same hooks through their own manifests. See [How the host
 
 **Runs.** `node` for each hook and for the MCP server. `git` to find the files a shell command changed. `bash` and `grep` for the test output filter. A `.mjs` pack that you add runs in the hook process with your permissions.
 
-**Changes commands.** The test output filter rewrites test commands, such as `pytest`, `npm test`, `go test`, `jest`, and `vitest`, so that their output goes through a filter. The full output goes to a private folder under `$TMPDIR`, and the hook prints its path. Put `NOFILTER=1` in a command to skip the filter.
+**Filters test output.** In Claude Code, the hooks never change a command and never approve one, so each command goes through your normal permission prompts. After a test command such as `pytest`, `npm test`, `go test`, `jest`, or `vitest` passes, a `PostToolUse` hook replaces the output that the agent sees with the matching lines, a short tail, and the path of the full output. A failed command keeps its full output. The full output goes to a private folder under `$TMPDIR`. Codex and omp rewrite the test command instead, so the filter runs as the command runs. Put `NOFILTER=1` in a command to skip the filter.
 
 **Stores on your computer.**
 

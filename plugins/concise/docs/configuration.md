@@ -119,6 +119,8 @@ Claude reads `hooks/hooks.json`, with broad `if` filters for shell commands. Cod
 
 In Claude Code auto mode, a subagent hands its report back through the `SubagentHandback` tool. A `PreToolUse` hook on that tool runs the subagent reply check over the report and denies the handback with the findings, so the subagent revises before the parent sees it. `SubagentStop` skips Claude's internal agents, such as prompt suggestions, which arrive with an empty `agent_type` when the session runs without `--agent`. [Claude hook events](https://code.claude.com/docs/en/hooks)
 
+Claude Code filters test output after the command ends. A `PostToolUse` hook on `Bash` replaces `stdout` through `updatedToolOutput` with the filtered text and empties `stderr`; the saved log holds both. Claude Code sends only passing runs to `PostToolUse`, so a failed run keeps its full output. The hook returns no permission decision and never changes the command. [Claude PostToolUse decision control](https://code.claude.com/docs/en/hooks)
+
 Codex keeps the existing test command rewrite by default. Set `testFilter.codexPostToolUse` to `true` to try filtering completed results. The post hook preserves failed output, the exit status, and a path to the available raw output. It uses `continue: false` feedback so nested code-mode promises can resolve. Direct calls, code-mode calls, and completed background polls must pass live host smoke checks before changing the default. [Codex PostToolUse contract](https://learn.chatgpt.com/docs/hooks#posttooluse)
 
 Filtering requires a structured response with an exit status. Codex CLI 0.153.2 sends raw text without that status, so the post hook leaves its output unchanged. Text printed by a test is not treated as exit metadata.
