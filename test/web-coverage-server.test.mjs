@@ -81,11 +81,15 @@ test("ingest rejects oversized, malformed, and foreign records", async (t) => {
 
 test("history keeps the newest 500 records", async (t) => {
   const app = await fixture(t);
-  for (let start = 0; start < 501; start += 50) {
-    const batch = Array.from({ length: Math.min(50, 501 - start) }, (_, i) => start + i);
-    const results = await Promise.all(batch.map((i) => app.ingest({ cwd: app.cwd, hook: `r${i}`, request: {}, response: {} })));
+  const ingest = (i) => app.ingest({ cwd: app.cwd, hook: `r${i}`, request: {}, response: {} });
+  // Records in one concurrent batch arrive in any order, so the asserted ends go one at a time.
+  for (const i of [0, 1]) assert.equal((await ingest(i)).status, 200);
+  for (let start = 2; start < 500; start += 50) {
+    const batch = Array.from({ length: Math.min(50, 500 - start) }, (_, i) => start + i);
+    const results = await Promise.all(batch.map(ingest));
     assert.ok(results.every((response) => response.status === 200));
   }
+  assert.equal((await ingest(500)).status, 200);
   const { records } = await (await app.api("/api/history")).json();
   assert.equal(records.length, 500);
   assert.equal(records[0].hook, "r1");
