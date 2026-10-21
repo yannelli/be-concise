@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createServer, request } from "node:http";
 import { startServer } from "../plugins/concise/web/server.mjs";
-import { validateConfig } from "../plugins/concise/web/configuration.mjs";
+import { validateConfig } from "../plugins/concise/tools/configuration.mjs";
 import { publishMonitor } from "../plugins/concise/hooks/lib/monitor.mjs";
 import { projectKey, recordsPath } from "../plugins/concise/hooks/lib/projects.mjs";
 import { loadPacks } from "../plugins/concise/hooks/lib/packs.mjs";

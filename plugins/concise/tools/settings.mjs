@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { configuration, saveConfiguration, validateConfig, problem } from "../web/configuration.mjs";
+import { configuration, saveConfiguration, validateConfig, problem } from "./configuration.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs", "configuration.md");

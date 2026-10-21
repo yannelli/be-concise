@@ -3,7 +3,7 @@ import test from "node:test";
 import { mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { configuration, saveConfiguration, validateConfig, validateFilter } from "../plugins/concise/web/configuration.mjs";
+import { configuration, saveConfiguration, validateConfig, validateFilter } from "../plugins/concise/tools/configuration.mjs";
 
 async function fixture(t) {
   const root = await realpath(await mkdtemp(join(tmpdir(), "concise-config-cov-")));

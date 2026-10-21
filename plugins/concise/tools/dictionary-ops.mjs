@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { configuration, problem } from "../web/configuration.mjs";
+import { configuration, problem } from "./configuration.mjs";
 import { compileEntry, entryProblem, scanDictionary, HOOKS } from "../hooks/lib/dictionary.mjs";
 import { SCOPES } from "../hooks/lib/packs.mjs";
 import { editSettings, readValue } from "./settings.mjs";
