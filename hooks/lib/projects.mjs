@@ -8,7 +8,7 @@ const MAX_SIZE = 5 * 1024 * 1024;
 const MAX_FILES = 5;
 const RECORD_LIMIT = 2 * 1024 * 1024;
 const NAME_LENGTH = 40;
-const KEY = /^[0-9a-f]{64}$/;
+const PROJECT_HASH = /^[0-9a-f]{64}$/;
 
 const home = (env) => env.HOME || env.USERPROFILE || null;
 
@@ -136,7 +136,7 @@ export function listProjects(env = process.env) {
   for (const name of names) {
     if (!name.endsWith(".json")) continue;
     const entry = readJson(join(dir, name));
-    const valid = entry && typeof entry.cwd === "string" && KEY.test(entry.key) && typeof entry.records === "string";
+    const valid = entry && typeof entry.cwd === "string" && PROJECT_HASH.test(entry.key) && typeof entry.records === "string";
     if (valid) out.push({ ...entry, file: join(dir, name) });
   }
   return out.sort((a, b) => String(b.lastSeen).localeCompare(String(a.lastSeen)));

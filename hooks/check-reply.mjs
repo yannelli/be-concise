@@ -7,7 +7,7 @@ import { sha256 } from "./lib/confirm.mjs";
 import { takePending, resetAttempt } from "./lib/state.mjs";
 import { runHook, bypassResult } from "./lib/hook-main.mjs";
 
-const KEY = "style:reply";
+const REPLY_TARGET = "style:reply";
 const REPLY_PATH = "reply.md";
 const TAIL_BYTES = 1024 * 1024;
 
@@ -55,8 +55,8 @@ const anyStyle = (config) => config.features.emDash.enabled || config.features.a
 
 function afterBlock(text, input, config, hook) {
   const summary = styleSummary(styleFindings(text, REPLY_PATH, config, "reply", hook), null);
-  const pending = takePending(input.session_id, KEY);
-  resetAttempt(input.session_id, KEY);
+  const pending = takePending(input.session_id, REPLY_TARGET);
+  resetAttempt(input.session_id, REPLY_TARGET);
   if (!summary) return {};
   if (pending === sha256(text)) return { systemMessage: `[concise] Kept after confirmation: ${summary} in your reply` };
   return { systemMessage: `[concise] Reply still has ${summary}; allowed.` };
@@ -79,7 +79,7 @@ async function handbackDecision(input, ctx) {
   const bypassed = bypassResult(text, config, ctx);
   if (bypassed) return bypassed;
   await prepareStyle(input.cwd, config);
-  const result = styleDecisionForText(text, `${KEY}:handback`, "your report", input, config, "PreToolUse", "reply", "subagentStop");
+  const result = styleDecisionForText(text, `${REPLY_TARGET}:handback`, "your report", input, config, "PreToolUse", "reply", "subagentStop");
   return withPackWarnings(result, input.session_id);
 }
 
@@ -109,7 +109,7 @@ async function decide(input, ctx) {
   await prepareStyle(input.cwd, config);
   const result = input.stop_hook_active
     ? afterBlock(text, input, config, hook)
-    : styleDecisionForText(text, KEY, "your reply", input, config, event, "reply", hook);
+    : styleDecisionForText(text, REPLY_TARGET, "your reply", input, config, event, "reply", hook);
   return withPackWarnings(result, input.session_id);
 }
 
