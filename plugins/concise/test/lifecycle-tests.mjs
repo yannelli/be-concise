@@ -136,7 +136,7 @@ console.log("\nlifecycle (monitor delivery)");
 
 {
   const c = setup({});
-  const env = { HOME: c.dir, XDG_CONFIG_HOME: join(c.dir, "config"), XDG_STATE_HOME: join(c.dir, "state"), XDG_CACHE_HOME: join(c.dir, "cache"), BEC_MONITOR_DISABLED: "0" };
+  const env = { HOME: c.dir, XDG_CONFIG_HOME: join(c.dir, "config"), XDG_STATE_HOME: join(c.dir, "state"), XDG_CACHE_HOME: join(c.dir, "cache"), BEC_MONITOR_DISABLED: "0", BEC_MONITOR_PERSIST: "1" };
   const fixture = join(c.dir, "event-hook.mjs");
   writeFileSync(fixture, `import { runHook } from ${JSON.stringify(new URL("../hooks/lib/hook-main.mjs", import.meta.url).href)};\nawait runHook({ hook: "lifecycle-contract", event: "PreToolUse" }, () => ({ systemMessage: "[concise] context" }));\n`);
   for (const hook_event_name of ["SessionStart", "SubagentStart", "UserPromptSubmit", "PostToolUse"]) {

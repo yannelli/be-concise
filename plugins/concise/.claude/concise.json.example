@@ -79,7 +79,7 @@
     "format": "json"
   },
   "monitor": {
-    "persist": true
+    "persist": false
   },
   "features": {
     "emDash": {
