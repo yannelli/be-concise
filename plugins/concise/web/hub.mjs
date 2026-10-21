@@ -1,7 +1,7 @@
 import { closeSync, existsSync, mkdirSync, openSync, readSync, statSync, truncateSync, watch } from "node:fs";
 import { dirname } from "node:path";
 import { gitRepo, listProjects, projectsDir } from "../hooks/lib/projects.mjs";
-import { problem } from "./configuration.mjs";
+import { problem } from "../tools/configuration.mjs";
 
 const POLL_MS = 5000;
 const DEBOUNCE_MS = 50;

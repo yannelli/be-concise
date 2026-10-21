@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writ
 import { dirname, isAbsolute, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { userPatternsDir, validatePack } from "../hooks/lib/packs.mjs";
-import { configuration, saveConfiguration, problem } from "./configuration.mjs";
+import { configuration, saveConfiguration, problem } from "../tools/configuration.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const RELEASES_URL = "https://api.github.com/repos/yannelli/be-concise/releases/latest";

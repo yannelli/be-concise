@@ -4,7 +4,7 @@ Use Node.js from `.nvmrc`, Bash, and `jq`.
 
 ## Branches
 
-`main` is the default branch, the only long-lived branch, and contains releases. Create feature branches from `main` and open PRs against `main`. Merge using the PR title and body; GitHub is configured to use those fields for the merge commit. Squash and rebase merges are disabled to preserve the individual commits used for version calculation.
+`main` is the default branch, the only branch you work on, and contains releases. The release workflow generates the `claude-directory` branch for Anthropic's directory; never edit it. Create feature branches from `main` and open PRs against `main`. Merge using the PR title and body; GitHub is configured to use those fields for the merge commit. Squash and rebase merges are disabled to preserve the individual commits used for version calculation.
 
 A merged PR releases as soon as it reaches `main` when one of its commits calls for a version bump.
 

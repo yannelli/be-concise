@@ -5,7 +5,7 @@ import { isVerbose } from "../hooks/lib/pr-body.mjs";
 import { scanComments } from "../hooks/lib/comment-scan.mjs";
 import { SCOPES } from "../hooks/lib/packs.mjs";
 import { HOOKS } from "../hooks/lib/dictionary.mjs";
-import { problem } from "../web/configuration.mjs";
+import { problem } from "./configuration.mjs";
 
 const HOOK_FOR = { files: "edit", comments: "edit", code: "edit", gh: "bash", commit: "bash", command: "bash", reply: "stop" };
 const PATH_FOR = { files: "check.md", comments: "check.js", code: "check.js" };

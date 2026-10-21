@@ -5,12 +5,12 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { stripVTControlCharacters } from "node:util";
 
-export const filterScript = fileURLToPath(new URL("../PreToolUse-test-filter.sh", import.meta.url));
+export const settingsScript = fileURLToPath(new URL("../test-filter.sh", import.meta.url));
 
 export const isCodexFilter = (input) => typeof input.turn_id === "string" || process.env.CONCISE_HOOK_HOST === "codex";
 
 export function filterSettings(input) {
-  const result = spawnSync("bash", [filterScript, "settings"], {
+  const result = spawnSync("bash", [settingsScript], {
     input: JSON.stringify(input), encoding: "utf8", timeout: 5000,
   });
   if (result.error) throw result.error;

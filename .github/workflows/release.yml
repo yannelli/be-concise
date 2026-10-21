@@ -47,3 +47,21 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish Claude directory branch
+        run: |
+          version="$(jq -r .version plugins/concise/.claude-plugin/plugin.json)"
+          tree="$RUNNER_TEMP/claude-directory"
+          if git rev-parse --verify --quiet origin/claude-directory >/dev/null; then
+            git worktree add -B claude-directory "$tree" origin/claude-directory
+          else
+            git worktree add --orphan -b claude-directory "$tree"
+          fi
+          if [ "$(jq -r .version "$tree/.claude-plugin/plugin.json" 2>/dev/null)" = "$version" ]; then
+            echo "claude-directory already has version $version"
+            exit 0
+          fi
+          node scripts/directory-tree.mjs "$tree"
+          git -C "$tree" add -A
+          git -C "$tree" commit -m "chore(release): claude-directory $version" \
+            -m "Built from $(git rev-parse HEAD) by scripts/directory-tree.mjs. Do not edit this branch."
+          git -C "$tree" push origin HEAD:refs/heads/claude-directory

@@ -130,7 +130,7 @@ Filtering requires a structured response with an exit status. Codex CLI 0.153.2 
 Generate one optional evaluator from the current project configuration, using the installed plugin path:
 
 ```sh
-node /path/to/concise/scripts/model-check-settings.mjs --evaluator prompt --cwd "$PWD" > /tmp/concise-model-settings.json
+node /path/to/concise/scripts/model-check-settings.mjs --evaluator prompt --cwd /path/to/project > /tmp/concise-model-settings.json
 claude --settings /tmp/concise-model-settings.json
 ```
 

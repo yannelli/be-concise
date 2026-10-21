@@ -10,7 +10,7 @@ import { hubPath, monitorPath } from "../hooks/lib/monitor.mjs";
 import { applyLayer } from "../hooks/lib/config-layers.mjs";
 import { defaultConfig } from "../hooks/lib/config.mjs";
 import { runTest, disposeTests } from "./testing/runner.mjs";
-import { configuration, saveConfiguration, validateConfig, problem } from "./configuration.mjs";
+import { configuration, saveConfiguration, validateConfig, problem } from "../tools/configuration.mjs";
 import { createHub } from "./hub.mjs";
 import { RELEASES_URL, addPack, checkUpdates, packSources, packTargets, pluginVersion, removePack, togglePack, updatePack } from "./packs.mjs";
 

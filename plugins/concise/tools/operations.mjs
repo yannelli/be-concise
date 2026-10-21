@@ -1,5 +1,5 @@
 import { loadConfig } from "../hooks/lib/config.mjs";
-import { problem } from "../web/configuration.mjs";
+import { problem } from "./configuration.mjs";
 import { editSettings, getSetting, mergeDelta, settingKeys, showSettings, validateSettings } from "./settings.mjs";
 import { addEntry, listDictionary, removeEntry, testEntry } from "./dictionary-ops.mjs";
 import { checkText } from "./check.mjs";

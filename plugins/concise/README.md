@@ -39,6 +39,8 @@ The 3 core checks run right away. No config file is needed.
 
 ### 2. Copy the example config
 
+The example config is `.claude/concise.json.example` in the plugin folder. In a Claude Code session the plugin folder is `${CLAUDE_PLUGIN_ROOT}`, so you can ask the agent to copy it. From a clone of this repository:
+
 ```sh
 cp plugins/concise/.claude/concise.json.example .claude/concise.json
 ```
@@ -123,6 +125,8 @@ Codex and omp load the same hooks through their own manifests. See [How the host
 - Session state under the system temp folder. The `SessionEnd` hook removes it.
 
 **Sends.** The hooks and the MCP server send nothing off your computer. When the `concise-web` console runs, each hook also posts its record to the console on `127.0.0.1`. The console is a separate npm command that you start yourself, from [`@yannelli/be-concise`](https://github.com/yannelli/be-concise#readme). It fetches the pack URLs that you enter, checks `api.github.com` for releases when you select **Check for updates**, and its `update` command runs `npm` and the `plugin` commands of your agent CLI.
+
+The full policy, with every stored file and how long it stays, is in [PRIVACY.md](PRIVACY.md).
 
 ## Presets
 
@@ -286,8 +290,10 @@ omp does not read `hooks/hooks.json`. Its marketplace install loads `omp/extensi
 
 ## Test
 
+The tests ship with the repository, not with the plugin install. From a clone of this repository:
+
 ```sh
-node test/run-tests.mjs
+node plugins/concise/test/run-tests.mjs
 ```
 
 The suite runs the Claude Code cases, then `test/codex-tests.mjs`, which feeds `apply_patch` payloads in the shape Codex 0.152 sends, then the `test/omp-*-tests.mjs` cases for the omp extension, and then a self-check that writes every file in this plugin through the hook under the `ryan` preset.

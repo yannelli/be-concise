@@ -9,7 +9,7 @@
         "email": "ryanyannelli@gmail.com",
         "url": "https://github.com/yannelli"
     },
-    "homepage": "https://github.com/yannelli/be-concise/tree/main/plugins/concise#readme",
+    "homepage": "https://ryanyannelli.com/projects/be-concise",
     "repository": "https://github.com/yannelli/be-concise",
     "license": "MIT",
     "keywords": [
@@ -19,7 +19,8 @@
         "verbosity",
         "pr-description"
     ],
-    "icon": "./assets/icon-512.png",
+    "icon": "./assets/icon.svg",
     "documentationUrl": "https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/INDEX.md",
-    "supportUrl": "https://github.com/yannelli/be-concise/issues"
+    "supportUrl": "https://github.com/yannelli/be-concise/issues",
+    "privacyPolicyUrl": "https://github.com/yannelli/be-concise/blob/main/plugins/concise/PRIVACY.md"
 }

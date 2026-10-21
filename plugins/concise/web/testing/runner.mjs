@@ -5,7 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig, defaultConfig } from "../../hooks/lib/config.mjs";
 import { applyLayer } from "../../hooks/lib/config-layers.mjs";
-import { validateFilter } from "../configuration.mjs";
+import { validateFilter } from "../../tools/configuration.mjs";
 import { runProcess } from "./process.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
