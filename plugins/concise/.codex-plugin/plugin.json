@@ -1,7 +1,7 @@
 {
     "name": "concise",
     "version": "0.16.1",
-    "description": "Detects verbose comments, oversized files, and padded PR/issue descriptions, plus optional em dash and AI writing pattern packs (pluggable, env-controlled), and nudges Codex to trim them before you see the bloated version.",
+    "description": "Checks the agent's own writing before it lands: long comments, oversized new files, padded PR and issue bodies, and optional em dash and AI writing rules.",
     "author": {
         "name": "Ryan Yannelli",
         "email": "ryanyannelli@gmail.com",
@@ -9,16 +9,18 @@
     },
     "license": "MIT",
     "keywords": [
-        "concise",
-        "hooks",
-        "comments",
+        "writing",
+        "ai-writing",
         "verbosity",
-        "pr-description"
+        "comments",
+        "pull-requests",
+        "em-dash",
+        "hooks"
     ],
     "skills": "./skills/",
     "hooks": "./hooks/codex.json",
     "interface": {
-        "displayName": "Concise",
+        "displayName": "Be Concise",
         "shortDescription": "Catch verbose comments, oversized files, and padded PR bodies",
         "longDescription": "PreToolUse hooks deny a write or gh call that is over the verbosity limits and tell the agent exactly what to trim, so the fix lands before you see the bloated version.",
         "developerName": "Ryan Yannelli",

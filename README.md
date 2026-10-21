@@ -1,8 +1,8 @@
 ![Concise: Stops verbose comments, oversized files, and padded PRs.](plugins/concise/assets/github-banner.png)
 
-# concise
+# Be Concise
 
-Concise is a Claude Code, Codex, and omp plugin that catches the agent's own verbosity before a write or GitHub command runs. It also filters test-runner output before the agent reads it.
+Be Concise (plugin id `concise`) is a Claude Code, Codex, and omp plugin that catches the agent's own verbosity before a write or GitHub command runs. It also filters test-runner output before the agent reads it.
 
 New here? Start with [plugins/concise/README.md](plugins/concise/README.md).
 
