@@ -3,7 +3,7 @@
     "name": "concise",
     "displayName": "Be Concise",
     "description": "Checks the agent's own writing before it lands: long comments, oversized new files, padded PR and issue bodies, and optional em dash and AI writing rules.",
-    "version": "0.16.1",
+    "version": "0.16.2",
     "author": {
         "name": "Ryan Yannelli",
         "email": "ryanyannelli@gmail.com",
