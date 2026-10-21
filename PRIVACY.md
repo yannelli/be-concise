@@ -1,4 +1,4 @@
-# Concise privacy policy
+# Be Concise privacy policy
 
 Effective: 2026-10-21
 

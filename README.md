@@ -1,6 +1,6 @@
-# concise
+# Be Concise
 
-Concise is a Claude Code, Codex, and omp plugin that stops the agent's own verbose or machine-sounding writing before it lands. It runs as `PreToolUse` and `Stop` hooks, so a long comment, an oversized new file, a padded PR body, an em dash, or a flagged phrase is denied while the agent still holds the text. The agent reads the reason and sends a rewrite. Nothing reaches your working tree or GitHub in between.
+Be Concise (plugin id `concise`) is a Claude Code, Codex, and omp plugin that stops the agent's own verbose or machine-sounding writing before it lands. It runs as `PreToolUse` and `Stop` hooks, so a long comment, an oversized new file, a padded PR body, an em dash, or a flagged phrase is denied while the agent still holds the text. The agent reads the reason and sends a rewrite. Nothing reaches your working tree or GitHub in between.
 
 ## Quick start
 
@@ -107,7 +107,7 @@ After 2 denied retries on the same target, the hook allows the action and flags 
 | Cowork | The hooks and the 3 skills. The MCP server loads when the session runs on your computer. The hooks need Node.js, Bash, and `jq` on `PATH`. |
 | claude.ai chat | The 3 skills only. Chat ignores hooks and local MCP servers, so chat does not check or block text. |
 
-Codex and omp load the same hooks through their own manifests. See [How the hosts share one hook set](#how-the-hosts-share-one-hook-set).
+Codex and omp load the same hooks through their own manifests. The section "How the hosts share one hook set" below shows how.
 
 ## What it runs, stores, and sends
 
@@ -126,7 +126,7 @@ Codex and omp load the same hooks through their own manifests. See [How the host
 
 **Sends.** The hooks and the MCP server send nothing off your computer. When the `concise-web` console runs, each hook also posts its record to the console on `127.0.0.1`. The console is a separate npm command that you start yourself, from [`@yannelli/be-concise`](https://github.com/yannelli/be-concise#readme). It fetches the pack URLs that you enter, checks `api.github.com` for releases when you select **Check for updates**, and its `update` command runs `npm` and the `plugin` commands of your agent CLI.
 
-The full policy, with every stored file and how long it stays, is in [PRIVACY.md](PRIVACY.md).
+The full policy, with every stored file and how long it stays, is in [PRIVACY.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/PRIVACY.md).
 
 ## Presets
 
@@ -169,7 +169,7 @@ The 47 categories fall into 5 groups.
 | Punctuation categories | 3 | an arrow character (`unicode-glyphs`) | Use `->`. |
 | Text statistics categories | 10 | passive voice over 30% of sentences (`passive-voice`) | Name the actor. |
 
-The full table, with every category id, its presets, and the scopes it runs in, is in [docs/categories.md](docs/categories.md). The flagged text and the replacement for every pattern are in [skills/concise-rules/references/ai-speak-patterns.md](skills/concise-rules/references/ai-speak-patterns.md).
+The full table, with every category id, its presets, and the scopes it runs in, is in [docs/categories.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/categories.md). The flagged text and the replacement for every pattern are in [skills/concise-rules/references/ai-speak-patterns.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/skills/concise-rules/references/ai-speak-patterns.md).
 
 What gets scanned:
 
@@ -183,7 +183,7 @@ What gets scanned:
 - The plan that `ExitPlanMode` shows for approval, task text, and questions that `AskUserQuestion` asks you.
 - The agent's final reply through the `Stop` hook when `replies` is true.
 
-Each place past Write and Edit has an on-by-default switch under `scan`, listed in [docs/configuration.md](docs/configuration.md).
+Each place past Write and Edit has an on-by-default switch under `scan`, listed in [docs/configuration.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/configuration.md).
 
 Not scanned: the agent's text between tool calls, because no hook can return it to the agent; page text in HTML files; and shell writes outside a git work tree. In Codex, shell writes are checked only for `cat` and `tee` heredocs. The omp extension checks neither MCP tools nor shell writes.
 
@@ -200,7 +200,7 @@ export BEC_LOG_ENABLED=1
 
 Those 4 lines turn both style checks on, add 2 more categories, downgrade every deny to a flagged allow, and write one record per hook call to `~/.cache/concise/concise.log`.
 
-The full variable table and 3 worked scenarios are in [docs/environment.md](docs/environment.md).
+The full variable table and 3 worked scenarios are in [docs/environment.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/environment.md).
 
 ## Your own packs
 
@@ -217,13 +217,13 @@ Each category is one pack file. Add a team phrase in 8 lines. Save this as `.cla
 
 Packs under `.claude/concise/patterns/` or `.codex/concise/patterns/` load with no config, and packs under `~/.config/concise/patterns/` load for every project. A pack of your own with no `presets` array runs under every preset. `features.aiWriting.packs` adds more files or directories. The `concise-web` Rules page switches packs on and off, adds packs from a URL, a path, or pasted JSON, and checks them for updates.
 
-The full field list, the 3 pattern kinds, the `.mjs` script pack format with `detect(text, ctx)`, and the validator and renderer commands are in [docs/packs.md](docs/packs.md). A `.mjs` pack executes code from the checkout inside the hook process. Read one before you add it.
+The full field list, the 3 pattern kinds, the `.mjs` script pack format with `detect(text, ctx)`, and the validator and renderer commands are in [docs/packs.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/packs.md). A `.mjs` pack executes code from the checkout inside the hook process. Read one before you add it.
 
 ## Configuration
 
-Every config key, the 5 config layers and their merge rules, `mode` and the confirm flow, `allowList`, `bypass`, `softFail`, the ignore globs, and the log format are in [docs/configuration.md](docs/configuration.md). [docs/INDEX.md](docs/INDEX.md) lists every doc.
+Every config key, the 5 config layers and their merge rules, `mode` and the confirm flow, `allowList`, `bypass`, `softFail`, the ignore globs, and the log format are in [docs/configuration.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/configuration.md). [docs/INDEX.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/INDEX.md) lists every doc.
 
-To change settings from a session, ask the agent: the `concise-config` skill reads the settings, shows a diff, and writes it after you agree. The `concise-tune` skill reads samples of your writing and proposes settings that let it pass. Both run the CLI in [docs/tools.md](docs/tools.md), which you can also run yourself from the installed plugin directory (`${CLAUDE_PLUGIN_ROOT}` in a Claude Code session) or from `plugins/concise` in a checkout:
+To change settings from a session, ask the agent: the `concise-config` skill reads the settings, shows a diff, and writes it after you agree. The `concise-tune` skill reads samples of your writing and proposes settings that let it pass. Both run the CLI in [docs/tools.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/tools.md), which you can also run yourself from the installed plugin directory (`${CLAUDE_PLUGIN_ROOT}` in a Claude Code session) or from `plugins/concise` in a checkout:
 
 ```sh
 node scripts/concise-config.mjs show --cwd /path/to/project
@@ -250,7 +250,7 @@ Claude Code also starts a `concise` MCP server with the same operations.
 }
 ```
 
-A finding uses the same confirm flow as the other style checks. The fields are in [docs/configuration.md](docs/configuration.md#dictionary).
+A finding uses the same confirm flow as the other style checks. The fields are in [docs/configuration.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/configuration.md#dictionary).
 
 ## Escape hatches
 
@@ -286,7 +286,7 @@ Claude Code sends `Write`, `Edit`, and `MultiEdit`. Codex sends `apply_patch` wi
 
 The reply hook reads `last_assistant_message` first, with a transcript fallback. A `Stop` block supplies the agent's correction instructions. Confirmation, bypass, and soft-fail notices remain terminal UI messages so they do not start another turn. These contracts follow the [Claude Code hook reference](https://code.claude.com/docs/en/hooks) and [Codex hook reference](https://developers.openai.com/codex/hooks/).
 
-omp does not read `hooks/hooks.json`. Its marketplace install loads `omp/extension.mjs`, which `package.json` lists under `omp.extensions`. The extension turns each omp event into the input Claude Code would send and runs the same hook scripts. omp `write` becomes `Write`, `bash` becomes `Bash`, and each `edit` mode becomes the `apply_patch` text `check-edit` reads. A denial blocks the call with its reason, and a `Stop` block holds the reply. An `ask` opens omp's confirmation dialog when a UI is attached and denies the call otherwise, as in Codex. See [docs/host-features.md](docs/host-features.md#omp) for the event mapping.
+omp does not read `hooks/hooks.json`. Its marketplace install loads `omp/extension.mjs`, which `package.json` lists under `omp.extensions`. The extension turns each omp event into the input Claude Code would send and runs the same hook scripts. omp `write` becomes `Write`, `bash` becomes `Bash`, and each `edit` mode becomes the `apply_patch` text `check-edit` reads. A denial blocks the call with its reason, and a `Stop` block holds the reply. An `ask` opens omp's confirmation dialog when a UI is attached and denies the call otherwise, as in Codex. See [docs/host-features.md](https://github.com/yannelli/be-concise/blob/main/plugins/concise/docs/host-features.md#omp) for the event mapping.
 
 ## Test
 
@@ -300,4 +300,4 @@ The suite runs the Claude Code cases, then `test/codex-tests.mjs`, which feeds `
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/yannelli/be-concise/blob/main/plugins/concise/LICENSE)
