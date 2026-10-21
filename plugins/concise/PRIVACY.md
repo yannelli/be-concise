@@ -2,7 +2,7 @@
 
 Effective: 2026-10-21
 
-This policy covers the concise plugin for Claude Code, Codex, and omp, and the optional `concise-web` console from the `@yannelli/be-concise` npm package. Concise runs on your computer. It has no account, no telemetry, and no analytics. The author receives no data from it.
+This policy covers the concise plugin for Claude Code, Codex, and omp, and the optional `concise-web` console from the `@yannelli/be-concise` npm package. Concise runs on your computer. It collects no telemetry and no analytics, it has no account, and the author receives no data from it.
 
 ## What concise reads
 
@@ -26,13 +26,17 @@ The record file can hold any text that the agent wrote or read, including person
 
 The hooks and the MCP server make no network calls, except one: when the `concise-web` console runs, each hook posts its record to the console on `127.0.0.1`. That post does not leave your computer.
 
-When a hook flags text, its message, with the flagged phrase and its location, goes back to your agent. Your agent sends it to its model provider as part of the conversation, under that provider's own terms.
-
 The `concise-web` console runs only when you start it. It makes these network calls:
 
 - It fetches the pack URLs that you enter.
 - When you select **Check for updates**, it reads release data from `api.github.com`.
 - Its `update` command runs `npm` and the `plugin` commands of your agent CLI, which contact their own registries.
+
+## Your agent and model provider
+
+Concise runs inside an agent host, such as Claude Code, Codex, or omp, and that host sends your conversation to a model provider. When a hook flags text, its message, with the flagged phrase and its location, becomes part of that conversation.
+
+The host and the provider can collect telemetry, logs, and conversation data, including tool inputs, tool outputs, and the messages that concise hooks return. Concise has no control over that collection. Their own privacy policies and terms apply.
 
 ## Children
 
