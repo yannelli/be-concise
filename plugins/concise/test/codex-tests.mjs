@@ -1,7 +1,8 @@
 import { writeFileSync, mkdtempSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHECK_EDIT, run, assertDenied, assertAllowed, assertFlagged } from "./lib.mjs";
+import { CHECK_EDIT, run, assertDenied, assertAllowed, assertFlagged, ok, bad } from "./lib.mjs";
+import { extractPatch, parseApplyPatch } from "../hooks/lib/apply-patch.mjs";
 
 const workDir = mkdtempSync(join(tmpdir(), "concise-codex-test-"));
 const sessionId = `codex-${Date.now()}`;
@@ -101,8 +102,10 @@ console.log("\ncheck-edit.mjs (Codex apply_patch)");
   );
   const result = run(CHECK_EDIT, patchEvent(body, `${sessionId}-12`));
   assertDenied("multi-file patch denied when one file violates", result);
-  if (!result.hookSpecificOutput?.permissionDecisionReason?.includes("dirty.ts")) {
-    console.log("  FAIL - reason names the violating file");
+  if (result.hookSpecificOutput?.permissionDecisionReason?.includes("dirty.ts")) {
+    ok("reason names the violating file");
+  } else {
+    bad("reason names the violating file", result.hookSpecificOutput?.permissionDecisionReason);
   }
 }
 
@@ -111,6 +114,28 @@ console.log("\ncheck-edit.mjs (Codex apply_patch)");
   const command = `apply_patch <<'EOF'\n${body}\nEOF`;
   assertDenied("apply_patch heredoc inside a Bash command denied", run(CHECK_EDIT, bashEvent(command, `${sessionId}-13`)));
   assertAllowed("Bash command without a patch ignored by check-edit", run(CHECK_EDIT, bashEvent("ls -la", `${sessionId}-14`)));
+}
+
+{
+  const first = patch(`*** Add File: ${join(workDir, "ok.ts")}`, plus(["export const x = 1;"]));
+  const second = patch(`*** Add File: ${join(workDir, "second.ts")}`, plus(LONG_COMMENT));
+  const command = `apply_patch <<'EOF'\n${first}\nEOF\napply_patch <<'EOF'\n${second}\nEOF`;
+  const extracted = extractPatch(command);
+  const files = parseApplyPatch(extracted);
+  if (files.some((file) => file.path.endsWith("ok.ts")) && files.some((file) => file.path.endsWith("second.ts"))) {
+    ok("extractPatch keeps every Begin/End Patch span in one command");
+  } else {
+    bad("extractPatch keeps every Begin/End Patch span in one command", files.map((file) => file.path).join(","));
+  }
+  assertDenied("second apply_patch heredoc in the same Bash command is still scanned", run(CHECK_EDIT, bashEvent(command, `${sessionId}-16`)));
+}
+
+{
+  const files = parseApplyPatch("*** Begin Patch\n*** Add File: a.ts\n+hello\n*** End Patch\n+// sneaky1\n+// sneaky2\n+// sneaky3\n+// sneaky4\n+// sneaky5");
+  if (files.length === 1 && files[0].chunks[0] === "hello") ok("parseApplyPatch stops at End Patch");
+  else bad("parseApplyPatch stops at End Patch", JSON.stringify(files));
+  const body = "*** Begin Patch\n*** Add File: trailing.ts\n+export const x = 1;\n*** End Patch\n" + plus(LONG_COMMENT);
+  assertAllowed("plus lines after End Patch are not scanned", run(CHECK_EDIT, patchEvent(body, `${sessionId}-17`)));
 }
 
 {
