@@ -1,0 +1,28 @@
+{
+  "name": "concise-website",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev --host 0.0.0.0",
+    "build": "astro build",
+    "preview": "astro preview --host 0.0.0.0",
+    "screenshots": "node scripts/console-screenshots.mjs",
+    "check": "astro check",
+    "test": "node --test tests/*.test.mjs",
+    "deploy": "npm run build && wrangler deploy",
+    "cf:preview": "npm run build && wrangler dev"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.5",
+    "astro": "^7.4.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.156.0"
+  }
+}

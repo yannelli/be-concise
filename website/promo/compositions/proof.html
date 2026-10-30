@@ -1,0 +1,254 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Jost";
+      src: url("assets/fonts/jost-latin-variable.woff2") format("woff2");
+      font-weight: 100 900;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: #f7f7f5;
+      font-family: "Jost", sans-serif;
+      color: #18191d;
+    }
+    #pf-stage {
+      position: absolute;
+      inset: 0;
+      perspective: 1400px;
+      perspective-origin: 960px 540px;
+    }
+    #pf-world {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+    }
+    .pf-st {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+    }
+    .pf-label {
+      position: absolute;
+      left: 120px;
+      top: 340px;
+      width: 560px;
+    }
+    .pf-label h2 {
+      font-size: 120px;
+      font-weight: 550;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+    .pf-label p {
+      margin-top: 30px;
+      font-size: 46px;
+      line-height: 1.2;
+      color: #60615f;
+      letter-spacing: -0.01em;
+    }
+    .pf-plane {
+      position: absolute;
+      left: 700px;
+      width: 1120px;
+    }
+    .pf-slab {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1120px;
+      background: #18191d;
+      border-radius: 24px;
+    }
+    .pf-light .pf-slab {
+      background: #ffffff;
+    }
+    .pf-ln {
+      position: absolute;
+      left: 44px;
+      white-space: pre;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 34px;
+      line-height: 52px;
+      color: #eceee8;
+    }
+    .pf-muted {
+      color: #a3a69e;
+    }
+    .pf-path {
+      font-size: 30px;
+      color: #a3a69e;
+    }
+    .pf-deny {
+      color: #ff4a24;
+      font-size: 31px;
+      line-height: 40px;
+      padding-left: 42px;
+    }
+    .pf-light .pf-deny {
+      color: #b52e10;
+    }
+    .pf-deny::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 26px;
+      height: 19px;
+      border-radius: 4px;
+      background: #ff4a24;
+    }
+    .pf-w {
+      position: relative;
+      display: inline-block;
+    }
+    .pf-u {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 2px;
+      height: 5px;
+      background: #ff4a24;
+      transform-origin: 0 50%;
+      transform: scaleX(0);
+    }
+    .pf-pr-title {
+      position: absolute;
+      left: 44px;
+      top: 40px;
+      font-size: 58px;
+      font-weight: 550;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+    .pf-body {
+      position: absolute;
+      left: 44px;
+      width: 1032px;
+      font-size: 38px;
+      line-height: 54px;
+      color: #18191d;
+    }
+    .pf-fold {
+      position: absolute;
+      inset: 0;
+      perspective: 1200px;
+    }
+  </style>
+  <div data-hf-id="hf-s4mz" id="root" data-composition-id="proof" data-width="1920" data-height="1080">
+    <div data-hf-id="hf-dbi7" id="pf-stage" data-layout-allow-overflow>
+      <div data-hf-id="hf-pptk" id="pf-world">
+        <!-- Station 1: a comment -->
+        <div data-hf-id="hf-5cr5" class="pf-st" id="pf-s1" style="transform: translate3d(0px, 0px, 0px)">
+          <div data-hf-id="hf-9kpb" class="pf-label">
+            <h2 data-hf-id="hf-eyw1">Comments</h2>
+            <p data-hf-id="hf-k4v2">Two lines, at most.</p>
+          </div>
+          <div data-hf-id="hf-0bvo" class="pf-plane" style="top: 228px">
+            <div data-hf-id="hf-wmoc" class="pf-slab" id="pf-s1-slab" style="height: 624px"></div>
+            <div data-hf-id="hf-pmpt" class="pf-ln pf-path" style="top: 40px">src/invoice.ts</div>
+            <div data-hf-id="hf-ev4w" class="pf-ln pf-muted pf-c" id="pf-c1" style="top: 100px">// This function delves into the invoice totals.</div>
+            <div data-hf-id="hf-wwaw" class="pf-ln pf-muted" id="pf-c1b" style="top: 100px; opacity: 0">// Amounts are integer cents; never floats.</div>
+            <div data-hf-id="hf-gx4n" class="pf-ln pf-muted pf-c pf-cx" style="top: 152px">// It carefully iterates over every line item</div>
+            <div data-hf-id="hf-pkmd" class="pf-ln pf-muted pf-c pf-cx" style="top: 204px">// and then sums them to produce a total value</div>
+            <div data-hf-id="hf-qj3i" class="pf-ln pf-muted pf-c pf-cx" style="top: 256px">// which is returned to the caller.</div>
+            <div data-hf-id="hf-t4ci" class="pf-ln pf-k" style="top: 308px">export const total = (lines) =&gt;</div>
+            <div data-hf-id="hf-nfg1" class="pf-ln pf-k" style="top: 360px">  lines.reduce((sum, line) =&gt;</div>
+            <div data-hf-id="hf-srb1" class="pf-ln pf-k" style="top: 412px">    sum + line.amount, 0);</div>
+            <div data-hf-id="hf-zp6u" class="pf-ln pf-deny" id="pf-d1" style="top: 500px">[concise] Comment at …/src/invoice.ts:1<br data-hf-id="hf-x5px" />is 4 lines (limit 2).</div>
+          </div>
+        </div>
+
+        <!-- Station 2: a commit -->
+        <div data-hf-id="hf-tycz" class="pf-st" id="pf-s2" style="transform: translate3d(4200px, -160px, -2600px)">
+          <div data-hf-id="hf-jg33" class="pf-label">
+            <h2 data-hf-id="hf-g0cf">Commits</h2>
+            <p data-hf-id="hf-tatd">Stock phrases, flagged.</p>
+          </div>
+          <div data-hf-id="hf-j6ti" class="pf-plane" style="top: 330px">
+            <div data-hf-id="hf-nnaq" class="pf-slab" style="height: 376px"></div>
+            <div data-hf-id="hf-gdzb" class="pf-ln pf-path" style="top: 40px">~/code/billing-api</div>
+            <div data-hf-id="hf-p2a6" class="pf-ln pf-cm" style="top: 100px">$ git commit -m "<span data-hf-id="hf-ctb8" class="pf-w">Leverage<i data-hf-id="hf-850s" class="pf-u"></i></span> a <span data-hf-id="hf-d0ya" class="pf-w">robust<i data-hf-id="hf-6o78" class="pf-u"></i></span>,</div>
+            <div data-hf-id="hf-rv5u" class="pf-ln pf-cm" style="top: 152px">  <span data-hf-id="hf-2qko" class="pf-w">seamless<i data-hf-id="hf-5ha5" class="pf-u"></i></span> approach to streamline</div>
+            <div data-hf-id="hf-1lvq" class="pf-ln pf-cm" style="top: 204px">  invoice rounding"</div>
+            <div data-hf-id="hf-8lzm" class="pf-ln pf-cf" style="top: 100px; opacity: 0">$ git commit -m "Round invoice totals</div>
+            <div data-hf-id="hf-5dtp" class="pf-ln pf-cf" style="top: 152px; opacity: 0">  to whole cents"</div>
+            <div data-hf-id="hf-ai1q" class="pf-ln pf-deny" id="pf-d2" style="top: 292px">[concise] 3 AI writing patterns in commit message.</div>
+          </div>
+        </div>
+
+        <!-- Station 3: a pull request -->
+        <div data-hf-id="hf-ceuu" class="pf-st pf-light" id="pf-s3" style="transform: translate3d(8400px, 0px, -5200px)">
+          <div data-hf-id="hf-j1s2" class="pf-label">
+            <h2 data-hf-id="hf-wcdi">Pull<br data-hf-id="hf-rsrt" />requests</h2>
+            <p data-hf-id="hf-ig77">One paragraph, three sentences.</p>
+          </div>
+          <div data-hf-id="hf-bc7l" class="pf-plane" style="top: 258px">
+            <div data-hf-id="hf-b25p" class="pf-slab" id="pf-s3-slab" style="height: 564px"></div>
+            <div data-hf-id="hf-ncp2" class="pf-pr-title">Round invoice totals</div>
+            <div data-hf-id="hf-ely6" class="pf-fold">
+              <div data-hf-id="hf-b79y" class="pf-body pf-p" style="top: 140px">This PR rounds invoice totals to whole cents.</div>
+              <div data-hf-id="hf-8hoq" class="pf-body pf-p" style="top: 218px">It also updates the tests.</div>
+              <div data-hf-id="hf-xd34" class="pf-body pf-p" style="top: 296px">Overall, this change makes billing more reliable and robust.</div>
+            </div>
+            <div data-hf-id="hf-fhcj" class="pf-body" id="pf-p-fix" style="top: 140px; opacity: 0">Rounds invoice totals to whole cents and updates the rounding tests.</div>
+            <div data-hf-id="hf-e8l1" class="pf-ln pf-deny" id="pf-d3" style="top: 440px">[concise] PR/issue body is too verbose:<br data-hf-id="hf-szow" />3 prose paragraphs (limit 1), …</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const q = (s) => document.querySelectorAll(s);
+      const blurIn = (target, at, dur = 0.15) =>
+        tl.fromTo(target, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: dur, ease: "power2.out" }, at);
+      const blurOut = (target, at, dur = 0.12) =>
+        tl.to(target, { opacity: 0, filter: "blur(8px)", duration: dur, ease: "power2.in" }, at);
+      const move = (to, at) => {
+        tl.to("#pf-world", { ...to, duration: 0.6, ease: "power2.inOut" }, at);
+        tl.fromTo("#pf-stage", { filter: "blur(0px)" }, { filter: "blur(10px)", duration: 0.3, ease: "power2.in" }, at);
+        tl.to("#pf-stage", { filter: "blur(0px)", duration: 0.3, ease: "power2.out" }, at + 0.3);
+      };
+
+      // Arrive from the fly-through: slightly large and soft, then settle.
+      tl.fromTo("#pf-world", { x: 0, y: 0, z: 420 }, { x: 0, y: 0, z: 0, duration: 0.55, ease: "expo.out" }, 0);
+      tl.fromTo("#pf-stage", { filter: "blur(12px)" }, { filter: "blur(0px)", duration: 0.4, ease: "power2.out" }, 0);
+
+      // Station 1: the comment piles up, the hook answers, it shrinks to one line.
+      q("#pf-s1 .pf-c").forEach((el, i) => blurIn(el, 0.25 + i * 0.12, 0.12));
+      q("#pf-s1 .pf-k").forEach((el, i) => blurIn(el, 0.75 + i * 0.08, 0.12));
+      tl.fromTo("#pf-d1", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3, ease: "expo.out" }, 1.2);
+      tl.to(q("#pf-s1 .pf-cx"), { opacity: 0, scaleY: 0.2, filter: "blur(6px)", duration: 0.25, ease: "power3.in", stagger: { each: 0.04, from: "end" } }, 2.2);
+      tl.to(q("#pf-s1 .pf-k, #pf-d1"), { y: -156, duration: 0.35, ease: "power3.inOut" }, 2.35);
+      tl.fromTo("#pf-s1-slab", { clipPath: "inset(0px 0px 0px 0px round 24px)" }, { clipPath: "inset(0px 0px 156px 0px round 24px)", duration: 0.35, ease: "power3.inOut" }, 2.35);
+      blurOut("#pf-c1", 2.45);
+      blurIn("#pf-c1b", 2.55, 0.18);
+
+      // Station 2: the commit message, three words underlined, then the plain rewrite.
+      move({ x: -4200, y: 160, z: 2600 }, 4.2);
+      q("#pf-s2 .pf-cm").forEach((el, i) => blurIn(el, 4.65 + i * 0.1, 0.12));
+      q("#pf-s2 .pf-u").forEach((el, i) => tl.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "expo.out" }, 5.2 + i * 0.08));
+      tl.fromTo("#pf-d2", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3, ease: "expo.out" }, 5.5);
+      blurOut(q("#pf-s2 .pf-cm"), 6.7);
+      q("#pf-s2 .pf-cf").forEach((el, i) => blurIn(el, 6.82 + i * 0.07, 0.16));
+
+      // Station 3: three paragraphs fold back into depth; one line lands.
+      move({ x: -8400, y: 0, z: 5200 }, 8.6);
+      tl.fromTo("#pf-d3", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3, ease: "expo.out" }, 9.5);
+      tl.to(q("#pf-s3 .pf-p"), { rotationX: -70, z: -500, opacity: 0, transformOrigin: "50% 0%", duration: 0.4, ease: "power3.in", stagger: 0.05 }, 10.4);
+      tl.to("#pf-d3", { y: -156, duration: 0.35, ease: "power3.inOut" }, 10.55);
+      tl.fromTo("#pf-s3-slab", { clipPath: "inset(0px 0px 0px 0px round 24px)" }, { clipPath: "inset(0px 0px 156px 0px round 24px)", duration: 0.35, ease: "power3.inOut" }, 10.55);
+      blurIn("#pf-p-fix", 10.75, 0.2);
+
+      // Pull back: the stations recede as the console arrives.
+      tl.to("#pf-world", { x: -6300, y: 0, z: 2200, duration: 0.7, ease: "power3.in" }, 13.0);
+
+      window.__timelines["proof"] = tl;
+    })();
+  </script>
+</template>

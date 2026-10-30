@@ -1,0 +1,32 @@
+---
+import { examples } from '../data/examples';
+import Icon from './Icon.astro';
+const example = examples.comments;
+---
+<div class="demo-stage" id="demo" data-ui>
+  <div class="demo-toolbar">
+    <div class="demo-tabs" role="tablist" aria-label="Example to demonstrate">
+      {Object.entries(examples).map(([key, item], index) => <button role="tab" id={`tab-${key}`} aria-selected={index === 0 ? 'true' : 'false'} aria-controls="demo-panel" tabindex={index === 0 ? 0 : -1} data-example={key}>{item.label}</button>)}
+    </div>
+    <span class="example-note">An example, not a live agent</span>
+  </div>
+  <div id="demo-panel" role="tabpanel" aria-labelledby="tab-comments" tabindex="0">
+    <div class="demo-columns">
+      <div class="code-pane before-pane">
+        <div class="pane-title"><span>What the agent tries to write</span><span class="pane-state">Pending</span></div>
+        <div class="file-name"><Icon name="terminal" size={16} /><span data-demo-file>{example.file}</span></div>
+        <pre class="demo-code"><code data-demo-before>{example.before.split('\n').map(line => <span class:list={['code-line', { comment: line.startsWith('//') }]}>{line || ' '}</span>)}</code></pre>
+        <div class="pane-bottom"><span data-before-count>{example.beforeCount}</span><span data-demo-language>{example.language}</span></div>
+      </div>
+      <div class="code-pane after-pane">
+        <div class="pane-title"><span>With Concise</span><span class="pane-state allowed"><Icon name="check" size={13} /> Rewritten</span></div>
+        <div class="file-name"><Icon name="terminal" size={16} /><span data-demo-file>{example.file}</span></div>
+        <pre class="demo-code"><code data-demo-after>{example.after.split('\n').map(line => <span class:list={['code-line', { comment: line.startsWith('//') }]}>{line || ' '}</span>)}</code></pre>
+        <div class="pane-bottom"><span data-after-count>{example.afterCount}</span></div>
+      </div>
+    </div>
+    <div class="hook-result"><span class="hook-result-label"><span class="hook-square" aria-hidden="true"></span> Caught before the write</span><p data-demo-finding>{example.finding}</p><button class="run-example" data-run-example><Icon name="play" size={14} /><span>Replay example</span></button></div>
+  </div>
+  <p class="visually-hidden" aria-live="polite" data-demo-status></p>
+</div>
+<p class="demo-caption"><span data-demo-result>{example.result}</span><a href="/docs/installation/">See the hook in action <Icon name="arrow" size={15} /></a></p>

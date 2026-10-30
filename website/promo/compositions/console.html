@@ -1,0 +1,115 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Jost";
+      src: url("assets/fonts/jost-latin-variable.woff2") format("woff2");
+      font-weight: 100 900;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      font-family: "Jost", sans-serif;
+    }
+    #cs-ground {
+      position: absolute;
+      inset: 0;
+      background: #ff4a24;
+      clip-path: inset(0% 0% 0% 100%);
+    }
+    #cs-title {
+      position: absolute;
+      left: 140px;
+      top: 92px;
+      font-size: 104px;
+      font-weight: 550;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: #18191d;
+      white-space: nowrap;
+    }
+    .cs-tw {
+      display: inline-block;
+      opacity: 0;
+    }
+    #cs-cmd {
+      position: absolute;
+      right: 120px;
+      top: 128px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 38px;
+      line-height: 1;
+      color: #18191d;
+      opacity: 0;
+    }
+    #cs-stage {
+      position: absolute;
+      inset: 0;
+      perspective: 1400px;
+      perspective-origin: 960px 540px;
+    }
+    #cs-plane {
+      position: absolute;
+      left: 140px;
+      top: 270px;
+      width: 1900px;
+      height: 900px;
+      border-radius: 22px 0 0 0;
+      overflow: hidden;
+      background: #1c1d21;
+    }
+    .cs-shot {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1900px;
+      height: 900px;
+      overflow: hidden;
+    }
+    .cs-shot img {
+      position: absolute;
+      width: 2304px;
+      height: 1440px;
+      max-width: none;
+    }
+  </style>
+  <div data-hf-id="hf-0tl0" id="root" data-composition-id="console" data-width="1920" data-height="1080">
+    <div data-hf-id="hf-1vax" id="cs-ground"></div>
+    <div data-hf-id="hf-bwn6" id="cs-title"><span data-hf-id="hf-blvu" class="cs-tw">Watch</span> <span data-hf-id="hf-yuem" class="cs-tw">every</span> <span data-hf-id="hf-58w9" class="cs-tw">check.</span></div>
+    <div data-hf-id="hf-n0h6" id="cs-cmd">concise-web --all</div>
+    <div data-hf-id="hf-vfsz" id="cs-stage" data-layout-allow-overflow>
+      <div data-hf-id="hf-r4ye" id="cs-plane">
+        <div data-hf-id="hf-rsfr" class="cs-shot" id="cs-activity">
+          <img data-hf-id="hf-tke5" id="cs-activity-img" src="assets/img/activity-dark.webp" alt="Concise console, Live activity: a denied git commit with three vocabulary matches" style="left: -448px; top: -24px" />
+        </div>
+        <div data-hf-id="hf-7njk" class="cs-shot" id="cs-overview" style="opacity: 0">
+          <img data-hf-id="hf-lo8i" id="cs-overview-img" src="assets/img/overview-dark.webp" alt="Concise console, Overview: active configuration and matched rules" style="left: -448px; top: -650px" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+
+      // Colour flood: the payoff gets the accent ground.
+      tl.fromTo("#cs-ground", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.35, ease: "power2.inOut" }, 0.02);
+
+      // The real console rises out of depth and lands flat.
+      tl.fromTo("#cs-plane", { x: 420, z: -3000 }, { x: 0, z: 0, duration: 0.8, ease: "expo.out" }, 0.24);
+      tl.fromTo("#cs-plane", { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none" }, 0.24);
+      document.querySelectorAll(".cs-tw").forEach((el, i) => {
+        tl.fromTo(el, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, ease: "power2.out" }, 0.55 + i * 0.07);
+      });
+      tl.fromTo("#cs-cmd", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, 0.85);
+
+      // Push toward the denied commit, then swap to the overview on the bar.
+      tl.fromTo("#cs-activity-img", { scale: 1 }, { scale: 1.05, transformOrigin: "40% 30%", duration: 2.1, ease: "power1.inOut" }, 0.4);
+      tl.to("#cs-activity", { opacity: 0, filter: "blur(8px)", duration: 0.15, ease: "power2.in" }, 2.4);
+      tl.fromTo("#cs-overview", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, ease: "power2.out" }, 2.5);
+      tl.fromTo("#cs-overview-img", { scale: 1 }, { scale: 1.05, transformOrigin: "35% 35%", duration: 2.5, ease: "power1.inOut" }, 2.5);
+
+      window.__timelines["console"] = tl;
+    })();
+  </script>
+</template>

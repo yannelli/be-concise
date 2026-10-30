@@ -1,0 +1,33 @@
+---
+import Icon from './Icon.astro';
+import { consoleViews, installCommands } from '../data/examples';
+const first = consoleViews[0];
+---
+<section class="console-section frame section-space" id="console" aria-labelledby="console-heading">
+  <div class="section-intro"><h2 id="console-heading" data-reveal>Watch hook calls<br />as they happen.</h2><p data-reveal>An optional local console for Concise. <br />Settings, tests, and live hook calls in one place.</p></div>
+  <div class="console-viewer" data-reveal>
+    <div class="console-controls">
+      <div class="console-tabs" role="tablist" aria-label="Console pages">
+        {consoleViews.map((view, index) => <button id={`console-tab-${view.id}`} role="tab" aria-selected={index === 0 ? 'true' : 'false'} aria-controls="console-panel" tabindex={index === 0 ? 0 : -1} data-console-view={view.id}>{view.label}</button>)}
+      </div>
+      <div class="console-theme" role="group" aria-label="Console theme">
+        <button aria-pressed="true" data-console-theme="light">Light</button><button aria-pressed="false" data-console-theme="dark">Dark</button>
+      </div>
+    </div>
+    <div class="console-frame" id="console-panel" role="tabpanel" aria-labelledby={`console-tab-${first.id}`}>
+      <img data-console-image src={`/console/${first.id}-light.webp`} width="1440" height="900" alt={first.alt} loading="lazy" decoding="async" />
+    </div>
+    <p class="console-caption" data-console-caption aria-live="polite">{first.caption}</p>
+  </div>
+  <div class="console-start">
+    <div class="console-command" data-ui data-reveal>
+      <div class="terminal-meta"><span>Node.js 24 or later</span><button class="copy-button" data-copy="console"><Icon name="copy" size={15} /><span>Copy</span></button></div>
+      <pre><code>{installCommands.console}</code></pre>
+    </div>
+    <div class="console-notes" data-reveal>
+      <p><strong>Local by default.</strong> It listens on 127.0.0.1 with a per-run access token, and it stops when you press Ctrl+C.</p>
+      <p><strong>One console, every project.</strong> <code>--all</code> follows each project your hooks have seen. Leave it out to watch one folder.</p>
+      <a class="text-link" href="/docs/console/">Read the console guide <Icon name="arrow" size={17} /></a>
+    </div>
+  </div>
+</section>

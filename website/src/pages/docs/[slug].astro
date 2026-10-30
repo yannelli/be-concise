@@ -1,0 +1,52 @@
+---
+import type { GetStaticPaths, MarkdownInstance } from 'astro';
+import DocsLayout from '../../layouts/DocsLayout.astro';
+
+type Reference = MarkdownInstance<Record<string, unknown>>;
+interface Props {
+  document: Reference;
+  description: string;
+  sourcePath: string;
+}
+
+export const getStaticPaths = (async () => {
+  const sources = import.meta.glob<Reference>([
+    '../../../../plugins/concise/docs/*.md',
+    '!../../../../plugins/concise/docs/INDEX.md',
+    '../../../../plugins/concise/skills/concise-rules/references/ai-speak-patterns*.md',
+  ]);
+  const descriptions: Record<string, string> = {
+    configuration: 'Every Concise configuration key and default, five configuration layers, merge rules, confirmation modes, ignore paths, and logging.',
+    tools: 'Read and change Concise settings with the concise-config CLI, the concise MCP server tools, and the config and tune skills, including the writing-sample tuner.',
+    'host-features': 'The Claude Code, Codex, and omp hook, skill, and MCP features that the Concise manifests and omp extension use, with dated host documentation sources.',
+    categories: 'All 47 Concise AI-writing categories with examples, suggested fixes, presets, and supported scanning scopes.',
+    environment: 'Every BEC_ environment variable for Concise, with cloud-agent setup, configuration overrides, and session logging examples.',
+    packs: 'Create Concise pattern packs with JSON or JavaScript. Reference pack fields, loading order, presets, custom detectors, and validation commands.',
+    'ai-speak-patterns': 'Concise pattern library, part 1: phrase patterns, rhetorical frames, and their suggested replacements.',
+    'ai-speak-patterns-2': 'Concise pattern library, part 2: writing structure, text statistics, Simplified Technical English, and suggested replacements.',
+    'ai-speak-patterns-3': 'Concise pattern library, part 3: vocabulary, wordiness, punctuation statistics, Git identity, and review patterns.',
+    'ai-speak-patterns-4': 'Concise pattern library, part 4: file narration, praise sandwiches, smart punctuation, and Unicode glyphs.',
+  };
+  return Promise.all(Object.entries(sources).map(async ([file, load]) => {
+    const slug = file.split('/').pop()!.replace(/\.md$/, '');
+    if (!descriptions[slug]) throw new Error(`Add documentation metadata for ${slug}`);
+    return {
+      params: { slug },
+      props: {
+        document: await load(),
+        description: descriptions[slug],
+        sourcePath: file.replace(/^(\.\.\/)+/, ''),
+      },
+    };
+  }));
+}) satisfies GetStaticPaths;
+
+const { document, description, sourcePath } = Astro.props;
+const { Content, getHeadings } = document;
+const headings = getHeadings();
+const title = headings.find(heading => heading.depth === 1)?.text;
+if (!title) throw new Error(`Documentation needs a page title: ${sourcePath}`);
+---
+<DocsLayout title={title} description={description} headings={headings} sourcePath={sourcePath}>
+  <Content />
+</DocsLayout>

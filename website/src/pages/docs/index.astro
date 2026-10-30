@@ -1,0 +1,12 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import { Content, getHeadings } from '../../content/docs/overview.md';
+---
+<DocsLayout
+  title="Documentation"
+  description="Install Concise for Claude Code, Codex, or omp, understand the default checks, and find the web console, configuration, environment, category, and pattern-pack references."
+  headings={getHeadings()}
+  sourcePath="website/src/content/docs/overview.md"
+>
+  <Content />
+</DocsLayout>

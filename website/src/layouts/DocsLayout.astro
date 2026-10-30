@@ -1,0 +1,137 @@
+---
+import type { MarkdownHeading } from 'astro';
+import SiteLayout from './SiteLayout.astro';
+import '../styles/docs.css';
+
+interface Props {
+  title: string;
+  description: string;
+  headings: MarkdownHeading[];
+  sourcePath: string;
+}
+const { title, description, headings, sourcePath } = Astro.props;
+const groups = [
+  { title: 'Get started', pages: [
+    { title: 'Overview', slug: '' },
+    { title: 'Installation', slug: 'installation' },
+    { title: 'Web console', slug: 'console' },
+  ] },
+  { title: 'Reference', pages: [
+    { title: 'Configuration', slug: 'configuration' },
+    { title: 'Categories', slug: 'categories' },
+    { title: 'Environment variables', slug: 'environment' },
+    { title: 'Pattern packs', slug: 'packs' },
+    { title: 'Settings tools', slug: 'tools' },
+    { title: 'Host features', slug: 'host-features' },
+  ] },
+  { title: 'Pattern library', pages: [
+    { title: 'AI patterns, part 1', slug: 'ai-speak-patterns' },
+    { title: 'AI patterns, part 2', slug: 'ai-speak-patterns-2' },
+    { title: 'AI patterns, part 3', slug: 'ai-speak-patterns-3' },
+    { title: 'AI patterns, part 4', slug: 'ai-speak-patterns-4' },
+  ] },
+];
+const href = (slug: string) => `/docs/${slug ? `${slug}/` : ''}`;
+const path = `${Astro.url.pathname.replace(/\/$/, '')}/`;
+const pages = groups.flatMap(group => group.pages);
+const position = pages.findIndex(page => href(page.slug) === path);
+const previous = pages[position - 1];
+const next = pages[position + 1];
+const contents = headings.filter(heading => heading.depth === 2 || heading.depth === 3);
+---
+<SiteLayout title={`${title} · Concise Docs`} description={description} isDocs={true}>
+  <div class="docs-shell">
+    <a class="docs-skip" href="#docs-content">Skip documentation navigation</a>
+    <aside class="docs-sidebar" aria-label="Documentation sidebar">
+      <nav aria-label="Documentation">
+        {groups.map(group => (
+          <div class="docs-nav-group">
+            <p class="docs-nav-title">{group.title}</p>
+            <ul>{group.pages.map(page => (
+              <li><a href={href(page.slug)} aria-current={href(page.slug) === path ? 'page' : undefined}>{page.title}</a></li>
+            ))}</ul>
+          </div>
+        ))}
+      </nav>
+    </aside>
+    <details class="docs-mobile-nav">
+      <summary>Documentation menu</summary>
+      <nav aria-label="Documentation on mobile">
+        {groups.map(group => (
+          <div class="docs-nav-group">
+            <p class="docs-nav-title">{group.title}</p>
+            <ul>{group.pages.map(page => (
+              <li><a href={href(page.slug)} aria-current={href(page.slug) === path ? 'page' : undefined}>{page.title}</a></li>
+            ))}</ul>
+          </div>
+        ))}
+      </nav>
+    </details>
+    <div class="docs-reading">
+      <article id="docs-content" class="docs-prose" aria-label={title} tabindex="-1">
+        <slot />
+      </article>
+      <p class="docs-copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <div class="docs-page-end">
+        <a class="docs-source" href={`https://github.com/yannelli/be-concise/blob/main/${sourcePath}`}>View this page on GitHub</a>
+        <nav class="docs-pagination" aria-label="Documentation pages">
+          {previous && <a href={href(previous.slug)} rel="prev">Previous: {previous.title}</a>}
+          {next && <a href={href(next.slug)} rel="next">Next: {next.title}</a>}
+        </nav>
+      </div>
+    </div>
+    {contents.length > 0 && (
+      <aside class="docs-toc" aria-label="On this page">
+        <p class="docs-nav-title">On this page</p>
+        <nav aria-label="Page contents">
+          <ul>{contents.map(heading => (
+            <li class:list={[{ 'docs-toc-nested': heading.depth === 3 }]}>
+              <a href={`#${heading.slug}`}>{heading.text}</a>
+            </li>
+          ))}</ul>
+        </nav>
+      </aside>
+    )}
+  </div>
+</SiteLayout>
+
+<script>
+  const status = document.querySelector<HTMLElement>('.docs-copy-status');
+  document.querySelectorAll<HTMLPreElement>('.docs-prose pre').forEach((pre, index) => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    pre.tabIndex = 0;
+    pre.setAttribute('aria-label', `Code block ${index + 1}`);
+    const frame = document.createElement('div');
+    frame.className = 'docs-code-frame';
+    const toolbar = document.createElement('div');
+    toolbar.className = 'docs-code-toolbar';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'docs-copy';
+    button.textContent = 'Copy code';
+    button.setAttribute('aria-label', `Copy code block ${index + 1}`);
+    pre.before(frame);
+    toolbar.append(button);
+    frame.append(toolbar, pre);
+    let reset: ReturnType<typeof setTimeout>;
+    button.addEventListener('click', async () => {
+      clearTimeout(reset);
+      try {
+        await navigator.clipboard.writeText(code.textContent || '');
+        button.textContent = 'Copied';
+        if (status) status.textContent = `Code block ${index + 1} copied to clipboard.`;
+      } catch {
+        pre.focus({ preventScroll: true });
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        button.textContent = 'Code selected';
+        if (status) status.textContent = 'Clipboard unavailable. Code selected; use your device’s copy command.';
+      }
+      reset = setTimeout(() => { button.textContent = 'Copy code'; }, 2400);
+    });
+  });
+</script>

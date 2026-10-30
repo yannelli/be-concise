@@ -1,0 +1,12 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import { Content, getHeadings } from '../../../content/docs/console.md';
+---
+<DocsLayout
+  title="Web console"
+  description="Run concise-web, the local Concise console: edit configuration, test text through the hooks, follow live hook activity across projects, manage pattern packs, and update the plugin."
+  headings={getHeadings()}
+  sourcePath="website/src/content/docs/console.md"
+>
+  <Content />
+</DocsLayout>

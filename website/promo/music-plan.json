@@ -1,0 +1,84 @@
+{
+  "model_id": "music_v2_5",
+  "composition_plan": {
+    "chunks": [
+      {
+        "text": "[Intro]\n{tension builds bar by bar}\n{everything stops dead for the final beat, total silence}",
+        "duration_ms": 6000,
+        "positive_styles": [
+          "cinematic electronic",
+          "instrumental",
+          "120 bpm",
+          "4/4",
+          "dark pulsing low synth bass",
+          "ticking hi-hats",
+          "rising tension",
+          "building density",
+          "tight and modern"
+        ],
+        "negative_styles": [
+          "vocals",
+          "lyrics",
+          "choir",
+          "lo-fi",
+          "acoustic guitar",
+          "piano ballad",
+          "orchestral strings swell"
+        ]
+      },
+      {
+        "text": "[Drop]\n{massive sub impact exactly on beat one, full drums start immediately}",
+        "duration_ms": 15000,
+        "positive_styles": [
+          "huge cinematic drop on the downbeat",
+          "driving punchy drums from the first beat",
+          "deep sub bass",
+          "bright clean synth stabs",
+          "confident",
+          "forward motion",
+          "120 bpm"
+        ],
+        "negative_styles": [
+          "vocals",
+          "lyrics",
+          "slow build",
+          "riser before the drop",
+          "dubstep wobble"
+        ]
+      },
+      {
+        "text": "[Peak]\n{biggest moment, full and wide, hits on every downbeat}",
+        "duration_ms": 4500,
+        "positive_styles": [
+          "peak energy",
+          "wide stereo synths",
+          "full drums",
+          "cinematic impact",
+          "triumphant but restrained"
+        ],
+        "negative_styles": [
+          "vocals",
+          "lyrics"
+        ]
+      },
+      {
+        "text": "[Outro]\n{drums stop; one warm wide synth chord is struck on beat one and rings out sustained until the very last second}",
+        "duration_ms": 5500,
+        "positive_styles": [
+          "resolve",
+          "sustained warm wide synth chord",
+          "long ring",
+          "held to the end"
+        ],
+        "negative_styles": [
+          "vocals",
+          "lyrics",
+          "drums",
+          "silence",
+          "early fade out",
+          "fade to silence"
+        ]
+      }
+    ]
+  }
+}
