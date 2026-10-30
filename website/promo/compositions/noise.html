@@ -228,7 +228,7 @@
       });
 
       // Fly through the title into the proof world.
-      tl.fromTo("#nz-title-wrap", { scale: 1, filter: "blur(0px)", opacity: 1 }, { scale: 6, filter: "blur(14px)", opacity: 0, duration: 0.3, ease: "power3.in" }, 7.7);
+      tl.fromTo("#nz-title-wrap", { scale: 1, filter: "blur(0px)", opacity: 1 }, { scale: 6, filter: "blur(14px)", opacity: 0, duration: 10 / 30, ease: "power3.in" }, 7.7);
 
       tl.eventCallback("onUpdate", render);
       render();
