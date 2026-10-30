@@ -160,6 +160,18 @@ node plugins/concise/test/run-tests.mjs
 
 The suite runs the Claude Code cases, then `plugins/concise/test/codex-tests.mjs`, which feeds `apply_patch` payloads in the shape Codex 0.152 sends, then the omp extension cases, and then a self-check that writes every file in the plugin through the hook under the `ryan` preset.
 
+## Website
+
+The website and its docs live in [`website/`](website/), built with Astro as a static site for Cloudflare Workers. The reference pages render the Markdown in `plugins/concise/docs/` at build time.
+
+```sh
+cd website
+npm ci
+npm run dev
+```
+
+See [website/WEBSITE.md](website/WEBSITE.md) for deployment and the console screenshot script.
+
 ## Maintainer
 
 [Ryan Yannelli (@yannelli)](https://github.com/yannelli)

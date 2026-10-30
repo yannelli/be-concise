@@ -1,0 +1,67 @@
+{
+  "inspectorMaxScroll": 9284,
+  "before": [
+    {
+      "class": "closing-section",
+      "top": 10201,
+      "height": 513,
+      "opacity": "1"
+    },
+    {
+      "class": "frame closing-grid",
+      "top": 10246,
+      "height": 423,
+      "opacity": "1"
+    },
+    {
+      "class": "",
+      "top": 10246,
+      "height": 106,
+      "opacity": "1"
+    },
+    {
+      "class": "closing-command reveal-pending",
+      "top": 10421,
+      "height": 137,
+      "opacity": "0"
+    },
+    {
+      "class": "closing-actions reveal-pending",
+      "top": 10605,
+      "height": 84,
+      "opacity": "0"
+    }
+  ],
+  "after": [
+    {
+      "class": "closing-section",
+      "top": 10201,
+      "height": 513,
+      "opacity": "1"
+    },
+    {
+      "class": "frame closing-grid",
+      "top": 10246,
+      "height": 423,
+      "opacity": "1"
+    },
+    {
+      "class": "",
+      "top": 10246,
+      "height": 106,
+      "opacity": "1"
+    },
+    {
+      "class": "closing-command",
+      "top": 10401,
+      "height": 137,
+      "opacity": "1"
+    },
+    {
+      "class": "closing-actions",
+      "top": 10585,
+      "height": 84,
+      "opacity": "1"
+    }
+  ]
+}

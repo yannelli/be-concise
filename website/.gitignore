@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+.taste-skill/*/
+.taste-skill/browser-results.json
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/config.local.json
+.env
+.env.*
+!.env.example
+.taste-skill/*.mjs
+promo/renders/
+promo/.hyperframes/
+promo/frames/
+promo/assets/music/takes/

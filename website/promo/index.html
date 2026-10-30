@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Jost";
+        src: url("assets/fonts/jost-latin-variable.woff2") format("woff2");
+        font-weight: 100 900;
+      }
+      :root {
+        --color-ground: #f7f7f5;
+        --color-ink: #18191d;
+        --color-accent: #ff4a24;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #18191d;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        font-family: "Jost", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-0xju" id="root" data-composition-id="main" data-start="0" data-duration="31" data-width="1920" data-height="1080">
+      <div data-hf-id="hf-u3v9" id="noise" data-composition-id="noise" data-composition-src="compositions/noise.html" data-start="0" data-duration="8" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index: 1"></div>
+      <div data-hf-id="hf-cm7l" id="proof" data-composition-id="proof" data-composition-src="compositions/proof.html" data-start="8" data-duration="13.7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index: 2"></div>
+      <div data-hf-id="hf-adez" id="console" data-composition-id="console" data-composition-src="compositions/console.html" data-start="21" data-duration="5" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index: 3"></div>
+      <div data-hf-id="hf-3131" id="outro" data-composition-id="outro" data-composition-src="compositions/outro.html" data-start="25.5" data-duration="5.5" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080" style="z-index: 4"></div>
+
+      <audio data-hf-id="hf-pafr" id="music" class="clip" src="assets/music/bed.mp3" data-start="0" data-duration="31" data-track-index="10" data-volume="0.8" data-automation='{"version":1,"lanes":[{"target":"volume","points":[{"t":0,"v":1},{"t":5.47,"v":1},{"t":5.55,"v":0.04},{"t":5.97,"v":0.04},{"t":6.0,"v":1},{"t":30.2,"v":1},{"t":31,"v":0}]}]}'></audio>
+      <audio data-hf-id="hf-17be" id="sfx-flight" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="0.0" data-duration="3.3" data-media-start="2.0" data-track-index="11" data-volume="0.5"></audio>
+      <audio data-hf-id="hf-fnpx" id="sfx-stroke" class="clip" src="assets/sfx/impact-bass-1.mp3" data-start="5.96" data-duration="2.1" data-track-index="12" data-volume="0.9"></audio>
+      <audio data-hf-id="hf-xmdn" id="sfx-split" class="clip" src="assets/sfx/whoosh.mp3" data-start="6.14" data-duration="0.57" data-track-index="11" data-volume="0.6"></audio>
+      <audio data-hf-id="hf-0wln" id="sfx-through" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="7.78" data-duration="0.9" data-media-start="2.3" data-track-index="13" data-volume="0.5"></audio>
+      <audio data-hf-id="hf-8l5y" id="sfx-deny1" class="clip" src="assets/sfx/pop.mp3" data-start="9.11" data-duration="0.7" data-track-index="11" data-volume="0.6"></audio>
+      <audio data-hf-id="hf-t8it" id="sfx-move1" class="clip" src="assets/sfx/whoosh-short.mp3" data-start="12.34" data-duration="0.57" data-track-index="12" data-volume="0.45"></audio>
+      <audio data-hf-id="hf-rcu3" id="sfx-underline" class="clip" src="assets/sfx/click-soft.mp3" data-start="13.16" data-duration="0.36" data-track-index="11" data-volume="0.8"></audio>
+      <audio data-hf-id="hf-87uh" id="sfx-deny2" class="clip" src="assets/sfx/ping.mp3" data-start="13.21" data-duration="1.05" data-track-index="12" data-volume="0.3"></audio>
+      <audio data-hf-id="hf-5izw" id="sfx-move2" class="clip" src="assets/sfx/whoosh-cinematic.mp3" data-start="16.7" data-duration="0.8" data-media-start="2.3" data-track-index="11" data-volume="0.45"></audio>
+      <audio data-hf-id="hf-oioj" id="sfx-deny3" class="clip" src="assets/sfx/pop.mp3" data-start="17.41" data-duration="0.7" data-track-index="12" data-volume="0.55"></audio>
+      <audio data-hf-id="hf-skrn" id="sfx-riser" class="clip" src="assets/sfx/riser.mp3" data-start="17.65" data-duration="3.9" data-track-index="11" data-volume="0.4"></audio>
+      <audio data-hf-id="hf-rbnu" id="sfx-payoff" class="clip" src="assets/sfx/impact-bass-2.mp3" data-start="19.14" data-duration="2.59" data-track-index="12" data-volume="0.8"></audio>
+      <audio data-hf-id="hf-raz8" id="sfx-outro" class="clip" src="assets/sfx/whoosh.mp3" data-start="25.54" data-duration="0.57" data-track-index="11" data-volume="0.5"></audio>
+      <audio data-hf-id="hf-wo8p" id="sfx-lock" class="clip" src="assets/sfx/impact-bass-1.mp3" data-start="28.46" data-duration="2.1" data-track-index="12" data-volume="0.6"></audio>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

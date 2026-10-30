@@ -11,6 +11,9 @@ const SCRIPT = fileURLToPath(new URL("../scripts/coverage.mjs", import.meta.url)
 
 const FILES = {
   "src/full.mjs": "export const one = 1;\n",
+  "website/astro.config.mjs": "export default {};\n",
+  "website/scripts/capture.mjs": "throw new Error('website scripts are tested separately');\n",
+  "website/tests/website.test.mjs": "throw new Error('website tests have their own runner');\n",
   "src/partial.mjs": "export const used = () => 1;\n\nexport function unused() {\n  const value = 2;\n  return value; // coverage-ignore: fixture\n}\n",
   "src/unloaded.mjs": "// A comment line.\nexport const two = 2;\n",
   "test/some.mjs": "import \"../src/full.mjs\";\nimport { used } from \"../src/partial.mjs\";\nused();\n",
@@ -47,7 +50,7 @@ test("the gate lists lines that never ran and files that never loaded, then exit
   ] });
 });
 
-test("the gate exits 0 when every source line ran", async (t) => {
+test("the gate excludes website sources and exits 0 when every plugin source line ran", async (t) => {
   const { collect, gate } = await fixture(t);
   const result = gate(collect("cov-all", "all.mjs"));
   assert.equal(result.stdout, "Line coverage 100.00% (5/5)\n");
