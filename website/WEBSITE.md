@@ -17,7 +17,7 @@ npm run dev
 - `npm test`: website route, metadata, link, screenshot, and copy checks (build first).
 - `npm run screenshots`: regenerate the web console screenshots. See [Console screenshots](#console-screenshots).
 
-The plugin's own tests run from the repository root; see `CONTRIBUTING.md`.
+CI runs the website build, typecheck, and tests in a separate Website job. The plugin's own tests and V8 coverage run from the repository root and exclude `website/`; see `CONTRIBUTING.md`.
 
 The homepage is `src/pages/index.astro`. Shared design tokens live in `src/styles/global.css`. Interactive examples and preset metadata are in `src/data/examples.ts`; interactions are in `src/scripts/home.ts`. Reference pages render the original Markdown in `../plugins/concise/docs/`, so plugin documentation edits flow into the next website build. A new file there fails the build until it has a description in `src/pages/docs/[slug].astro` and a sidebar entry in `src/layouts/DocsLayout.astro`. The overview, installation, and web console guides are site pages in `src/content/docs/`.
 

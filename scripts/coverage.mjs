@@ -6,7 +6,8 @@ import { fileURLToPath } from "node:url";
 const usage = `Usage: node scripts/coverage.mjs DIR
 
 Reads the V8 coverage files that NODE_V8_COVERAGE=DIR wrote and exits 1
-when a source line never ran. Sources are the .mjs files outside test directories.
+when a source line never ran. Sources are the .mjs files outside test directories
+and the separately tested website/ project.
 A line that holds "coverage-ignore" is left out; use it for code no test can reach.
 `;
 
@@ -15,7 +16,7 @@ const NOT_CODE = /^\s*$|^\s*(\/\/|\*|\/\*)|^\s*[}\])]+[;,)]*\s*$/;
 
 function sources(root) {
   return execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z", "*.mjs"], { cwd: root, encoding: "utf8" })
-    .split("\0").filter((path) => path && !/(^|\/)test\//.test(path));
+    .split("\0").filter((path) => path && !/(^|\/)test\//.test(path) && !path.startsWith("website/"));
 }
 
 /** Marks every character that ran in at least one process. A later, inner range overrides the outer one. */
