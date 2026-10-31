@@ -181,7 +181,7 @@ components:
 
 Concise is plain, precise, and product-led. The neutral ground, Jost typography, orange actions, and original convergence mark make a conventional developer site feel considered. Linear, Raycast, and Resend set the craft bar, not a template to copy. Preserve this chosen conventional identity rather than introducing an experimental visual world.
 
-Readable code, hook findings, configuration, and installation commands supply the imagery. The homepage has a large centered introduction and varied, mostly left-aligned sections; documentation uses a quieter reading layout. Open space separates ideas, while flat tonal stages group related material. Neither surface needs stock photography or invented proof.
+Readable code, hook findings, configuration, and installation commands supply the imagery. The homepage has a large centered introduction, the existing film, and a short next-step section. Dedicated marketing pages hold the interactive examples, use cases, installation, configuration, console, and FAQ; documentation uses a quieter reading layout. Open space separates ideas, while flat tonal stages group related material. Neither surface needs stock photography or invented proof.
 
 **Key Characteristics:**
 - Warm-neutral ground, white and soft stages, charcoal code, and purposeful orange.
@@ -240,7 +240,19 @@ Documentation does not inherit homepage type-role overrides. It uses its own dis
 
 ## Layout
 
-The homepage frame is centered with the root gutter and maximum width (`--width: 1296px`). Its width is `min(calc(100% - var(--gutter)*2), var(--width))`. The gutter grows fluidly from a mobile inset to a generous desktop margin. The header is a normal-flow horizontal bar (96px desktop, 82px at widths up to 650px), not sticky chrome.
+### Multipage structure
+
+Main navigation goes to `/why-concise/`, `/use-cases/`, `/docs/`, and `/install/`. Supplemental `/configuration/`, `/console/`, and `/faq/` pages are linked from relevant content and the shared footer. Every page has one h1, route-specific metadata, and current-page navigation. All existing reference routes remain intact.
+
+`MarketingLayout.astro` loads `home.css`, the focused overrides in `pages.css`, and the existing interaction bootstrap. The old component styles still govern demos, installation, the console, configuration, and film; they are no longer stacked on the homepage. The first two homepage sections contain only the introduction/film and next-step links. The demo belongs to Why Concise. Installation and configuration have separate routes, so neither is a prerequisite scroll on the homepage.
+
+Interior page introductions use the headline role; their secondary section headings use the title role so the page title leads. Introductions use left alignment, a 62ch maximum prose measure, and 52px/48px top/bottom padding (40px tablet, 32px mobile). Their sections use 64px spacing, reducing to 48px on mobile. Page endings use 80px, 64px, and 48px bottom padding. The core-check summary is a semantic definition list on a soft ground, three columns at desktop and stacked at 800px and below. Homepage next steps use two columns, stacked at 550px. Keep the spacious existing film and product components, rather than shrinking their controls or text to reduce page length.
+
+The footer is compact on all routes: wordmark, supported hosts, navigation, MIT/typeface licenses, and Ryan Yannelli attribution. The former oversized closing slogan and duplicate installation band are omitted. Footer destinations use two columns, including on mobile. The mobile header menu is a native `details`/`summary`, available without JavaScript; Escape closes it and returns focus when enhanced. Active links are underlined in the existing orange. The install action remains visible on mobile. The wordmark's optical correction is unchanged.
+
+### Existing component geometry
+
+The marketing frame is centered with the root gutter and maximum width (`--width: 1296px`). Its width is `min(calc(100% - var(--gutter)*2), var(--width))`. The gutter grows fluidly from a mobile inset to a generous desktop margin. The header is a normal-flow horizontal bar (96px desktop, 82px at widths up to 650px), not sticky chrome.
 
 Wide homepage sections use purpose-specific compositions: paired demo panes, an asymmetric feature grouping, text beside code, a use-case list, a two-column installation area, configuration beside a native select, an unboxed guide list, and an FAQ column. Keep these differences; do not turn every section into an identical card grid. Major separation is spacious (150px desktop, 100px at widths up to 800px, 85px at widths up to 550px). Full-width tonal bands contain the same inner frame. Component insets and gaps use the smaller spacing tokens rather than another layout system.
 
@@ -302,9 +314,9 @@ This records source behavior, not completed final validation. The promo review r
 
 ### Navigation, FAQ, and documentation
 
-The wordmark is an accessible home link. Its text has a `translateY(-.08em)` optical correction to align Jost’s lowercase letters with the mark, shared across the header and footer. Main navigation is plain text with opacity hover; the documentation current-page link has an orange underline. The mobile site menu is controlled by a real button with `aria-expanded`; Escape closes it and returns focus. Documentation navigation uses muted links, a soft active background, readable-orange active text, and weight (600). Its mobile menu is native `details`/`summary` and remains useful without client JavaScript. The TOC links directly to h2/h3 anchors.
+The wordmark is an accessible home link. Its text has a `translateY(-.08em)` optical correction to align Jost’s lowercase letters with the mark, shared across the header and footer. Main navigation is plain text with opacity hover; the documentation current-page link has an orange underline. The mobile site menu uses a native disclosure with an accessible summary; the browser exposes its expanded state. Escape closes it and returns focus when JavaScript runs. Documentation navigation uses muted links, a soft active background, readable-orange active text, and weight (600). Its mobile menu is native `details`/`summary` and remains useful without client JavaScript. The TOC links directly to h2/h3 anchors.
 
-The closing installation section stays visible by default; its command and actions do not depend on scroll-reveal initialization. FAQ items are native `details`/`summary` in white square containers. Their plus indicator is CSS geometry; opening an item changes the indicator without replacing the semantic disclosure. Documentation code remains available without JavaScript; enhancement adds a copy toolbar, a focusable scrollable code block, status feedback, and a selection fallback when clipboard access fails. Preserve source-page links and previous/next navigation.
+The dedicated installation page stays readable by default; its commands and actions do not depend on scroll-reveal initialization. FAQ items are native `details`/`summary` in white square containers. Their plus indicator is CSS geometry; opening an item changes the indicator without replacing the semantic disclosure. Documentation code remains available without JavaScript; enhancement adds a copy toolbar, a focusable scrollable code block, status feedback, and a selection fallback when clipboard access fails. Preserve source-page links and previous/next navigation.
 
 ### Focus, selection, and motion
 
@@ -314,7 +326,7 @@ Motion is restrained and content stays visible without it. The root easing is `c
 
 **The Evidence Is Imagery Rule.** Use source-backed code, configuration, and diagnostics as product imagery. Examples must remain labeled as examples, not fabricated live-agent activity or measured performance.
 
-For frontend work, retain the Astro structure: shared `SiteLayout.astro` and `global.css`, homepage-only `home.css`, and `DocsLayout.astro` with `docs.css`. Reuse `Demo`, `Install`, `Mark`, and `Icon` rather than drawing parallel variants. Keep the documentation Markdown transforms and semantic table attributes when adding pages. The site is statically generated with trailing slashes and Cloudflare Workers static assets configured in `wrangler.jsonc`; a new visual surface should not require a framework runtime or client-rendered replacement for readable HTML.
+For frontend work, retain the Astro structure: shared `SiteLayout.astro` and `global.css`, `MarketingLayout.astro` with `home.css` and `pages.css`, and `DocsLayout.astro` with `docs.css`. Reuse `Demo`, `Install`, `Mark`, and `Icon` rather than drawing parallel variants. Keep the documentation Markdown transforms and semantic table attributes when adding pages. The site is statically generated with trailing slashes and Cloudflare Workers static assets configured in `wrangler.jsonc`; a new visual surface should not require a framework runtime or client-rendered replacement for readable HTML.
 
 ## Do's and Don'ts
 
