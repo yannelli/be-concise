@@ -89,6 +89,11 @@ baseline. The next delivery requires preview approval, render, and a fresh file/
 managed browser launcher failed to start, but HyperFrames checks and snapshots used system Chrome
 with software rendering; both the editor and lightweight player answer HTTP 200.
 
+Independent review (sa30eb4a2): ship for preview, with no introduced P0/P1. The reviewer compared
+before/after frames and all review sheets, confirmed that the tighter claim has no glyph collision,
+that both two-line proof subtitles fit, and that the console handoff is clean. This does not verify
+perceived musical sync by listening or any replacement encode; those remain delivery checks.
+
 The existing IBM Plex Mono code face is intentional under SPEC.md. A value-specific detector
 exception is scoped to the three film compositions only; website typography is unchanged. An
 existing DESIGN.md/sidecar freshness warning was not repaired as a side effect of this film edit.
