@@ -27,7 +27,7 @@ The homepage is deliberately short: an introduction, the existing film, and link
 
 | Route | Content |
 | --- | --- |
-| `/` | Introduction, film and transcript, install and discovery links |
+| `/` | Introduction, film, install and discovery links |
 | `/why-concise/` | Interactive examples, core defaults, retry behavior, test-output filtering |
 | `/use-cases/` | Reviews, writing, team rules, cloud agents |
 | `/install/` | Host commands, prerequisites, trust and reload instructions |
@@ -82,7 +82,7 @@ ffmpeg -ss 7.3 -i renders/concise-promo-master.mp4 -frames:v 1 \
   -c:v libwebp -quality 82 ../public/promo/concise-promo-poster.webp
 ```
 
-The player is `src/components/Film.astro`, with behavior in `src/scripts/home.ts`. It loops muted while visible. **Sound on** restarts with sound; pause persists across scrolling. Reduced motion shows a poster and requires explicit play/resume. All playback pauses offscreen. Without JavaScript, native video controls remain available. A native transcript disclosure includes the hook messages and notes that AI-writing checks are optional and disabled by default.
+The player is `src/components/Film.astro`, with behavior in `src/scripts/home.ts`. It loops muted while visible. **Sound on** restarts with sound; pause persists across scrolling. Reduced motion shows a poster and requires explicit play/resume. All playback pauses offscreen. Without JavaScript, native video controls remain available. A visually hidden caption, for screen readers only, carries the film's text: the hook messages, a note that AI-writing checks are optional and disabled by default, and the console and closing lines. It has no links, so nothing invisible takes keyboard focus.
 
 Render artifacts and rejected music takes are gitignored. Keep API keys outside the repository; the shipped bed is sufficient for rendering.
 
