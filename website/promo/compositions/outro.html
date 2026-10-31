@@ -25,7 +25,7 @@
       font-size: 210px;
       font-weight: 550;
       letter-spacing: -0.045em;
-      line-height: 1.02;
+      line-height: 0.94;
       white-space: nowrap;
     }
     .ot-w {
@@ -130,8 +130,8 @@
 
       // End card: the mark is drawn, its square slides home on the beat, the name wipes in.
       tl.fromTo("#ot-ink", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.45, ease: "expo.out" }, 2.6);
-      tl.fromTo("#ot-sq", { attr: { x: 160 }, opacity: 0 }, { attr: { x: 728 }, opacity: 1, duration: 0.4, ease: "back.out(1.4)" }, 2.6);
-      tl.fromTo("#ot-word", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.4, ease: "expo.out" }, 3.0);
+      tl.fromTo("#ot-sq", { attr: { x: 160 }, opacity: 0 }, { attr: { x: 728 }, opacity: 1, duration: 13 / 30, ease: "back.out(1.4)" }, 2.6);
+      tl.fromTo("#ot-word", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.4, ease: "expo.out" }, 91 / 30);
       tl.fromTo("#ot-cmd", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, 3.3);
       tl.fromTo("#ot-url", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, 3.42);
 
