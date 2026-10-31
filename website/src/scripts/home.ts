@@ -1,4 +1,4 @@
-import { examples, presets, installCommands, consoleViews, type ExampleKey } from '../data/examples';
+import { examples, presets, installCommands, type ExampleKey } from '../data/examples';
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const live = document.querySelector<HTMLElement>('[data-demo-status]');
@@ -102,56 +102,35 @@ function keyboardTabs(selector: string) {
 }
 keyboardTabs('[data-example]');
 keyboardTabs('[data-host]');
-keyboardTabs('[data-console-view]');
-
-const consoleImage = document.querySelector<HTMLImageElement>('[data-console-image]');
-const consoleCaption = document.querySelector<HTMLElement>('[data-console-caption]');
-let consoleView: string = consoleViews[0].id;
-let consoleTheme = 'light';
-let consoleSwap = 0;
-function showConsole() {
-  const view = consoleViews.find(item => item.id === consoleView) || consoleViews[0];
-  const src = `/console/${view.id}-${consoleTheme}.webp`;
-  if (consoleCaption) consoleCaption.textContent = view.caption;
-  document.querySelector('#console-panel')?.setAttribute('aria-labelledby', `console-tab-${view.id}`);
-  if (!consoleImage || consoleImage.getAttribute('src') === src) return;
-  const swap = () => { consoleImage.src = src; consoleImage.alt = consoleTheme === 'dark' ? `${view.alt} Dark theme.` : view.alt; };
-  const frame = consoleImage.parentElement;
+// Console screenshots: one theme switch swaps every shot, crossfading each decoded image in place.
+function swapShot(image: HTMLImageElement, theme: string) {
+  const id = image.dataset.consoleShot;
+  const src = `/console/${id}-${theme}.webp`;
+  if (!id || image.getAttribute('src') === src) return;
+  const alt = image.dataset.alt || image.alt;
+  const swap = () => { image.src = src; image.alt = theme === 'dark' ? `${alt} Dark theme.` : alt; };
+  const frame = image.parentElement;
   if (reduceMotion || !frame) { swap(); return; }
-  // Decode the next screenshot, then fade it in over the current one: a true crossfade with no blank frame.
-  const token = ++consoleSwap;
   const next = new Image(1440, 900);
   next.alt = '';
   next.className = 'console-next';
   next.src = src;
   next.decode().catch(() => undefined).then(() => {
-    if (token !== consoleSwap) return;
     frame.querySelectorAll('.console-next').forEach(node => node.remove());
     frame.append(next);
     requestAnimationFrame(() => requestAnimationFrame(() => next.classList.add('is-in')));
     let done = false;
-    const finish = () => { if (done) return; done = true; if (token === consoleSwap) swap(); next.remove(); };
+    const finish = () => { if (done) return; done = true; swap(); next.remove(); };
     next.addEventListener('transitionend', finish, { once: true });
     setTimeout(finish, 700);
   });
 }
-document.querySelectorAll<HTMLButtonElement>('[data-console-view]').forEach(tab => {
-  tab.addEventListener('click', () => {
-    consoleView = tab.dataset.consoleView || consoleView;
-    document.querySelectorAll<HTMLElement>('[data-console-view]').forEach(item => {
-      const selected = item === tab;
-      item.setAttribute('aria-selected', String(selected));
-      item.tabIndex = selected ? 0 : -1;
-    });
-    showConsole();
-  });
-});
 document.querySelectorAll<HTMLButtonElement>('[data-console-theme]').forEach(button => {
   button.addEventListener('click', () => {
-    consoleTheme = button.dataset.consoleTheme || 'light';
+    const theme = button.dataset.consoleTheme || 'light';
     document.querySelectorAll<HTMLElement>('[data-console-theme]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-    document.querySelector('.console-frame')?.classList.toggle('is-dark', consoleTheme === 'dark');
-    showConsole();
+    document.querySelectorAll<HTMLElement>('.shot-frame').forEach(frame => frame.classList.toggle('is-dark', theme === 'dark'));
+    document.querySelectorAll<HTMLImageElement>('[data-console-shot]').forEach(image => swapShot(image, theme));
   });
 });
 

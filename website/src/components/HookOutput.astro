@@ -1,0 +1,13 @@
+---
+import type { HookOutput } from '../data/hook-output';
+interface Props { output: HookOutput; caption?: string; }
+const { output, caption } = Astro.props;
+---
+<figure class="hook-output" data-ui data-reveal>
+  <div class="hook-meta"><span>{output.host}</span><span class:list={['hook-decision', `is-${output.decision}`]}>{output.decision}</span></div>
+  {output.env && <pre class="hook-env"><code>{output.env.join('\n')}</code></pre>}
+  <p class="hook-call"><code>{output.call}</code></p>
+  {output.input && <pre class="hook-input"><code>{output.input}</code></pre>}
+  <pre class="hook-response"><code>{output.response}</code></pre>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

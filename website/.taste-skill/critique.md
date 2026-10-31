@@ -41,3 +41,17 @@ Fixed this round (from round-two screenshots):
 Also: footer "Made by Ryan Yannelli" now links to https://ryanyannelli.com on every page.
 Remaining: no photography or video (deliberate; interface fragments are the honest imagery for a local CLI hook); inspector percentile margin reading of 72px vs 91px despite one equal .frame wrapper; desktop screen 6 (docs list end → FAQ start) still the lightest at 0.23 fill.
 Final gate: 0 FAIL, 3 WARN at 1440/768/390; lint 0 FAIL/0 WARN; astro check clean; 6/6 website tests; browser interaction suite passes; all ten final screenshot sheets opened.
+
+ROUND 4 (all routes, after the multipage split)
+Seen in one second: each route now opens on its own display headline ("Concise checks before the write.", "Install Concise in two commands.", "Watch every hook call.").
+Idea (one sentence): every claim on a marketing route sits beside the real thing that proves it: a captured hook response or a real console screenshot.
+Live thing: example tabs with replay, host install tabs, the preset picker, and one light/dark switch for all five console screenshots.
+Layout words by section: home=hero+film / next-links beside proof grid; why=demo / core checks / shot pair / test split; use-cases, configuration, faq=alternating proof rows; install=dark tabs / numbered check beside its denial / shot pair; console=lead shot then alternating shots / start split; docs=three columns on the site frame.
+Scores: design 8.1 · usability 8.5 · creativity 7.4 · content 9.0 → overall 8.2
+Caps applied: none.
+Fixed this round (from the before screenshots in .taste-skill/before/):
+1. Subpages opened on a 52px bare-name title with no picture (focal-point and few-pictures FAIL on six routes). Now a display headline that says what the page is, and 4+ real pictures per route.
+2. Subpages had no motion (still-page FAIL). Every section part now has a staggered entrance.
+3. Docs: an eyebrow-like menu label above the h1, 3.3:1 code comments, and a narrower frame than the header. The menu is now a navigation landmark, comments are 5.8:1, and the shell uses the site frame.
+Remaining: WARNs for no footage (no honest clip exists for a local CLI hook beyond the homepage film) and fewer than 16 moving elements on some routes; FAQ margin reading 72/98px with one equal frame. Docs routes are judged with --app (0 FAIL); in page mode they still fail the marketing rules for pictures, display headline and scroll motion, which do not fit reference pages. 404 keeps few-pictures and still-page FAILs as a utility page.
+Final gate: page mode 0 FAIL at 1440/768/390 on all 7 marketing routes; --app 0 FAIL on 7 docs routes; lint 0/0; astro check 0/0/0; 24/24 tests; browser interaction script passed; all final desktop, tablet and phone sheets opened.

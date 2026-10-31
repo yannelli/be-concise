@@ -2,7 +2,13 @@
 import MarketingLayout from '../layouts/MarketingLayout.astro';
 import Console from '../components/Console.astro';
 ---
-<MarketingLayout title="Web console — Concise" description="Explore the optional local Concise console: live hook calls, settings, text checks, and pattern packs. Run concise-web in your terminal.">
-  <header class="page-intro frame"><h1>Web console</h1><p>Inspect checks and change settings in your browser. <code>concise-web</code> runs in your terminal, not as a background daemon.</p></header>
+<MarketingLayout title="Web console: Concise" description="Explore the optional local Concise console: live hook calls, settings, text checks, and pattern packs. Run concise-web in your terminal.">
+  <header class="page-intro frame">
+    <h1 data-hero>Watch every hook call.</h1>
+    <p data-hero>Inspect checks and change settings in your browser. <code>concise-web</code> runs in your terminal, not as a background daemon. These are real screenshots with 2 sample projects.</p>
+    <div class="console-theme" role="group" aria-label="Screenshot theme" data-hero>
+      <button aria-pressed="true" data-console-theme="light">Light</button><button aria-pressed="false" data-console-theme="dark">Dark</button>
+    </div>
+  </header>
   <Console />
 </MarketingLayout>

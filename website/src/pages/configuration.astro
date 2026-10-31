@@ -2,13 +2,19 @@
 import MarketingLayout from '../layouts/MarketingLayout.astro';
 import Icon from '../components/Icon.astro';
 import { presets } from '../data/examples';
+import HookOutput from '../components/HookOutput.astro';
+import Shot from '../components/Shot.astro';
+import { hookOutputs } from '../data/hook-output';
 ---
-<MarketingLayout title="Configure Concise — Your rules and exceptions" description="Choose from eight writing presets and 47 categories. Enable optional checks, configure exceptions, or try findings without blocking.">
-  <header class="page-intro frame"><h1>Configure Concise</h1><p>The basics run out of the box. Turn on the style checks when you want them.</p></header>
+<MarketingLayout title="Configure Concise: your rules and exceptions" description="Choose from 8 writing presets and 47 categories. Turn on optional checks, set exceptions, or get findings without a block.">
+  <header class="page-intro frame">
+    <h1 data-hero>Set the checks for your project.</h1>
+    <p data-hero>The core checks run without configuration. Turn on the style checks when you want them.</p>
+  </header>
   <section class="frame page-section" aria-labelledby="preset-heading">
     <div class="config-grid">
-      <div class="preset-picker"><h2 id="preset-heading">Choose a preset.</h2><p>Eight starting points, from removing chat boilerplate to checking all 47 writing categories. This example enables the optional em-dash and AI-writing checks.</p><label for="preset">Writing preset</label><select id="preset">{presets.map(preset => <option value={preset.id}>{preset.id}</option>)}</select><div class="preset-info" aria-live="polite"><strong data-preset-count>21 categories</strong><p data-preset-description>{presets[0].description}</p></div><a class="text-link" href="/docs/categories/">Compare all presets <Icon name="arrow" size={16} /></a><noscript><p>The example uses the default preset. See the preset reference for other values.</p></noscript></div>
-      <div class="config-code" data-ui><div class="terminal-meta"><span>.claude/concise.json</span><button class="copy-button" data-copy="config"><Icon name="copy" size={15} /><span>Copy</span></button></div><pre><code data-config-code>{`{
+      <div class="preset-picker"><h2 id="preset-heading" data-reveal>Choose a preset.</h2><p data-reveal>There are 8 presets. They go from chat boilerplate only to all 47 writing categories. This example turns on the optional em-dash and AI-writing checks.</p><label for="preset">Writing preset</label><select id="preset">{presets.map(preset => <option value={preset.id}>{preset.id}</option>)}</select><div class="preset-info" aria-live="polite"><strong data-preset-count>21 categories</strong><p data-preset-description>{presets[0].description}</p></div><a class="text-link" href="/docs/categories/">Compare all presets <Icon name="arrow" size={16} /></a><noscript><p>The example uses the default preset. See the preset reference for other values.</p></noscript></div>
+      <div class="config-code" data-ui data-reveal><div class="terminal-meta"><span>.claude/concise.json</span><button class="copy-button" data-copy="config"><Icon name="copy" size={15} /><span>Copy</span></button></div><pre><code data-config-code>{`{
   "features": {
     "emDash": { "enabled": true },
     "aiWriting": {
@@ -16,9 +22,22 @@ import { presets } from '../data/examples';
       "preset": "default"
     }
   }
-}`}</code></pre><p>Codex uses <code>.codex/concise.json</code>.<br />If both exist, the Claude configuration wins.</p></div>
+}`}</code></pre><p>Codex uses <code>.codex/concise.json</code>. <br />If both exist, the Claude configuration wins.</p></div>
     </div>
-    <div class="exceptions"><p><strong>Keep an intentional phrase.</strong> Use <code>concise-ignore</code>, allow a phrase, or exempt a file. Style checks default to confirm mode: resubmit identical text to keep it.</p><p><strong>Try it without blocking.</strong> Set <code>softFail: true</code> to receive findings as flagged allows. It is off by default.</p></div>
   </section>
-  <nav class="page-next frame" aria-label="Configuration references"><a class="text-link" href="/docs/configuration/">Every option and config layer <Icon name="arrow" size={17} /></a><a class="text-link" href="/docs/environment/">Session overrides <Icon name="arrow" size={17} /></a><a class="text-link" href="/console/">Edit settings in the console <Icon name="arrow" size={17} /></a></nav>
+  <div class="frame proof-rows page-section">
+    <section class="proof-row" aria-labelledby="keep-heading">
+      <div class="proof-copy"><h2 id="keep-heading" data-reveal>Keep a phrase on purpose.</h2><p data-reveal>Put <code>concise-ignore</code> on the line, allow a phrase, or exempt a file. By default, style checks use confirm mode: send the identical text again to keep it.</p></div>
+      <HookOutput output={hookOutputs.docs} />
+    </section>
+    <section class="proof-row" aria-labelledby="soft-heading">
+      <div class="proof-copy"><h2 id="soft-heading" data-reveal>Try it without a block.</h2><p data-reveal>Set <code>softFail: true</code> to get findings as flagged allows. The agent sees the finding, and the write continues. Soft fail is off by default.</p></div>
+      <HookOutput output={hookOutputs.softFail} />
+    </section>
+    <section class="proof-row" aria-labelledby="console-config-heading">
+      <div class="proof-copy"><h2 id="console-config-heading" data-reveal>Or use the console.</h2><p data-reveal>Pick a configuration layer in the local web console. Change it with switches, numbers, or raw JSON.</p><a class="text-link" href="/console/" data-reveal>See the web console <Icon name="arrow" size={16} /></a></div>
+      <Shot view="configuration" caption="The configuration page with the project layer selected." />
+    </section>
+  </div>
+  <nav class="page-next frame" aria-label="Configuration references"><a class="text-link" href="/docs/configuration/">Every option and config layer <Icon name="arrow" size={17} /></a><a class="text-link" href="/docs/environment/">Session overrides <Icon name="arrow" size={17} /></a></nav>
 </MarketingLayout>

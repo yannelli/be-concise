@@ -4,18 +4,18 @@ import { installCommands } from '../data/examples';
 ---
 <section class="install-section" id="install" aria-labelledby="install-heading">
   <div class="frame install-grid">
-    <div class="install-copy"><h2 id="install-heading" data-reveal>Two commands.<br />Then back to work.</h2><p data-reveal>The core checks need no configuration file or account. Review the hooks and follow your host’s session or reload instructions.</p><a class="text-link" href="/docs/installation/" data-reveal>Read the installation guide <Icon name="arrow" size={17} /></a></div>
+    <div class="install-copy"><h2 id="install-heading" data-reveal>Choose your agent.</h2><p data-reveal>Run the 2 commands for your host. Review the hooks, then follow the session or reload instructions of your host.</p><a class="text-link" href="/docs/installation/" data-reveal>Read the installation guide <Icon name="arrow" size={17} /></a></div>
     <div class="install-terminal" data-ui data-reveal>
       <div class="host-tabs" role="tablist" aria-label="Choose your coding agent"><button id="host-claude" role="tab" aria-selected="true" aria-controls="install-claude" data-host="claude"><svg class="claude-symbol" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M2 12h20M5 5l14 14M5 19 19 5M8 3l8 18M3 8l18 8M3 16l18-8M8 21l8-18" /></svg>Claude Code</button><button id="host-codex" role="tab" aria-selected="false" aria-controls="install-codex" tabindex="-1" data-host="codex"><Icon name="terminal" size={17} />Codex</button><button id="host-omp" role="tab" aria-selected="false" aria-controls="install-omp" tabindex="-1" data-host="omp"><Icon name="terminal" size={17} />omp</button></div>
       <div class="install-panel" role="tabpanel" id="install-claude" aria-labelledby="host-claude">
         <div class="terminal-meta"><span>Run inside Claude Code</span><button class="copy-button" data-copy="claude"><Icon name="copy" size={15} /><span>Copy</span></button></div>
         <pre><code>{installCommands.claude}</code></pre>
-        <p class="terminal-instruction">Review the hooks and choose an installation scope. Run <code>/reload-plugins</code> if the install summary asks.</p>
+        <p class="terminal-instruction">Review the hooks and choose an installation scope. If the install summary tells you to, run <code>/reload-plugins</code>.</p>
       </div>
       <div class="install-panel" role="tabpanel" id="install-codex" aria-labelledby="host-codex" hidden>
         <div class="terminal-meta"><span>Codex CLI 0.152.0 or newer</span><button class="copy-button" data-copy="codex"><Icon name="copy" size={15} /><span>Copy</span></button></div>
         <pre><code>{installCommands.codex}</code></pre>
-        <p class="terminal-instruction">Start a new session. Run <code>/hooks</code>, and review and trust each Concise hook under <code>PreToolUse</code> and <code>Stop</code>.</p>
+        <p class="terminal-instruction">Start a new session. Run <code>/hooks</code>. Review and trust each Concise hook under <code>PreToolUse</code> and <code>Stop</code>.</p>
       </div>
       <div class="install-panel" role="tabpanel" id="install-omp" aria-labelledby="host-omp" hidden>
         <div class="terminal-meta"><span>omp (oh-my-pi)</span><button class="copy-button" data-copy="omp"><Icon name="copy" size={15} /><span>Copy</span></button></div>
@@ -25,5 +25,5 @@ import { installCommands } from '../data/examples';
       <p class="install-requirements">On your PATH: Git, Node.js, Bash, jq, realpath, and core Unix tools.</p>
     </div>
   </div>
-  <noscript><div class="frame no-script-install"><h3>Install for Codex</h3><pre><code>{installCommands.codex}</code></pre><p>Use Codex CLI 0.152.0 or newer. Start a new session, run /hooks, and trust each Concise hook under PreToolUse and Stop.</p><h3>Install for omp</h3><pre><code>{installCommands.omp}</code></pre><p>Start a new omp session after you install.</p></div></noscript>
+  <noscript><div class="frame no-script-install"><h3>Install for Codex</h3><pre><code>{installCommands.codex}</code></pre><p>Use Codex CLI 0.152.0 or newer. Start a new session and run /hooks. Trust each Concise hook under PreToolUse and Stop.</p><h3>Install for omp</h3><pre><code>{installCommands.omp}</code></pre><p>Start a new omp session after you install.</p></div></noscript>
 </section>

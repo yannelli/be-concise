@@ -1,134 +1,167 @@
 # Installation
 
-Install Concise in Claude Code, Codex, or omp, review its hooks, then check a sample denial. Once your host loads and trusts the hooks, the 3 core checks run without configuration. Em-dash and AI-writing checks stay off until you enable them.
+This guide tells you how to install Concise in Claude Code, Codex, or omp. It also tells you how to review the hooks and how to see a sample denial. After your host loads and trusts the hooks, the 3 core checks run without configuration. The em-dash and AI-writing checks stay disabled until you enable them.
 
 ## Prerequisites
 
-You need Git, Node.js, Bash, `jq`, `realpath`, and core Unix tools on `PATH` in the environment that runs your agent. A GitHub account or `gh` is not needed for file checks; the PR and issue checks apply when the agent uses `gh`.
+The environment that runs your agent must have these tools on `PATH`:
 
-Check the required executables in a Bash terminal:
+- Git
+- Node.js
+- Bash
+- `jq`
+- `realpath`
+- Core Unix tools
+
+The file checks do not need a GitHub account or `gh`. The PR and issue checks apply when the agent uses `gh`.
+
+To make sure that the necessary executables are available, run this command in a Bash terminal:
 
 ```sh
 command -v git node bash jq realpath
 ```
 
-If any command is missing, install it with your system’s package manager and make it available to the agent process. Concise has no extra setup step or configuration requirement for its core checks.
+If a command is not available, install it with the package manager of your system. Then make sure that the agent process can use the command. Concise needs no more setup steps and no configuration for its core checks.
 
 ## Claude Code
 
-Run these slash commands inside Claude Code, not in your terminal:
+Run these slash commands in Claude Code. Do not run them in your terminal:
 
 ```text
 /plugin marketplace add https://github.com/yannelli/be-concise
 /plugin install concise@be-concise
 ```
 
-Review the hook commands and choose an installation scope. If the install summary requests it, reload the plugins:
+Then do these steps:
 
-```text
-/reload-plugins
-```
+1. Review the hook commands.
+2. Select an installation scope.
+3. If the install summary tells you to reload the plugins, run this command:
 
-Continue with [verification](#verify-the-core-checks). For host-specific installation and scope options, see the [Claude Code plugin documentation](https://code.claude.com/docs/en/discover-plugins).
+   ```text
+   /reload-plugins
+   ```
+
+Then go to [Verify the core checks](#verify-the-core-checks). For installation and scope options that are specific to the host, refer to the [Claude Code plugin documentation](https://code.claude.com/docs/en/discover-plugins).
 
 ## Codex CLI
 
-Codex CLI **0.152.0 or newer** is the supported baseline. Check your version first:
+Concise supports Codex CLI **0.152.0 or newer**. Do these steps:
 
-```sh
-codex --version
-```
+1. Make sure that you have a supported version:
 
-Install from your terminal:
+   ```sh
+   codex --version
+   ```
 
-```sh
-codex plugin marketplace add yannelli/be-concise
-codex plugin add concise@be-concise
-```
+2. Install Concise from your terminal:
 
-Start a new Codex session. Run `/hooks`, and review and trust each `concise` hook under both `PreToolUse` and `Stop`. Codex asks for review again whenever a hook definition changes; installation alone does not grant trust.
+   ```sh
+   codex plugin marketplace add yannelli/be-concise
+   codex plugin add concise@be-concise
+   ```
 
-For automation that already validates its hook sources, Codex offers a per-invocation bypass:
+3. Start a new Codex session.
+4. Run `/hooks`.
+5. Review each `concise` hook under both `PreToolUse` and `Stop`.
+6. Trust each `concise` hook under both `PreToolUse` and `Stop`.
+
+Each time a hook definition changes, Codex asks for a review again. The installation alone does not make Codex trust the hooks.
+
+If your automation already validates its hook sources, you can use the Codex bypass for one invocation.
+
+**CAUTION:** Do not use the bypass in place of a review of hook code that you do not know.
 
 ```sh
 codex exec --dangerously-bypass-hook-trust "<prompt>"
 ```
 
-This skips hook trust review for that invocation and does not save trust. Do not use it as a substitute for reviewing unfamiliar hook code. See the [Codex plugin documentation](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli) for host details.
+The bypass does not do the hook trust review for that invocation. It does not save trust. For host details, refer to the [Codex plugin documentation](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli).
 
 ## omp
 
-omp (oh-my-pi) installs from the same marketplace. Run these in your terminal:
+You install Concise in omp (oh-my-pi) from the same marketplace. Do these steps:
 
-```sh
-omp plugin marketplace add yannelli/be-concise
-omp plugin install concise@be-concise
-```
+1. Run these commands in your terminal:
 
-Start a new omp session. omp loads the hooks as an extension when a session starts, so `/reload-plugins` does not pick them up. omp has no subagent stop event, so subagent replies are not checked. See the [omp marketplace documentation](https://github.com/can1357/oh-my-pi/blob/main/docs/marketplace.md).
+   ```sh
+   omp plugin marketplace add yannelli/be-concise
+   omp plugin install concise@be-concise
+   ```
+
+2. Start a new omp session.
+
+omp loads the hooks as an extension when a session starts. Thus, `/reload-plugins` does not load them. omp has no subagent stop event. Thus, Concise does not do a check of subagent replies. Refer to the [omp marketplace documentation](https://github.com/can1357/oh-my-pi/blob/main/docs/marketplace.md).
 
 ## Verify the core checks
 
-Use a scratch project and ask the agent to create `concise-demo.js` with its file-write tool, containing exactly this three-line comment:
+Do these steps:
 
-```js
-// Read the input.
-// Check the value.
-// Return the result.
-```
+1. Use a scratch project.
+2. Ask the agent to create `concise-demo.js` with its file-write tool.
+3. Tell the agent that the file must contain exactly this 3-line comment:
 
-A contiguous comment run over two lines should trigger the comment-length check. The denial reaches the agent before the write lands, so it can shorten the comment and try again.
+   ```js
+   // Read the input.
+   // Check the value.
+   // Return the result.
+   ```
 
-Sample denial, with an illustrative path:
+The comment-length check denies a contiguous comment run of more than 2 lines. The agent gets the denial before the write occurs. Thus, the agent can make the comment shorter and try again.
+
+This is a sample denial. The path is an example:
 
 ```text
 [concise] Comment at /tmp/demo/concise-demo.js:1 is 3 lines (limit 2). Trim it to the one non-obvious point, or put "concise-ignore" inside it if it is a genuine exception.
 ```
 
-If the agent shortens the comment before its first tool call, no denial is expected. To exercise the hook, the pending tool call must actually contain the three lines. Do not repeatedly resend it during this test: after two denied retries on the same target, the next action is allowed and flagged. Remove any demo file that the agent eventually creates.
+If the agent makes the comment shorter before its first tool call, you will not see a denial. To do a test of the hook, the tool call must contain all 3 lines. During this test, do not send the tool call again many times. After 2 denied retries on the same target, Concise allows and flags the next action. If the agent creates a demo file, remove it after the test.
 
-The file-size and PR-body checks are also enabled by default. Their limits and scope are in the [overview](/docs/#what-runs-by-default) and [configuration reference](/docs/configuration/).
+The file-size and PR-body checks are also enabled by default. For their limits and scope, refer to the [overview](/docs/#what-runs-by-default) and the [configuration reference](/docs/configuration/).
 
 ## Enable optional style checks
 
-Create a project configuration file at `.claude/concise.json` for Claude Code or `.codex/concise.json` for Codex. If both exist, **`.claude/concise.json` wins**, regardless of the host.
+Do these steps:
 
-Add this JSON, or merge these feature settings into your existing file:
+1. Create a project configuration file. For Claude Code, use `.claude/concise.json`. For Codex, use `.codex/concise.json`.
+2. If the file already has settings, merge these feature settings into it. If not, add this JSON:
 
-```json
-{
-  "features": {
-    "emDash": { "enabled": true },
-    "aiWriting": { "enabled": true, "preset": "default" }
-  }
-}
-```
+   ```json
+   {
+     "features": {
+       "emDash": { "enabled": true },
+       "aiWriting": { "enabled": true, "preset": "default" }
+     }
+   }
+   ```
 
-If you have a checkout of the source repository, you can copy `plugins/concise/.claude/concise.json.example` into the appropriate project path instead. The example lists more available settings.
+If both files exist, **`.claude/concise.json` has priority** on all hosts.
 
-For one session without creating a file, start your host with environment variables:
+If you have a checkout of the source repository, you can copy `plugins/concise/.claude/concise.json.example` to the correct project path. Use it in place of the JSON above. The example file shows more settings that you can use.
+
+To enable the checks for one session without a file, start your host with environment variables:
 
 ```sh
 BEC_FEATURE_ENABLE=emDash,aiWriting claude
 ```
 
-Or, for Codex:
+For Codex, use this command:
 
 ```sh
 BEC_FEATURE_ENABLE=emDash,aiWriting codex
 ```
 
-These baseline variables sit below user and project configuration. A config file can override them; use the `ALWAYS` forms when you intentionally need an override. See [environment variables](/docs/environment/) and the [five configuration layers](/docs/configuration/#the-five-layers).
+These baseline variables have a lower priority than the user and project configuration. A configuration file can override them. If you must have an override, use the `ALWAYS` forms. Refer to [environment variables](/docs/environment/) and the [5 configuration layers](/docs/configuration/#the-five-layers).
 
 ## Read a style denial
 
-After enabling `aiWriting`, ask the agent to write `notes.md` in your scratch project with this sentence:
+After you enable `aiWriting`, ask the agent to write `notes.md` in your scratch project. The file must contain this sentence:
 
 ```text
 We delve into the parser.
 ```
 
-Sample denial, with illustrative paths:
+This is a sample denial. The paths are examples:
 
 ```text
 [concise] 1 AI writing pattern in /tmp/demo/notes.md.
@@ -138,21 +171,26 @@ Suppress: concise-ignore on the line, or allowList.phrases in concise.json. Refe
 To keep it, send the identical write again to confirm. To fix it, read <plugin>/skills/concise-rules/references/ai-speak-patterns.md.
 ```
 
-In the default `confirm` mode, you can:
+In the default `confirm` mode, you can select one of these options:
 
-1. Rewrite the sentence as `We read the parser.` The new write is checked and allowed if it passes.
-2. Keep the wording by sending the identical write again. Concise allows it and reports that it was kept after confirmation.
-3. Put `concise-ignore` on that line to exempt the instance.
+1. Change the sentence to `We read the parser.` Concise does a check of the new write and allows it if it passes.
+2. To keep the words, send the identical write again. Concise allows it and reports that the text was kept after confirmation.
+3. To stop the check for this one instance, put `concise-ignore` on that line.
 
-The [pattern library](/docs/ai-speak-patterns/) explains individual findings. [Configuration modes](/docs/configuration/#mode) describes `confirm`, `ask`, and `deny`.
+The [pattern library](/docs/ai-speak-patterns/) explains each finding. The [confirmation modes](/docs/configuration/#mode) section describes `confirm`, `ask`, and `deny`.
 
 ## If nothing is flagged
 
-- Check that the plugin is installed in your intended scope and that the host loaded its hooks. Follow any Claude reload request; in Codex, start a new session and review hook trust.
-- Check dependencies on the agent process’s `PATH`, not only in a separate terminal.
-- For style checks, confirm `enabled` is `true` in the winning config layer. Both features start disabled.
-- Use an ordinary project file for the test. Generated paths are ignored, and agent instruction files are excluded from style checks by default.
-- Check `softFail`, bypass phrases, allow lists, and ignore markers. They can turn a denial into a flag or exempt the text.
-- Run the [web console](/docs/console/) and watch **Live activity** while the agent works, or paste the text into its playground. You can also enable [logging](/docs/configuration/#log) to see each hook’s decision. Pattern matching is heuristic, and statistical checks skip texts below their minimum size.
+- Make sure that the plugin is installed in the scope that you selected.
+- Make sure that the host loaded the hooks.
+- If Claude Code tells you to reload the plugins, do the reload.
+- In Codex, start a new session. Then review the hook trust.
+- Make sure that the dependencies are on the `PATH` of the agent process. A check in a separate terminal is not enough.
+- For style checks, make sure that `enabled` is `true` in the configuration layer that has priority. Both features are disabled by default.
+- For the test, use a normal project file. Concise ignores generated paths. By default, the style checks do not apply to agent instruction files.
+- Do a check of `softFail`, bypass phrases, allow lists, and ignore markers. These settings can change a denial into a flag. They can also remove the text from the checks.
+- Start the [web console](/docs/console/). While the agent works, look at **Live activity**. You can also paste the text into the playground.
+- To see the decision of each hook, enable the [log](/docs/configuration/#log).
+- Pattern matches are heuristic. Statistical checks do not apply to text that is shorter than their minimum size.
 
-For shared settings and cloud agents, continue to [configuration](/docs/configuration/) and [environment variables](/docs/environment/). To add team-specific wording checks, read [pattern packs](/docs/packs/).
+For shared settings and cloud agents, go to [configuration](/docs/configuration/) and [environment variables](/docs/environment/). To add checks for words that are specific to your team, read [pattern packs](/docs/packs/).
