@@ -1,0 +1,179 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Jost";
+      src: url("assets/fonts/jost-latin-variable.woff2") format("woff2");
+      font-weight: 100 900;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      font-family: "Jost", sans-serif;
+      color: #18191d;
+    }
+    #ot-ground {
+      position: absolute;
+      inset: 0;
+      background: #f7f7f5;
+      clip-path: inset(100% 0% 0% 0%);
+    }
+    #ot-claim {
+      position: absolute;
+      left: 90px;
+      top: 572px;
+      font-size: 200px;
+      font-weight: 550;
+      letter-spacing: -0.045em;
+      line-height: 0.94;
+      white-space: nowrap;
+    }
+    .ot-line {
+      display: block;
+    }
+    .ot-w {
+      display: inline-block;
+      opacity: 0;
+    }
+    /* The intro's stroke returns and becomes the mark's square. */
+    #ot-bar {
+      position: absolute;
+      left: 0;
+      top: 949px;
+      width: 1080px;
+      height: 22px;
+      background: #ff4a24;
+      transform-origin: 0 0;
+      transform: scaleX(0);
+    }
+    #ot-card {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 700px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #ot-lockup {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+    #ot-mark {
+      position: relative;
+      width: 146px;
+      height: 104px;
+    }
+    #ot-mark svg {
+      position: absolute;
+      inset: 0;
+      width: 146px;
+      height: 104px;
+      overflow: visible;
+    }
+    #ot-ink {
+      clip-path: inset(0% 0% 0% 100%);
+    }
+    #ot-sq {
+      opacity: 0;
+    }
+    #ot-word {
+      font-size: 136px;
+      font-weight: 600;
+      letter-spacing: -0.055em;
+      line-height: 1;
+      padding-bottom: 14px;
+      /* Negative tracking lets the final "e" overhang its box; pad the clip, keep the layout width. */
+      padding-right: 16px;
+      margin-right: -16px;
+      clip-path: inset(0% 100% 0% 0%);
+    }
+    #ot-cmd {
+      margin-top: 84px;
+      padding: 24px 40px;
+      border-radius: 14px;
+      background: #18191d;
+      color: #eceee8;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 33px;
+      line-height: 1.2;
+      opacity: 0;
+    }
+    #ot-url {
+      margin-top: 30px;
+      font-size: 44px;
+      color: #60615f;
+      opacity: 0;
+    }
+  </style>
+  <div data-hf-id="hf-x7nm" id="root" data-composition-id="outro" data-width="1080" data-height="1920">
+    <div data-hf-id="hf-kq7g" id="ot-ground"></div>
+    <div data-hf-id="hf-2v8f" id="ot-claim">
+      <span class="ot-line ot-up"><span data-hf-id="hf-7mo7" class="ot-w">Your</span></span>
+      <span class="ot-line ot-up"><span data-hf-id="hf-yj2p" class="ot-w">agent.</span></span>
+      <span class="ot-line ot-down"><span data-hf-id="hf-afqt" class="ot-w">Less</span></span>
+      <span class="ot-line ot-down"><span data-hf-id="hf-cfx8" class="ot-w">verbose.</span></span>
+    </div>
+    <div data-hf-id="hf-swvb" id="ot-card">
+      <div data-hf-id="hf-0khf" id="ot-lockup">
+        <div data-hf-id="hf-2d0q" id="ot-mark">
+          <svg data-hf-id="hf-zlps" id="ot-ink" viewBox="125 240 765 545" aria-hidden="true">
+            <g data-hf-id="hf-oibc" fill="#18191D">
+              <path data-hf-id="hf-0pmg" d="M160 272h260c34 0 58 12 82 36l136 140c14 15 32 24 52 24v80c-46 0-84-16-114-47L438 364c-6-6-14-10-22-10H160Z" />
+              <path data-hf-id="hf-94tu" d="M160 752h260c34 0 58-12 82-36l136-140c14-15 32-24 52-24v-80c-46 0-84 16-114 47L438 660c-6 6-14 10-22 10H160Z" />
+              <path data-hf-id="hf-w7dy" d="M160 460h530v104H160Z" />
+            </g>
+          </svg>
+          <svg data-hf-id="hf-v4sk" viewBox="125 240 765 545" aria-hidden="true">
+            <rect data-hf-id="hf-dmx5" id="ot-sq" width="136" height="104" x="728" y="460" fill="#FF4A24" rx="22" />
+          </svg>
+        </div>
+        <div data-hf-id="hf-f1tr" id="ot-word">concise</div>
+      </div>
+      <div data-hf-id="hf-2ock" id="ot-cmd">/plugin install concise@be-concise</div>
+      <div data-hf-id="hf-5mee" id="ot-url">concise.chat</div>
+    </div>
+    <div id="ot-bar"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      // Root start 25.3 s: local time = root time - 25.3.
+      const at = (seconds) => seconds - 25.3;
+
+      // Flood up from the bottom into the clean world, finished on the 25.53 s beat.
+      tl.fromTo("#ot-ground", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.23, ease: "power2.inOut" }, 0);
+
+      // The claim: one word per beat, slammed in, dead still once landed.
+      document.querySelectorAll(".ot-w").forEach((el, i) => {
+        tl.fromTo(
+          el,
+          { opacity: 0, scale: 1.3, filter: "blur(10px)" },
+          { opacity: 1, scale: 1, filter: "blur(0px)", transformOrigin: "0% 80%", duration: 0.28, ease: "expo.out" },
+          at(766 / 30 + i * 0.5),
+        );
+      });
+
+      // 28.0 s, the bed's last break: the stroke cuts the claim apart,
+      // as it cut the wall at 6.0 s.
+      tl.fromTo("#ot-bar", { scaleX: 0 }, { scaleX: 1, duration: 0.18, ease: "expo.out" }, at(27.967));
+      tl.to(".ot-up", { y: -900, filter: "blur(14px)", opacity: 0, duration: 0.45, ease: "power3.in" }, at(28.05));
+      tl.to(".ot-down", { y: 900, filter: "blur(14px)", opacity: 0, duration: 0.45, ease: "power3.in" }, at(28.07));
+
+      // The bar becomes the mark's square (measured at 363,765 26x19) on frame 856.
+      const LOCK = 856 / 30;
+      tl.to("#ot-bar", { x: 363, y: 765 - 949, scaleX: 26 / 1080, scaleY: 19 / 22, duration: 0.4, ease: "power3.inOut" }, at(LOCK) - 0.4);
+      tl.set("#ot-bar", { opacity: 0 }, at(LOCK));
+      tl.set("#ot-sq", { opacity: 1 }, at(LOCK));
+
+      // The mark is drawn out of the square, then the name and the install line.
+      tl.fromTo("#ot-ink", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.4, ease: "expo.out" }, at(LOCK));
+      tl.fromTo("#ot-word", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.4, ease: "expo.out" }, at(LOCK) + 0.1);
+      tl.fromTo("#ot-cmd", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, at(28.8));
+      tl.fromTo("#ot-url", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, at(28.92));
+
+      window.__timelines["outro"] = tl;
+    })();
+  </script>
+</template>
