@@ -49,7 +49,7 @@
 - The end card is plain: the mark draws, its square locks, the command fades in. A camera move
   through the square into the lockup would carry the depth idea to the end.
 
-## Beat and title refinement (source preview; not yet rendered)
+## Beat and title refinement (replacement delivery)
 
 The user asked for stronger music synchronization and tighter left-slide titles. No new storyline,
 UI, music generation or duration was introduced.
@@ -84,15 +84,24 @@ width; the homepage's text transcript remains available. Automatic review sheet 
 some transition frames rather than the held title/claim/end card, so targeted full-size frames were
 also reviewed.
 
-No new audio measurements or listening claim: the rendered-file numbers above belong to the
-baseline. The next delivery requires preview approval, render, and a fresh file/audio check. The
-managed browser launcher failed to start, but HyperFrames checks and snapshots used system Chrome
-with software rendering; both the editor and lightweight player answer HTTP 200.
+The user approved rendering and shipping the refinement without motifs. Replacement web MP4:
+3,690,504 bytes, H.264/AAC, 1920×1080, 30 fps, 930 frames, exactly 31.000 s. FFmpeg measurements of
+the encoded file: −14.56 LUFS integrated, −1.27 dBTP, no clipping. Normalized waveform correlation
+against the music source found 0 ms offset in clean windows 10.9–11.8, 14.9–15.8 and 23.8–24.8 s
+(correlation 0.998–1.000, 2 kHz analysis, 0.5 ms sample resolution). This verifies placement, not
+perceived musical feel; sound was measured, not listened to. The unchanged title-frame poster is
+retained because the title at 7.3 s did not change.
+
+The delivery master rendered in 24.2 s using screenshot capture and software GPU (system Chrome).
+Opened an eight-frame contact sheet decoded from the web MP4 plus the full-resolution 14 s commit
+frame: labels, optional/default-off text, code, console entrance, claim and end card match the
+reviewed source. The managed browser launcher failed to start, but HyperFrames checks and snapshots
+ran in system Chrome; both editor and lightweight-player endpoints answer HTTP 200.
 
 Independent review (sa30eb4a2): ship for preview, with no introduced P0/P1. The reviewer compared
 before/after frames and all review sheets, confirmed that the tighter claim has no glyph collision,
 that both two-line proof subtitles fit, and that the console handoff is clean. This does not verify
-perceived musical sync by listening or any replacement encode; those remain delivery checks.
+perceived musical sync by listening. The subsequent replacement encode checks are recorded above.
 
 The existing IBM Plex Mono code face is intentional under SPEC.md. A value-specific detector
 exception is scoped to the three film compositions only; website typography is unchanged. An
