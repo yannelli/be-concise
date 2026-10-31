@@ -18,7 +18,7 @@ import Icon from './Icon.astro';
 <script>
   // Site search with Pagefind. The index is written to /pagefind/ by `npm run build`.
   type Result = { url: string; excerpt: string; meta: { title?: string }; sub_results?: { url: string; title: string; excerpt: string }[] };
-  type Pagefind = { init: () => Promise<void>; debouncedSearch: (term: string, options?: object, wait?: number) => Promise<{ results: { data: () => Promise<Result> }[] } | null> };
+  type Pagefind = { init: () => Promise<void>; search: (term: string) => Promise<{ results: { data: () => Promise<Result> }[] }> };
 
   const open = document.querySelector<HTMLButtonElement>('[data-search-open]');
   const dialog = document.querySelector<HTMLDialogElement>('[data-search-dialog]');
@@ -77,15 +77,24 @@ import Icon from './Icon.astro';
     }));
   }
 
-  async function search() {
+  // Each keystroke waits 150 ms; only the latest query may write results.
+  let latest = 0;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  function search() {
     if (!input || !status || !list) return;
+    clearTimeout(timer);
+    const query = ++latest;
     const term = input.value.trim();
     if (!term) { list.replaceChildren(); status.textContent = hint; return; }
-    const pagefind = await load();
-    if (!pagefind) { status.textContent = 'Search is not available here. Run npm run build to create the index.'; return; }
-    const found = await pagefind.debouncedSearch(term, {}, 150);
-    if (found === null || input.value.trim() !== term) return;
-    render(term, await Promise.all(found.results.slice(0, 8).map(result => result.data())));
+    timer = setTimeout(async () => {
+      if (!list.childElementCount) status.textContent = 'Searching…';
+      const pagefind = await load();
+      if (query !== latest) return;
+      if (!pagefind) { status.textContent = 'Search is not available here. Run npm run build to create the index.'; return; }
+      const found = await pagefind.search(term);
+      const results = await Promise.all(found.results.slice(0, 8).map(result => result.data()));
+      if (query === latest) render(term, results);
+    }, 150);
   }
 
   function show() {
