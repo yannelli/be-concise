@@ -149,8 +149,11 @@ test('hero film ships with a poster, a text description, and no autoplay attribu
   assert.match(home, /<video[^>]*data-film-video[^>]*>/);
   assert.doesNotMatch(home.match(/<video[^>]*>/)[0], /autoplay/);
   assert.match(home, /aria-describedby="film-description"/);
-  assert.match(home, /Read the film transcript/);
-  assert.match(home, /AI-writing checks are disabled by default/);
+  assert.doesNotMatch(home, /Read the film transcript|film-transcript/);
+  const caption = home.match(/<figcaption class="visually-hidden"[^>]*>([\s\S]*?)<\/figcaption>/)?.[1];
+  assert.ok(caption, 'the film text is kept for screen readers only');
+  assert.doesNotMatch(caption, /<a\b/, 'no focusable links inside hidden text');
+  assert.match(home, /AI-writing checks are optional and disabled by default/);
   assert.match(home, /Concise does not rewrite files or commit messages/);
   assert.match(home, /id="film-description"[^>]*>[^<]*Concise checks it first/);
   for (const file of ['concise-promo.mp4', 'concise-promo-poster.webp']) {

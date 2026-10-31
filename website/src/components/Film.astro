@@ -33,42 +33,14 @@ import Icon from './Icon.astro';
       </button>
     </div>
   </div>
-  <figcaption class="film-caption">
-    <p id="film-description" class="visually-hidden">A 31-second film: Concise checks it first. Kinetic phrases give way to three real hook messages and the web console. Read the film transcript below for the checks and example revisions.</p>
-    <details class="film-transcript">
-      <summary>Read the film transcript</summary>
-      <div class="film-transcript-body">
-        <p>Stock agent phrases pile into a wall. An orange stroke splits it: “Concise checks it first.” Three checks follow, using real hook output on sample writes. The revisions illustrate what the agent could write next; Concise does not rewrite files or commit messages.</p>
-        <h3>Comments</h3>
-        <p>A four-line comment in <code>src/invoice.ts</code> is denied. The on-screen message reads:</p>
-        <blockquote><code>[concise] Comment at …/src/invoice.ts:1 is 4 lines (limit 2).</code></blockquote>
-        <p>The example revision is <code>// Amounts are integer cents; never floats.</code></p>
-        <h3>Commit messages</h3>
-        <p><strong>Optional: AI-writing checks are disabled by default.</strong> This example enables them and flags three phrases in “Leverage a robust, seamless approach to streamline invoice rounding.”</p> <!-- taste-skill-ignore: quotes the input being checked -->
-        <blockquote><code>[concise] 3 AI writing patterns in commit message.</code></blockquote>
-        <p>The example revision is “Round invoice totals to whole cents.”</p>
-        <h3>Pull requests</h3>
-        <p>A three-paragraph PR body is denied. The film abbreviates the hook message:</p>
-        <blockquote><code>[concise] PR/issue body is too verbose: 3 prose paragraphs (limit 1), …</code></blockquote>
-        <p>The example revision is “Rounds invoice totals to whole cents and updates the rounding tests.”</p>
-        <h3>The web console</h3>
-        <p>Real Live activity and Overview screens show the sample checks. “Watch every check.” Start the console with <code>concise-web --all</code>.</p>
-        <p>The film closes on “Your agent. Less verbose.”, the Concise mark, <code>/plugin install concise@be-concise</code>, and <a href="https://github.com/yannelli/be-concise">github.com/yannelli/be-concise</a>. For the complete setup, see <a href="/docs/installation/">installation instructions</a>.</p>
-      </div>
-    </details>
+  {/* Screen readers only: the film's text, so nothing in it depends on seeing the video. */}
+  <figcaption class="visually-hidden">
+    <p id="film-description">A 31-second film: Concise checks it first. Stock agent phrases pile into a wall until an orange stroke cuts through it. Three checks follow, using real hook output on sample writes, then the web console.</p>
+    <p>Comments: a four-line comment in <code>src/invoice.ts</code> is denied with <code>[concise] Comment at …/src/invoice.ts:1 is 4 lines (limit 2).</code> The example revision is <code>// Amounts are integer cents; never floats.</code></p>
+    <p>Commit messages: AI-writing checks are optional and disabled by default. With them enabled, “Leverage a robust, seamless approach to streamline invoice rounding” is denied with <code>[concise] 3 AI writing patterns in commit message.</code> The example revision is “Round invoice totals to whole cents.”</p> <!-- taste-skill-ignore: quotes the input being checked -->
+    <p>Pull requests: a three-paragraph PR body is denied with <code>[concise] PR/issue body is too verbose: 3 prose paragraphs (limit 1)</code>, shortened on screen. The example revision is “Rounds invoice totals to whole cents and updates the rounding tests.”</p>
+    <p>The revisions show what the agent could write next. Concise does not rewrite files or commit messages.</p>
+    <p>Real console screens follow: Live activity, Overview, Configuration, Playground, and Rules &amp; usage, under “Watch every check.” Start the console with <code>concise-web --all</code>.</p>
+    <p>The film ends on “Your agent. Less verbose.”, the Concise mark, <code>/plugin install concise@be-concise</code>, and github.com/yannelli/be-concise.</p>
   </figcaption>
 </figure>
-
-<style>
-  .film-caption { margin-top: 12px; }
-  .film-transcript summary { width: fit-content; cursor: pointer; padding: 8px 0; font-size: 14px; color: var(--muted); }
-  .film-transcript summary:hover { color: var(--ink); }
-  .film-transcript:not([open]) > .film-transcript-body { display: none; }
-  .film-transcript-body { max-width: 70ch; margin: 12px auto 28px; padding: 24px; background: var(--soft); font-size: 17px; line-height: 1.65; }
-  .film-transcript-body h3 { font-size: 24px; margin: 28px 0 12px; }
-  .film-transcript-body p + p { margin-top: 14px; }
-  .film-transcript-body blockquote { margin: 16px 0; padding: 16px; background: var(--surface); }
-  .film-transcript-body code { font-size: .85em; overflow-wrap: anywhere; }
-  .film-transcript-body a { text-decoration: underline; overflow-wrap: anywhere; }
-  @media (max-width: 550px) { .film-caption { padding-inline: 10px; } .film-transcript-body { padding: 18px; } }
-</style>
