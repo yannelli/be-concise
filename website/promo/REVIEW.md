@@ -106,3 +106,41 @@ perceived musical sync by listening. The subsequent replacement encode checks ar
 The existing IBM Plex Mono code face is intentional under SPEC.md. A value-specific detector
 exception is scoped to the three film compositions only; website typography is unchanged. An
 existing DESIGN.md/sidecar freshness warning was not repaired as a side effect of this film edit.
+
+## Proof-title motifs (source preview; not yet rendered)
+
+Started on a new branch only after PRs #49, #52 and #53 were merged and all 21 production routes,
+metadata, homepage assets, and the exact refined MP4 were verified at concise.chat. The user
+explicitly deferred the separate Cloudflare watch-path setting.
+
+Added Lucide comment, commit and pull-request geometry behind the three proof labels. The marks
+inherit brand ink at 8% opacity, measure 520×520 px, and travel with the unchanged station camera;
+there is no additional ambient motion. The deliberately faint treatment is the user's request.
+Their pinned sources and complete license are in assets/icons/. Only these three decorative SVGs
+are aria-hidden, unfocusable, pointer-inert, and individually excluded from layout auditing because
+their title overlap is intentional. All text remains audited and paints above the marks.
+
+Measured: 21-page website build, zero Astro diagnostics, 20 passing website tests, and a clean
+project-local Impeccable detector. HyperFrames check reports no errors/warnings in lint, runtime,
+layout, motion or contrast; the same four outro occlusion infos and eight intentional noise/before-
+text reading warnings remain. The proof script is byte-identical to main. The root timeline, music,
+SFX, other scenes, website UI, public media, plugin and package sources are unchanged. The existing
+scoped IBM Plex Mono exception is retained; no new detector ignore or design-sidecar repair.
+
+Opened the three full-size proof stills at 9.6, 14 and 18.5 s; both eight-frame camera-move sheets
+(12–12.7 and 16.5–17.2 s); and the proof-scoped beat and 360px phone sheets. The icons stay behind
+the headings, clear the code planes, and follow the camera without new cropping or jumps. Labels
+and default/optional qualifications remain readable. No introduced P0/P1 found. Weakest detail:
+the commit symbol is less apparent than the other two because its simple geometry is mostly
+covered by the heading; accepted as a quiet background mark rather than increasing its weight.
+Phone-size diagnostic detail still belongs to the existing readable transcript.
+
+The source player answers HTTP 200 on port 4397. No replacement MP4 was rendered or listened to;
+all rendered-file/audio numbers above describe the already shipped pre-motif film, not this edit.
+The public MP4 and poster remain unchanged. HyperFrames usage remains unknown (unsupported_harness).
+Rendering requires approval of this source preview. This separate PR is not authorized to merge.
+
+Independent advisor (sae4b5561): ship-for-source-preview, no introduced P0/P1. The motifs remain
+subordinate and topic-consistent, titles and qualifications stay legible above the SVGs, and both
+camera-move sheets show no problematic cropping or neighbor bleed. This verdict does not approve
+a render, audition sound, verify a new encode, or approve the whole film.

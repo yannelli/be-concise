@@ -109,3 +109,25 @@ test('proof titles share tighter metrics and identify default versus optional ch
   assert.match(proof, /Off by default\./);
   assert.match(proof, /Default: 1 paragraph,/);
 });
+
+test('proof motifs are faint, decorative, and use credited Lucide geometry', () => {
+  const proof = source('compositions/proof.html');
+  const shapes = (svg) => [...svg.matchAll(/<(?:path|circle|line)\b[^>]*\/>/g)]
+    .map(([shape]) => shape.replace(/\s+/g, ' ').trim());
+  assert.equal([...proof.matchAll(/<svg\b/g)].length, 3);
+  for (const [id, asset] of [
+    ['comments', 'message-square-text'],
+    ['commits', 'git-commit-horizontal'],
+    ['pull-requests', 'git-pull-request'],
+  ]) {
+    const icon = proof.match(new RegExp(`<svg\\b[^>]*id="pf-motif-${id}"[^>]*>[\\s\\S]*?<\\/svg>`))?.[0];
+    assert.ok(icon, id);
+    assert.match(icon, /aria-hidden="true"/);
+    assert.match(icon, /focusable="false"/);
+    assert.match(icon, /data-layout-ignore/);
+    assert.deepEqual(shapes(icon), shapes(source(`assets/icons/${asset}.svg`)));
+  }
+  const opacity = Number(proof.match(/\.pf-motif\s*\{[^}]*opacity:\s*([\d.]+)/)?.[1]);
+  assert.ok(opacity > 0 && opacity <= 0.1, `Motif opacity ${opacity} must remain faint`);
+  assert.match(source('assets/icons/LICENSE'), /ISC License[\s\S]*Lucide/);
+});

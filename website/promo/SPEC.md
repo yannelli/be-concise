@@ -21,6 +21,9 @@ LOOK:    Two worlds, one palette (the site's own tokens):
          Display: Jost (self-hosted variable woff2) weight 550, tracking -0.04em; titles 104–210 px.
          Proof labels: x 160/y 340, width 500, heading 112/0.92, subtitle 42/1.15, gap 24 px.
          Opening, proof, console and claim share the x 160 left anchor; claim leading 0.94.
+         Proof motifs: Lucide comment, commit and pull-request outlines in inherited ink at 8%
+         opacity, 520 x 520 px. Offset x -64/y -208 from the unchanged label anchor; PR y -156
+         centres its mark behind the two-line title. Text paints above the decorative SVGs.
          Body/label: Jost 400–500, 40–48 px. Code: IBM Plex Mono 400, 34 px (never under 28 px).
          No shadows, no glow, no gradients, no grain. Depth comes only from perspective (1400 px),
          scale, haze and blur.
@@ -35,6 +38,10 @@ OBJECTS: - Agent-speak phrases: real strings from Concise's pattern references (
            the real hook text in Plex Mono 30 px, #FF4A24 on dark, #B52E10 on light.
          - Console: the real concise-web screenshots (activity-dark.webp, overview-dark.webp, 2880 x 1800).
          - Mark: the repository's icon paths (ink chevron, orange square).
+         - Proof-title motifs: actual Lucide message-square-text, git-commit-horizontal and
+           git-pull-request geometry; pinned sources and license in assets/icons/. Faint by explicit
+           request, static at rest, travelling only with the existing station camera. No new cues,
+           text, accent colour, audio, or duration. Decorative SVGs alone carry data-layout-ignore.
          All hook text is real output from plugins/concise/hooks on the billing-api session (a41c):
            comment: [concise] Comment at ~/code/billing-api/src/invoice.ts:1 is 4 lines (limit 2).
            commit:  [concise] 3 AI writing patterns in commit message.

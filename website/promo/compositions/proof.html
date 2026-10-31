@@ -37,6 +37,24 @@
       top: 340px;
       width: 500px;
     }
+    .pf-motif {
+      position: absolute;
+      left: -64px;
+      top: -208px;
+      width: 520px;
+      height: 520px;
+      opacity: 0.08;
+      z-index: 0;
+      pointer-events: none;
+    }
+    #pf-motif-pull-requests {
+      top: -156px;
+    }
+    .pf-label h2,
+    .pf-label p {
+      position: relative;
+      z-index: 1;
+    }
     .pf-label h2 {
       font-size: 112px;
       font-weight: 550;
@@ -147,6 +165,13 @@
         <!-- Station 1: a comment -->
         <div data-hf-id="hf-5cr5" class="pf-st" id="pf-s1" style="transform: translate3d(0px, 0px, 0px)">
           <div data-hf-id="hf-9kpb" class="pf-label">
+            <!-- Lucide icon geometry; source and license in assets/icons/. -->
+            <svg id="pf-motif-comments" class="pf-motif" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" data-layout-ignore>
+              <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" />
+              <path d="M7 11h10" />
+              <path d="M7 15h6" />
+              <path d="M7 7h8" />
+            </svg>
             <h2 data-hf-id="hf-eyw1">Comments</h2>
             <p data-hf-id="hf-k4v2">Default: 2 lines.</p>
           </div>
@@ -168,6 +193,11 @@
         <!-- Station 2: a commit -->
         <div data-hf-id="hf-tycz" class="pf-st" id="pf-s2" style="transform: translate3d(4200px, -160px, -2600px)">
           <div data-hf-id="hf-jg33" class="pf-label">
+            <svg id="pf-motif-commits" class="pf-motif" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" data-layout-ignore>
+              <circle cx="12" cy="12" r="3" />
+              <line x1="3" x2="9" y1="12" y2="12" />
+              <line x1="15" x2="21" y1="12" y2="12" />
+            </svg>
             <h2 data-hf-id="hf-g0cf">Commits</h2>
             <p data-hf-id="hf-tatd"><span data-hf-id="hf-iwwl">Optional style checks.</span> <span data-hf-id="hf-dtqc">Off by default.</span></p>
           </div>
@@ -186,6 +216,12 @@
         <!-- Station 3: a pull request -->
         <div data-hf-id="hf-ceuu" class="pf-st pf-light" id="pf-s3" style="transform: translate3d(8400px, 0px, -5200px)">
           <div data-hf-id="hf-j1s2" class="pf-label">
+            <svg id="pf-motif-pull-requests" class="pf-motif" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" data-layout-ignore>
+              <circle cx="18" cy="18" r="3" />
+              <circle cx="6" cy="6" r="3" />
+              <path d="M13 6h3a2 2 0 0 1 2 2v7" />
+              <line x1="6" x2="6" y1="9" y2="21" />
+            </svg>
             <h2 data-hf-id="hf-wcdi">Pull<br data-hf-id="hf-rsrt" />requests</h2>
             <p data-hf-id="hf-ig77"><span data-hf-id="hf-km4b">Default: 1 paragraph,</span> <span data-hf-id="hf-97i6">3 sentences.</span></p>
           </div>
