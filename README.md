@@ -80,57 +80,51 @@ Start a new omp session. omp loads the hooks as an extension at session start, s
 
 ## Web console
 
-Run from this repository with Node.js 24:
+Use the console to edit settings, check text, and view live hook activity.
+It needs Node.js 24.
 
-```sh
-node bin/concise-web.mjs
-```
-
-Or install the command globally from npm:
+Install and start it:
 
 ```sh
 npm install -g @yannelli/be-concise
 concise-web --cwd /path/to/project
 ```
 
-`npm install -g .` installs it from a checkout.
+From this repository, run `node bin/concise-web.mjs` instead.
+The console opens in your browser. Press `Ctrl+C` to stop it.
 
-Update the console and the plugin with one command:
+| Option | Effect |
+|---|---|
+| `--all` | Shows all projects registered by the hooks. Use instead of `--cwd`. |
+| `--port 4317` | Uses port 4317. |
+| `--no-open` | Prints the URL without opening the browser. |
+
+The playground checks pasted text without running pasted commands.
+To keep hook history between console sessions, set `BEC_MONITOR_PERSIST=1` in the agent environment.
+
+Update the console and installed plugins:
 
 ```sh
 concise-web update
 ```
 
-The command installs the latest npm release. Then it updates `concise@be-concise` in each of Claude Code, Codex, and omp that has the plugin installed. It restarts each running console on another version when that console is the main process of a systemd user unit, and prints a restart hint for other consoles. `--check` reports what would change and changes nothing. From a git checkout, the command skips the npm step; use `git pull` for the checkout.
+Add `--check` to preview changes. From a git checkout, use `git pull` to update the console.
 
-The command starts a localhost server on an available port and opens the browser. Use `--port 4317` to select a port or `--no-open` to print the URL without opening it. `npm run web` also starts the console from the repository.
-
-`concise-web --all` serves every project the hooks have registered under `~/.config/concise/projects`, with a project switcher in the sidebar that groups projects by git repository and labels worktrees. Projects whose directory no longer exists are hidden until you choose "Show N missing". Each hook call registers its project there. While the hub runs, each call also appends its record to `~/.local/state/concise/projects/<hash>/records.jsonl`, and the hub follows that file. To keep the record file at all times, so the hub also shows history from before it started, set `"monitor": { "persist": true }` or `BEC_MONITOR_PERSIST=1`.
-
-The console edits user and project configuration, shows the effective settings and environment overrides, and tests pasted text through the hooks. The Rules page switches packs on and off, adds a pack from an https URL, a local path, or pasted JSON, checks packs installed from a URL and the plugin itself for updates, and removes packs it installed. Pack management is described in [plugins/concise/docs/packs.md](plugins/concise/docs/packs.md). It shows matches, hook decisions, timings, and full JSON responses. Repeat an attempt to test confirmation and retry limits, or reset the playground session.
-
-The playground previews Bash command rewrites. It does not run the pasted command. It uses separate retry state and leaves test configuration changes unsaved until you save a configuration layer.
-
-Live activity captures hook requests and responses for the selected project while the console runs, with filtering, JSON export, and counts for the retained records. It keeps up to 500 records per project within 16 MiB in memory. Stop the server to discard them, and clear a project's history to truncate its record file. Capture requires this version of the plugin in the agent host; reload the plugin and review the changed Bash hook definition after updating. Other environment overrides in the agent process still apply to its hooks.
-
-The URL contains a local access token. Configuration saves detect intervening file edits. `Ctrl+C` stops the server and removes its capture registration.
+See the [console guide](website/src/content/docs/console.md) for configuration, live activity, and restart details.
 
 ### Manage packs from the console
 
-The Rules page of `concise-web` lists every loaded pack with a switch, an add form, and an update check. Each write goes to the target picked under "Save changes to": `Project` edits `<cwd>/.claude/concise.json` and the `<cwd>/.claude/concise/patterns/` directory, `User` edits the user config file and `~/.config/concise/patterns/`.
+Open the Rules page. Under "Save changes to", select `Project` or `User`.
 
-| Action | What it writes |
+| Action | Result |
 |---|---|
-| Switch a pack off | Adds the id to `features.aiWriting.excludePacks` and drops it from `enablePatterns`. An `emDash` pack sets `features.emDash.enabled`. |
-| Switch a pack on | Drops the id from `excludePacks` and `disablePatterns`, sets `features.aiWriting.enabled` when the feature is off, and adds the id to `enablePatterns` when the preset leaves its category out. The response names any other layer that still excludes it. |
-| Add an https URL | Downloads the `.json` pack into the pack directory as `<id>.json` and records the URL and a hash in `packs.json` next to that directory. A `.mjs` URL is refused, because it runs code inside the hook. `http` is accepted for `localhost` only. |
-| Add a path | Appends the file or directory to `features.aiWriting.packs` in the target's config file. |
-| Paste JSON | Validates the pack and saves it as `<id>.json` in the pack directory. |
-| Check for updates | Refetches every URL in the `packs.json` files, reports which packs changed, and compares the plugin version with the latest GitHub release. |
-| Update | Refetches one changed pack and rewrites its file and hash. |
-| Remove | Deletes a pack file under a pack directory and its `packs.json` entry. Built-in packs and path entries stay. |
+| Switch a pack on or off | Changes its state in the selected configuration. Other layers can still exclude it. |
+| Add a pack | Accepts an HTTPS URL for a JSON pack, a local path, or pasted JSON. |
+| Check for updates | Checks packs added by URL and the plugin for new versions. |
+| Update a pack | Downloads the changed pack. |
+| Remove a pack | Deletes a pack installed by the console. Built-in packs and local path entries stay. |
 
-The API behind the page is `POST /api/packs/toggle`, `POST /api/packs/add`, `POST /api/packs/remove`, `GET /api/packs/updates`, and `POST /api/packs/update`, each scoped to the selected project.
+See [pattern packs](plugins/concise/docs/packs.md) for the format and custom rules.
 
 ## Control test output
 
