@@ -15,7 +15,7 @@ const page = route => pages.find(page => page.file === join(dist, route, 'index.
 const marketingRoutes = ['', 'why-concise', 'use-cases', 'install', 'configuration', 'console', 'faq'];
 
 test('focused marketing pages and all baseline reference routes are generated', async () => {
-  for (const route of [...marketingRoutes, 'docs', 'docs/installation', 'docs/console', 'docs/tools', 'docs/host-features', 'docs/configuration', 'docs/categories', 'docs/environment', 'docs/packs', 'docs/ai-speak-patterns', 'docs/ai-speak-patterns-2', 'docs/ai-speak-patterns-3', 'docs/ai-speak-patterns-4']) {
+  for (const route of [...marketingRoutes, 'docs', 'docs/installation', 'docs/console', 'docs/tools', 'docs/host-features', 'docs/configuration', 'docs/categories', 'docs/environment', 'docs/packs', 'docs/patterns', 'docs/patterns/chatbot', 'docs/patterns/vocabulary', 'docs/patterns/unicode-glyphs']) {
     assert.ok((await stat(join(dist, route, 'index.html'))).isFile(), route);
   }
   assert.ok((await stat(join(dist, '404.html'))).isFile());
@@ -105,6 +105,21 @@ test('navigation uses real routes, current states, and a native mobile disclosur
   }
   assert.match(page('docs/configuration'), /href="\/docs\/" aria-current="page"/);
   assert.doesNotMatch(pages.find(page => page.file === join(dist, '404.html')).html, /aria-current="page"/);
+});
+
+test('the pattern library has one short page per category and redirects the old parts', async () => {
+  const index = page('docs/patterns');
+  const links = [...new Set([...index.matchAll(/href="\/docs\/patterns\/([a-z-]+)\/"/g)].map(match => match[1]))];
+  assert.equal(links.length, 47);
+  for (const id of links) assert.ok((await stat(join(dist, 'docs', 'patterns', id, 'index.html'))).isFile(), id);
+  const chatbot = page('docs/patterns/chatbot');
+  assert.match(chatbot, /<h1>Chatbot phrases<\/h1>/);
+  assert.match(chatbot, /data-label="Flagged"/);
+  assert.match(chatbot, /rel="next">Next: /);
+  assert.match(chatbot, /href="\/docs\/patterns\/" aria-current="true"/);
+  for (const old of ['', '-2', '-3', '-4']) await assert.rejects(stat(join(dist, 'docs', `ai-speak-patterns${old}`)));
+  const redirects = await readFile(join(dist, '_redirects'), 'utf8');
+  for (const old of ['', '-2', '-3', '-4']) assert.match(redirects, new RegExp(`^/docs/ai-speak-patterns${old}/ /docs/patterns/ 301$`, 'm'));
 });
 
 test('reference table values have build-time mobile labels', () => {

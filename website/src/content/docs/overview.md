@@ -114,7 +114,7 @@ You can keep persistent defaults in `~/.claude/test-filter.conf` or `~/.codex/te
 - [Pattern packs](/docs/packs/): the JSON and script formats, the load order, custom detectors, validation, and how to generate references.
 - [Settings tools](/docs/tools/): the `concise-config` CLI, the MCP server tools, and the tuner that adjusts settings to samples of your text.
 - [Host features](/docs/host-features/): the Claude Code, Codex, and omp features that Concise uses, with the date of each source.
-- [Pattern library](/docs/ai-speak-patterns/): the flagged words and the suggested fix for each built-in pattern, in 4 parts.
+- [Pattern library](/docs/patterns/): the flagged words and the suggested fix for each built-in pattern, with 1 page for each category.
 
 The reference pages use the Markdown source files of the plugin.
 

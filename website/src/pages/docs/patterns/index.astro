@@ -1,0 +1,54 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import { categories, presets, sourceDir } from '../../../lib/patterns';
+---
+<DocsLayout
+  title="Pattern library"
+  description={`All ${categories.length} Concise AI-writing categories, each with its own page of flagged text and the fix the hook prints. Filter by preset.`}
+  headings={[]}
+  sourcePath={`${sourceDir}/ai-speak-patterns.md`}
+  wide
+>
+  <h1>Pattern library</h1>
+  <p>Concise has {categories.length} AI-writing categories. Each page lists the flagged text and the fix that the hook prints. Choose a preset to see the categories that it turns on.</p>
+  <div class="pattern-filter" role="group" aria-label="Filter by preset" hidden data-pattern-filter>
+    <button type="button" aria-pressed="true" data-preset="">All</button>
+    {presets.filter(preset => preset !== 'all').map(preset => <button type="button" aria-pressed="false" data-preset={preset}>{preset}</button>)}
+  </div>
+  <p class="pattern-count" aria-live="polite" data-pattern-count>{categories.length} categories</p>
+  <ul class="pattern-index">
+    {categories.map(category => (
+      <li data-presets={category.presets.join(' ')}>
+        <a href={`/docs/patterns/${category.id}/`}>{category.title}</a>
+        <p>{category.description}</p>
+        <p class="pattern-presets">{category.presets.filter(preset => preset !== 'all').join(', ')}</p>
+      </li>
+    ))}
+  </ul>
+</DocsLayout>
+
+<script>
+  // Old part URLs carried the category as an anchor; send those visitors to the category page.
+  const wanted = decodeURIComponent(location.hash.slice(1));
+  if (wanted && document.querySelector(`a[href="/docs/patterns/${CSS.escape(wanted)}/"]`)) location.replace(`/docs/patterns/${wanted}/`);
+
+  const filter = document.querySelector<HTMLElement>('[data-pattern-filter]');
+  const count = document.querySelector<HTMLElement>('[data-pattern-count]');
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.pattern-index li'));
+  if (filter) {
+    filter.hidden = false;
+    filter.addEventListener('click', event => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-preset]');
+      if (!button) return;
+      const preset = button.dataset.preset || '';
+      filter.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+      let shown = 0;
+      items.forEach(item => {
+        const match = !preset || (item.dataset.presets || '').split(' ').includes(preset);
+        item.hidden = !match;
+        if (match) shown += 1;
+      });
+      if (count) count.textContent = preset ? `${shown} categories in the ${preset} preset` : `${items.length} categories`;
+    });
+  }
+</script>
