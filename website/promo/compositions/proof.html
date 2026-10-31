@@ -30,12 +30,33 @@
       top: 0;
       width: 1920px;
       height: 1080px;
+      transform-style: preserve-3d;
     }
+    /* Even grid: 120 margin | 490 label | 120 gutter | 1070 card | 120 margin. */
     .pf-label {
       position: absolute;
-      left: 160px;
+      left: 120px;
       top: 340px;
-      width: 500px;
+      width: 490px;
+    }
+    /* Hand-drawn station marks: one tone darker than the ground, cropped by the frame. */
+    .pf-motif {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: visible;
+      pointer-events: none;
+      fill: none;
+      stroke: #eeefeb;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .pf-label h2,
+    .pf-label p {
+      position: relative;
+      z-index: 1;
     }
     .pf-label h2 {
       font-size: 112px;
@@ -55,14 +76,16 @@
     }
     .pf-plane {
       position: absolute;
-      left: 700px;
-      width: 1120px;
+      left: 730px;
+      width: 1070px;
+      overflow: hidden;
+      border-radius: 24px;
     }
     .pf-slab {
       position: absolute;
       left: 0;
       top: 0;
-      width: 1120px;
+      width: 1070px;
       background: #18191d;
       border-radius: 24px;
     }
@@ -107,6 +130,19 @@
     .pf-w {
       position: relative;
       display: inline-block;
+      color: #eceee8;
+    }
+    /* The intro's stroke, reused to strike text the hook rejected. */
+    .pf-strike {
+      position: absolute;
+      left: -8px;
+      right: -8px;
+      top: 24px;
+      height: 6px;
+      border-radius: 3px;
+      background: #ff4a24;
+      transform-origin: 0 50%;
+      transform: scaleX(0);
     }
     .pf-u {
       position: absolute;
@@ -130,7 +166,7 @@
     .pf-body {
       position: absolute;
       left: 44px;
-      width: 1032px;
+      width: 982px;
       font-size: 38px;
       line-height: 54px;
       color: #18191d;
@@ -146,18 +182,23 @@
       <div data-hf-id="hf-pptk" id="pf-world">
         <!-- Station 1: a comment -->
         <div data-hf-id="hf-5cr5" class="pf-st" id="pf-s1" style="transform: translate3d(0px, 0px, 0px)">
+          <!-- "//": a code comment, drawn as two wide slashes. -->
+          <svg id="pf-motif-comments" class="pf-motif" viewBox="0 0 1920 1080" aria-hidden="true" focusable="false">
+            <path d="M-40 1260 L420 -180" stroke-width="170" />
+            <path d="M300 1260 L760 -180" stroke-width="170" />
+          </svg>
           <div data-hf-id="hf-9kpb" class="pf-label">
             <h2 data-hf-id="hf-eyw1">Comments</h2>
             <p data-hf-id="hf-k4v2">Default: 2 lines.</p>
           </div>
-          <div data-hf-id="hf-0bvo" class="pf-plane" style="top: 228px">
+          <div data-hf-id="hf-0bvo" class="pf-plane" id="pf-s1-plane" style="top: 228px; height: 624px">
             <div data-hf-id="hf-wmoc" class="pf-slab" id="pf-s1-slab" style="height: 624px"></div>
             <div data-hf-id="hf-pmpt" class="pf-ln pf-path" style="top: 40px">src/invoice.ts</div>
-            <div data-hf-id="hf-ev4w" class="pf-ln pf-muted pf-c" id="pf-c1" style="top: 100px">// This function delves into the invoice totals.</div>
+            <div data-hf-id="hf-ev4w" class="pf-ln pf-muted pf-c" id="pf-c1" style="top: 100px">// This function delves into the invoice totals.<i class="pf-strike"></i></div>
             <div data-hf-id="hf-wwaw" class="pf-ln pf-muted" id="pf-c1b" style="top: 100px; opacity: 0">// Amounts are integer cents; never floats.</div>
-            <div data-hf-id="hf-gx4n" class="pf-ln pf-muted pf-c pf-cx" style="top: 152px">// It carefully iterates over every line item</div>
-            <div data-hf-id="hf-pkmd" class="pf-ln pf-muted pf-c pf-cx" style="top: 204px">// and then sums them to produce a total value</div>
-            <div data-hf-id="hf-qj3i" class="pf-ln pf-muted pf-c pf-cx" style="top: 256px">// which is returned to the caller.</div>
+            <div data-hf-id="hf-gx4n" class="pf-ln pf-muted pf-c pf-cx" style="top: 152px">// It carefully iterates over every line item<i class="pf-strike"></i></div>
+            <div data-hf-id="hf-pkmd" class="pf-ln pf-muted pf-c pf-cx" style="top: 204px">// and then sums them to produce a total value<i class="pf-strike"></i></div>
+            <div data-hf-id="hf-qj3i" class="pf-ln pf-muted pf-c pf-cx" style="top: 256px">// which is returned to the caller.<i class="pf-strike"></i></div>
             <div data-hf-id="hf-t4ci" class="pf-ln pf-k" style="top: 308px">export const total = (lines) =&gt;</div>
             <div data-hf-id="hf-nfg1" class="pf-ln pf-k" style="top: 360px">  lines.reduce((sum, line) =&gt;</div>
             <div data-hf-id="hf-srb1" class="pf-ln pf-k" style="top: 412px">    sum + line.amount, 0);</div>
@@ -167,11 +208,17 @@
 
         <!-- Station 2: a commit -->
         <div data-hf-id="hf-tycz" class="pf-st" id="pf-s2" style="transform: translate3d(4200px, -160px, -2600px)">
+          <!-- A commit lane: one history line through two commit rings. -->
+          <svg id="pf-motif-commits" class="pf-motif" viewBox="0 0 1920 1080" aria-hidden="true" focusable="false">
+            <path d="M330 -200 V1300" stroke-width="120" />
+            <circle cx="330" cy="110" r="190" fill="#f7f7f5" stroke-width="120" />
+            <circle cx="330" cy="1010" r="190" fill="#f7f7f5" stroke-width="120" />
+          </svg>
           <div data-hf-id="hf-jg33" class="pf-label">
             <h2 data-hf-id="hf-g0cf">Commits</h2>
             <p data-hf-id="hf-tatd"><span data-hf-id="hf-iwwl">Optional style checks.</span> <span data-hf-id="hf-dtqc">Off by default.</span></p>
           </div>
-          <div data-hf-id="hf-j6ti" class="pf-plane" style="top: 330px">
+          <div data-hf-id="hf-j6ti" class="pf-plane" id="pf-s2-plane" style="top: 352px; height: 376px">
             <div data-hf-id="hf-nnaq" class="pf-slab" style="height: 376px"></div>
             <div data-hf-id="hf-gdzb" class="pf-ln pf-path" style="top: 40px">~/code/billing-api</div>
             <div data-hf-id="hf-p2a6" class="pf-ln pf-cm" style="top: 100px">$ git commit -m "<span data-hf-id="hf-ctb8" class="pf-w">Leverage<i data-hf-id="hf-850s" class="pf-u"></i></span> a <span data-hf-id="hf-d0ya" class="pf-w">robust<i data-hf-id="hf-6o78" class="pf-u"></i></span>,</div>
@@ -185,11 +232,17 @@
 
         <!-- Station 3: a pull request -->
         <div data-hf-id="hf-ceuu" class="pf-st pf-light" id="pf-s3" style="transform: translate3d(8400px, 0px, -5200px)">
+          <!-- A pull request: a branch lane turning back toward the base lane. -->
+          <svg id="pf-motif-pull-requests" class="pf-motif" viewBox="0 0 1920 1080" aria-hidden="true" focusable="false">
+            <path d="M150 -200 V1300" stroke-width="120" />
+            <path d="M600 1300 V380 Q600 130 350 130 H330" stroke-width="120" />
+            <path d="M450 10 L330 130 L450 250" stroke-width="120" />
+          </svg>
           <div data-hf-id="hf-j1s2" class="pf-label">
             <h2 data-hf-id="hf-wcdi">Pull<br data-hf-id="hf-rsrt" />requests</h2>
             <p data-hf-id="hf-ig77"><span data-hf-id="hf-km4b">Default: 1 paragraph,</span> <span data-hf-id="hf-97i6">3 sentences.</span></p>
           </div>
-          <div data-hf-id="hf-bc7l" class="pf-plane" style="top: 258px">
+          <div data-hf-id="hf-bc7l" class="pf-plane" id="pf-s3-plane" style="top: 258px; height: 564px">
             <div data-hf-id="hf-b25p" class="pf-slab" id="pf-s3-slab" style="height: 564px"></div>
             <div data-hf-id="hf-ncp2" class="pf-pr-title">Round invoice totals</div>
             <div data-hf-id="hf-ely6" class="pf-fold">
@@ -208,51 +261,97 @@
     (function () {
       const tl = gsap.timeline({ paused: true });
       const q = (s) => document.querySelectorAll(s);
-      // Root frame 241 matches the measured 8.044 s attack. Keep diagnostics
-      // on their existing absolute cues; only the camera moves change beats.
+      // Root frame 241 matches the measured 8.044 s attack. Denials keep their
+      // absolute cues; repairs and moves land on the bed's beats and re-entries.
       const at = (seconds) => seconds - 241 / 30;
+      const MOVE1 = 361 / 30; // 12.033 s
+      const MOVE2 = 496 / 30; // 16.533 s
       const blurIn = (target, seconds, dur = 0.15) =>
         tl.fromTo(target, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: dur, ease: "power2.out" }, at(seconds));
-      const blurOut = (target, seconds, dur = 0.12) =>
-        tl.to(target, { opacity: 0, filter: "blur(8px)", duration: dur, ease: "power2.in" }, at(seconds));
+      // Whip between stations; motifs sit deeper, so they slide slower than the text.
       const move = (to, seconds) => {
-        tl.to("#pf-world", { ...to, duration: 0.5, ease: "power2.inOut" }, at(seconds));
-        tl.fromTo("#pf-stage", { filter: "blur(0px)" }, { filter: "blur(10px)", duration: 0.25, ease: "power2.in" }, at(seconds));
+        tl.to("#pf-world", { ...to, duration: 0.5, ease: "expo.inOut" }, at(seconds));
+        tl.fromTo("#pf-stage", { filter: "blur(0px)" }, { filter: "blur(16px)", duration: 0.25, ease: "power2.in" }, at(seconds));
         tl.to("#pf-stage", { filter: "blur(0px)", duration: 0.25, ease: "power2.out" }, at(seconds) + 0.25);
       };
+      // Station labels rise into place as each station settles.
+      const label = (station, seconds) => {
+        tl.fromTo(`${station} .pf-label h2`, { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "expo.out" }, at(seconds));
+        tl.fromTo(`${station} .pf-label p`, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "expo.out" }, at(seconds) + 0.08);
+      };
+      // The hook's answer hits the card: a short punch and a decaying shake.
+      const punch = (plane, seconds) => {
+        tl.fromTo(plane, { scale: 1.035 }, { scale: 1, duration: 0.35, ease: "expo.out" }, at(seconds));
+        [12, -9, 6, -3, 0].forEach((x, i) => tl.set(plane, { x }, at(seconds) + i / 30));
+      };
+
+      // Motifs: a deeper plane, scaled back to full frame, drifting slowly.
+      gsap.set(".pf-motif", { z: -400, scale: 9 / 7, transformOrigin: "960px 540px" });
+      tl.fromTo("#pf-motif-comments", { y: 0 }, { y: -60, duration: at(MOVE1) + 0.5, ease: "none" }, 0);
+      tl.fromTo("#pf-motif-commits", { y: 40 }, { y: -40, duration: 5, ease: "none" }, at(MOVE1));
+      tl.fromTo("#pf-motif-pull-requests", { y: 40 }, { y: -40, duration: 5, ease: "none" }, at(MOVE2));
 
       // Arrive from the fly-through: slightly large and soft, then settle.
       tl.fromTo("#pf-world", { x: 0, y: 0, z: 420 }, { x: 0, y: 0, z: 0, duration: 0.55, ease: "expo.out" }, 0);
       tl.fromTo("#pf-stage", { filter: "blur(12px)" }, { filter: "blur(0px)", duration: 0.4, ease: "power2.out" }, 0);
+      label("#pf-s1", 8.1);
 
-      // Station 1: the comment piles up, the hook answers, it shrinks to one line.
+      // Station 1: the comment piles up, the hook answers, the stroke strikes it,
+      // the struck lines fly at the lens and one line remains.
       q("#pf-s1 .pf-c").forEach((el, i) => blurIn(el, 8.25 + i * 0.12, 0.12));
       q("#pf-s1 .pf-k").forEach((el, i) => blurIn(el, 8.75 + i * 0.08, 0.12));
       tl.fromTo("#pf-d1", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3, ease: "expo.out" }, at(9.2));
-      tl.to(q("#pf-s1 .pf-cx"), { opacity: 0, scaleY: 0.2, filter: "blur(6px)", duration: 0.25, ease: "power3.in", stagger: { each: 0.04, from: "end" } }, at(10.2));
+      punch("#pf-s1-plane", 9.2);
+      tl.fromTo(q("#pf-s1 .pf-strike"), { scaleX: 0 }, { scaleX: 1, duration: 0.16, ease: "expo.out", stagger: 0.04 }, at(301 / 30));
+      tl.to(q("#pf-s1 .pf-c"), { scale: 1.4, x: 60, opacity: 0, filter: "blur(10px)", transformOrigin: "0% 50%", duration: 0.28, ease: "power3.in", stagger: 0.03 }, at(10.2));
       tl.to(q("#pf-s1 .pf-k, #pf-d1"), { y: -156, duration: 0.35, ease: "power3.inOut" }, at(10.35));
       tl.fromTo("#pf-s1-slab", { clipPath: "inset(0px 0px 0px 0px round 24px)" }, { clipPath: "inset(0px 0px 156px 0px round 24px)", duration: 0.35, ease: "power3.inOut" }, at(10.35));
-      blurOut("#pf-c1", 10.3);
-      blurIn("#pf-c1b", 10.4, 0.18);
+      blurIn("#pf-c1b", 10.47, 0.18);
 
-      // Station 2: the commit message, three words underlined, then the plain rewrite.
-      move({ x: -4200, y: 160, z: 2600 }, 361 / 30);
+      // Station 2: the commit, three words underlined in the bed's break; on the
+      // 14.0 s re-entry they blow out, and the plain message types in a beat later.
+      move({ x: -4200, y: 160, z: 2600 }, MOVE1);
+      label("#pf-s2", MOVE1 + 0.3);
       q("#pf-s2 .pf-cm").forEach((el, i) => blurIn(el, 12.65 + i * 0.1, 0.12));
       q("#pf-s2 .pf-u").forEach((el, i) => tl.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: 0.2, ease: "expo.out" }, at(13.2 + i * 0.08)));
       tl.fromTo("#pf-d2", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3, ease: "expo.out" }, at(13.5));
-      blurOut(q("#pf-s2 .pf-cm"), 14.4);
-      q("#pf-s2 .pf-cf").forEach((el, i) => blurIn(el, 436 / 30 + i * 0.07, 0.16));
+      punch("#pf-s2-plane", 13.5);
+      const BURST = 421 / 30; // 14.033 s
+      tl.to(q("#pf-s2 .pf-cm"), { color: "rgba(236, 238, 232, 0)", duration: 0.12, ease: "power2.in" }, at(BURST));
+      [
+        { y: -110, rotation: -12 },
+        { y: 90, rotation: 9 },
+        { y: -80, rotation: -7 },
+      ].forEach((to, i) => {
+        const word = q("#pf-s2 .pf-w")[i];
+        tl.to(word, { ...to, scale: 2.2, filter: "blur(10px)", duration: 0.4, ease: "expo.out" }, at(BURST) + i * 0.03);
+        tl.to(word, { opacity: 0, duration: 0.24, ease: "power1.in" }, at(BURST) + i * 0.03);
+      });
+      tl.set(q("#pf-s2 .pf-cm"), { opacity: 0 }, at(14.34));
+      const typed = q("#pf-s2 .pf-cf");
+      [
+        { steps: 37, start: 436 / 30, dur: 0.3 },
+        { steps: 17, start: 436 / 30 + 0.3, dur: 0.15 },
+      ].forEach((line, i) => {
+        tl.set(typed[i], { opacity: 1 }, at(line.start));
+        tl.fromTo(typed[i], { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: line.dur, ease: `steps(${line.steps})` }, at(line.start));
+      });
 
-      // Station 3: three paragraphs fold back into depth; one line lands.
-      move({ x: -8400, y: 0, z: 5200 }, 496 / 30);
+      // Station 3: three paragraphs are crushed into one line.
+      move({ x: -8400, y: 0, z: 5200 }, MOVE2);
+      label("#pf-s3", MOVE2 + 0.3);
       tl.fromTo("#pf-d3", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.3, ease: "expo.out" }, at(17.5));
-      tl.to(q("#pf-s3 .pf-p"), { rotationX: -70, z: -500, opacity: 0, transformOrigin: "50% 0%", duration: 0.4, ease: "power3.in", stagger: 0.05 }, at(18.4));
+      punch("#pf-s3-plane", 17.5);
+      tl.to(q("#pf-s3 .pf-p"), { y: (i) => -78 * i, scaleY: 0.08, opacity: 0, transformOrigin: "50% 0%", duration: 0.18, ease: "power4.in" }, at(18.36));
       tl.to("#pf-d3", { y: -156, duration: 0.35, ease: "power3.inOut" }, at(18.55));
       tl.fromTo("#pf-s3-slab", { clipPath: "inset(0px 0px 0px 0px round 24px)" }, { clipPath: "inset(0px 0px 156px 0px round 24px)", duration: 0.35, ease: "power3.inOut" }, at(18.55));
-      blurIn("#pf-p-fix", 18.75, 0.2);
+      tl.fromTo("#pf-p-fix", { opacity: 0, scale: 1.12, filter: "blur(6px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", transformOrigin: "0% 50%", duration: 0.3, ease: "expo.out" }, at(556 / 30));
 
-      // Pull back: the stations recede as the console arrives.
-      tl.to("#pf-world", { x: -6300, y: 0, z: 2200, duration: 0.7, ease: "power3.in" }, at(21.0));
+      // Once each repair has landed, its denial dims: resolved.
+      [["#pf-d1", 11.0], ["#pf-d2", 15.5], ["#pf-d3", 20.6]].forEach(([d, t]) => tl.to(d, { opacity: 0.4, duration: 0.3, ease: "power1.inOut" }, at(t)));
+
+      // Pull back: creeping from 20.3 s, the stations recede under the console flood.
+      tl.to("#pf-world", { x: -6300, y: 0, z: 2200, duration: 1.4, ease: "power3.in" }, at(20.3));
 
       window.__timelines["proof"] = tl;
     })();

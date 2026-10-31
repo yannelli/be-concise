@@ -19,8 +19,14 @@ LOOK:    Two worlds, one palette (the site's own tokens):
          - Accent #FF4A24 only on: what Concise flags (underline, the denial square), the stroke,
            the mark's square. Never on a whole word of a title.
          Display: Jost (self-hosted variable woff2) weight 550, tracking -0.04em; titles 104–210 px.
-         Proof labels: x 160/y 340, width 500, heading 112/0.92, subtitle 42/1.15, gap 24 px.
-         Opening, proof, console and claim share the x 160 left anchor; claim leading 0.94.
+         Proof grid, equal at 120 px: margin 120 | label 490 | gutter 120 | card 1070 | margin 120.
+         Labels y 340, heading 112/0.92, subtitle 42/1.15, gap 24 px. Commit card centred (y 352).
+         Opening, proof, console and claim share the x 120 left anchor (console command right 120);
+         claim leading 0.94.
+         Proof motifs: hand-drawn wide bands, stroke #EEEFEB on #F7F7F5, round caps, bleeding off
+         the frame edges and painted behind the labels and cards: "//" (two 170 px slashes),
+         a commit lane through two rings (120 px), a pull-request branch turning back to its base
+         lane with an arrowhead (120 px).
          Body/label: Jost 400–500, 40–48 px. Code: IBM Plex Mono 400, 34 px (never under 28 px).
          No shadows, no glow, no gradients, no grain. Depth comes only from perspective (1400 px),
          scale, haze and blur.
@@ -33,8 +39,13 @@ OBJECTS: - Agent-speak phrases: real strings from Concise's pattern references (
          - PR plane: white #FFFFFF slab, radius 24, PR title in Jost 550 48 px, body in Jost 400 36 px.
          - Denial line: orange square (24 x 18 px, radius 4, the mark's square in miniature) then
            the real hook text in Plex Mono 30 px, #FF4A24 on dark, #B52E10 on light.
-         - Console: the real concise-web screenshots (activity-dark.webp, overview-dark.webp, 2880 x 1800).
+         - Console: the real concise-web dark screenshots (activity, overview, configuration,
+           playground, rules; 2880 x 1800 shown 1:1), each cropped to one panel.
          - Mark: the repository's icon paths (ink chevron, orange square).
+         - Proof motifs: original geometry drawn for this film (no icon library) on a deeper plane
+           (z -400, scaled 9/7 back to full frame) so camera moves show parallax; a slow 60–80 px
+           drift per station. aria-hidden; text stays layout-audited above them.
+         - Strike: the stroke in miniature (6 px #FF4A24 bar) drawn through rejected comment lines.
          All hook text is real output from plugins/concise/hooks on the billing-api session (a41c):
            comment: [concise] Comment at ~/code/billing-api/src/invoice.ts:1 is 4 lines (limit 2).
            commit:  [concise] 3 AI writing patterns in commit message.
@@ -43,42 +54,57 @@ OBJECTS: - Agent-speak phrases: real strings from Concise's pattern references (
            PR:      [concise] PR/issue body is too verbose: 3 prose paragraphs (limit 1), use short
                     bullets instead.
 MOTION:  enter = expo.out (arrivals, slams 0.35 s), move = power2.inOut (camera 0.5 s),
-         exit/zoom-through = power3.in (0.3–0.5 s). Spring only on the mark's square (back.out 1.4).
-         Title words: blur 8 → 0 px + opacity, 0.15 s, 0.07 s apart, no translate.
-         Exits 40–50 % shorter than entrances. Camera moves carry a horizontal blur peak of 10 px.
+         exit/zoom-through = power3.in (0.3–0.5 s). No springs.
+         Title words rise 60–70 px with blur 8 → 0 (expo.out 0.3–0.45 s), dead still once landed.
+         Exits 40–50 % shorter than entrances. Camera moves are whips (expo.inOut 0.5 s, blur peak
+         16 px). Denials punch their card (scale 1.035 → 1, decaying 12 px shake over 4 frames) and
+         dim to 40 % about a second after the repair lands. The bed's breaks (13–14, 21–22, 28+)
+         carry the held breaths; its re-entries (14.0, 22.0) carry the payoffs.
 SHOTS:   (global time; frame = t x 30)
   1  0.0–3.0   NOISE / flight. Camera z 0 → 4200 (power1.out: fastest at frame 0). 64 phrases at
                z -100…-12500 around the vanishing point; near ones pass the lens blurred.
                Frame 0 = a full frame of type. Sound: whoosh-cinematic swell.
-  2  3.0–6.0   WALL. Camera settles. 8 phrases slam to the wall plane on 3.0, 3.5, 4.0, 4.5, then
-               half-beats 4.75, 5.0, 5.25, 5.5, each pushing earlier layers 70 px back and 12 % darker.
-               5.5–6.0 the wall is complete; the music stops for that beat.
+  2  3.0–6.0   WALL. Camera settles. 22 phrases slam to the wall plane: frames 90, 105, 120, then
+               the barrage accelerates from 4.5 s with gaps of 7, 6, 5, 4, 3, 3, 2, 2, 2 frames and
+               then one frame apart until f178. Each slam pushes earlier layers 70 px back and 10 %
+               darker (floor 16 %). 4.5–6.0 the tunnel surges again (z 4200 → 7600, power3.in), the
+               wall scales 1 → 1.22 (power3.in) and a deterministic shake rises to 14 px over the
+               last 30 frames, zeroed at 6.0. The music's one-beat stop (5.55–5.97) is unchanged.
   3  6.0–8.033 STROKE / reveal. 6.0 orange bar (22 px) wipes across y 540 in 0.18 s; 6.1 the wall's
                halves fly up/down and back (z -1400, rotX ±28°, blur 16 px, 0.55 s power3.in); the slit
                floods to #F7F7F5 (0.4 s). 6.45–6.85 the bar shrinks into the full stop after "first".
-               6.6 "Concise checks it first" (132 px) per word. 7.7 fly through the title (power3.in).
+               6.55 "Concise checks it first" (180 px, one line ending at x 1754) per word.
+               7.7 fly through the title (power3.in).
                Sound: impact-bass-1 on 6.0, the drop, whoosh on the split, whoosh into 8.0.
   4  8.033–12.033 COMMENT station. "Comments" / "Default: 2 lines." Code plane (34 px mono):
                src/invoice.ts, 4 comment lines + code arrive by 9.0; 9.2 the real denial (pop);
-               10.2 lines 2–4 collapse, the code and denial rise 156 px, the slab shortens; 10.4
-               line 1 becomes "// Amounts are integer cents; never floats." Denial stays to the move.
+               10.033 (f301) the stroke strikes all four comment lines; 10.2 they fly at the lens
+               (scale 1.4, blur), clipped by the card; the code and denial rise 156 px, the slab
+               shortens; 10.47 "// Amounts are integer cents; never floats." Denial dims at 11.0.
   5 12.033–16.533 COMMIT station (camera move f361–376, whoosh). git commit -m "Leverage a robust,
                seamless approach to streamline invoice rounding"; 13.2 orange underlines (click);
-               13.5 denial (ping); 14.533 the message becomes "Round invoice totals to whole cents".
+               13.5 denial (ping), all in the bed's 13–14 s break; 14.033 (f421, the re-entry) the three
+               flagged words blow out (scale 2.2, ±rotation, blur) and the rest of the line vanishes;
+               14.533 (f436) "Round invoice totals to whole cents" types in (steps, 0.45 s, typing SFX).
                Subtitle: "Optional style checks." / "Off by default."
   6 16.533–21.0 PR station (camera move f496–511). PR "Round invoice totals", 3 paragraphs; 17.5
-               denial (pop); 18.4 paragraphs fold back into depth; 18.75 the one-line body lands.
+               denial (pop); 18.36 the paragraphs are crushed into the first line (power4.in 0.18 s);
+               18.533 (f556) the one-line body slams in. Denial dims at 20.6 (its 3.1 s reading floor); the pull-back creeps from 20.3.
                Subtitle: "Default: 1 paragraph," / "3 sentences." Riser from 17.65.
   7 21.0–26.0  CONSOLE / payoff on the accent ground. 21.0 the stations recede, orange floods in
                from the right and completes at 21.37. The real Live activity screenshot rises from
                z -3000 at 21.5, opaque by 21.533, settled at 22.033 (f661). impact-bass-1 starts 21.423,
                with its measured peak near 21.5, replacing the earlier two-stage impact.
                "Watch every check." (104 px) + "concise-web --all" (38 px mono).
-               23.4 blur swap to the Overview screenshot. Slow push 1.00 → 1.05 on each screenshot.
-  8 25.5–28.0  CLAIM. Flood up to #F7F7F5. "Your agent." / "Less verbose." 210 px at x 160,
-               per word grey → ink, dead still once landed; out at 27.95.
-  9 28.0–31.0  END CARD. The mark's ink wipes in (28.1); its square slides home and locks on 28.533
-               (f856, back.out 1.4, impact-bass-1); "concise" starts wiping on that frame; 28.8 the command
+               The activity view holds two beats, pushing 1.00 → 1.10 toward its findings; then hard cuts
+               one per beat (f691, 706, 721, 736; soft click each) to Overview, Configuration, Playground
+               and Rules & usage, each punching 1.07 → 1 and drifting.
+  8 25.3–28.0  CLAIM. Flood up to #F7F7F5, done on the 25.53 beat. "Your agent." / "Less verbose."
+               210 px at x 120, one word per beat (f766, 781, 796, 811), slammed 1.3 → 1, dead still.
+               27.967 the stroke returns across y 540 and the two lines split up/down (blur 14 px).
+  9 28.0–31.0  END CARD. The bar shrinks into the mark's square (measured 783,395, 26 x 19) and locks
+               on 28.533 (f856, impact-bass-1); the ink is drawn leftward out of the square from that
+               frame and "concise" wipes 0.1 s later; 28.8 the command
                "/plugin install concise@be-concise" in a dark slab, 28.9 "github.com/yannelli/be-concise".
                Held to 31.0.
 BANNED:  a dark void with small floating things (the noise world is always full of type);

@@ -54,9 +54,9 @@
     }
     #nz-title {
       position: absolute;
-      left: 160px;
-      top: 470px;
-      font-size: 132px;
+      left: 120px;
+      top: 446px;
+      font-size: 180px;
       font-weight: 550;
       letter-spacing: -0.04em;
       line-height: 1;
@@ -69,10 +69,10 @@
     }
     #nz-sq {
       display: inline-block;
-      width: 30px;
-      height: 23px;
-      margin-left: 10px;
-      border-radius: 5px;
+      width: 41px;
+      height: 31px;
+      margin-left: 14px;
+      border-radius: 7px;
       background: #ff4a24;
       opacity: 0;
     }
@@ -153,6 +153,20 @@
       <div data-hf-id="hf-dehm" class="nz-w" style="left: 980px; top: 650px; font-size: 220px">seamless</div>
       <div data-hf-id="hf-s0s0" class="nz-w" style="left: -60px; top: 700px; font-size: 230px">In conclusion,</div>
       <div data-hf-id="hf-obk0" class="nz-w" style="left: 700px; top: 890px; font-size: 200px">Let me know if</div>
+      <div data-hf-id="hf-yvok" class="nz-w" style="left: 1500px; top: -40px; font-size: 240px">robust</div>
+      <div data-hf-id="hf-ys9r" class="nz-w" style="left: 300px; top: 120px; font-size: 220px">tapestry</div>
+      <div data-hf-id="hf-yapb" class="nz-w" style="left: 1100px; top: 860px; font-size: 230px">Certainly!</div>
+      <div data-hf-id="hf-2jju" class="nz-w" style="left: -120px; top: 560px; font-size: 240px">game-changer</div>
+      <div data-hf-id="hf-kqdh" class="nz-w" style="left: 820px; top: 330px; font-size: 250px">Absolutely!</div>
+      <div data-hf-id="hf-c1sn" class="nz-w" style="left: 1350px; top: 560px; font-size: 230px">streamline</div>
+      <div data-hf-id="hf-ex4i" class="nz-w" style="left: 380px; top: 820px; font-size: 270px">pivotal</div>
+      <div data-hf-id="hf-9bhg" class="nz-w" style="left: -80px; top: -20px; font-size: 230px">comprehensive</div>
+      <div data-hf-id="hf-jldr" class="nz-w" style="left: 900px; top: 40px; font-size: 250px">Happy coding!</div>
+      <div data-hf-id="hf-uobl" class="nz-w" style="left: 1500px; top: 760px; font-size: 280px">embark</div>
+      <div data-hf-id="hf-1dtz" class="nz-w" style="left: 100px; top: 380px; font-size: 240px">It's worth noting</div>
+      <div data-hf-id="hf-jgf0" class="nz-w" style="left: 640px; top: 600px; font-size: 290px">In summary,</div>
+      <div data-hf-id="hf-b5zo" class="nz-w" style="left: 1000px; top: 280px; font-size: 300px">a testament to</div>
+      <div data-hf-id="hf-bfie" class="nz-w" style="left: 300px; top: 700px; font-size: 320px">As an AI</div>
     </div>
     <div data-hf-id="hf-ydze" id="nz-light"></div>
     <div data-hf-id="hf-ud1d" id="nz-title-wrap">
@@ -197,41 +211,74 @@
       // 1. Flight: fastest at frame 0, settling as the wall begins.
       tl.fromTo(cam, { z: 0 }, { z: 4200, duration: 3, ease: "power1.out" }, 0);
 
-      // 2. Wall: one phrase slams in per beat, pushing the earlier ones back and darker.
+      // 2. Wall: phrases slam in on beats, then the barrage accelerates from
+      // seven frames apart to one, so the last 1.5 s is too much to take in.
+      // Depth is computed per frame (renderWall) so overlapping slams never fight.
       const wall = [...document.querySelectorAll("#nz-wall .nz-w")];
-      // Slams land on beats, then on half-beats as the tension tightens.
-      const slamAt = [3, 3.5, 4, 4.5, 4.75, 5, 5.25, 5.5];
-      wall.forEach((el, i) => {
-        const t = slamAt[i];
-        tl.fromTo(el, { z: -2600, opacity: 0 }, { z: 0, opacity: 1, duration: 0.35, ease: "expo.out" }, t);
-        for (let j = 0; j < i; j++) {
-          tl.to(wall[j], { z: -70 * (i - j), opacity: 1 - 0.12 * (i - j), duration: 0.25, ease: "power2.out" }, t);
-        }
+      const slamFrames = [90, 105, 120, 135, 142, 148, 153, 157, 160, 163, 165, 167, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178];
+      const slams = slamFrames.map((frame, i) => {
+        const gap = i > 0 ? (frame - slamFrames[i - 1]) / 30 : B;
+        return { t: frame / 30, slam: Math.min(0.35, Math.max(0.16, gap * 2)), push: Math.min(0.25, Math.max(0.1, gap * 2)) };
       });
+      const clamp01 = (v) => Math.min(1, Math.max(0, v));
+      const expoOut = (v) => (v >= 1 ? 1 : 1 - Math.pow(2, -10 * v));
+      const cubicOut = (v) => 1 - Math.pow(1 - v, 3);
+      const splitAt = (i) => 6.1 + (i % 3) * 0.02;
+      // One per-frame pass: tunnel depth, then the wall barrage.
+      function renderWall() {
+        render();
+        const t = tl.time();
+        wall.forEach((el, i) => {
+          const arrive = expoOut(clamp01((t - slams[i].t) / slams[i].slam));
+          let depth = 0;
+          for (let j = i + 1; j < wall.length; j++) depth += cubicOut(clamp01((t - slams[j].t) / slams[j].push));
+          const opacity = arrive * Math.max(0.16, 1 - 0.1 * depth);
+          // Before its split the phrase is ours; from splitAt the split tween owns its transform.
+          if (t < splitAt(i)) el.style.transform = `translate3d(0px, 0px, ${(-2600 * (1 - arrive) - 70 * depth).toFixed(2)}px)`;
+          el.style.opacity = opacity.toFixed(3);
+        });
+      }
       tl.to(cam, { dim: 0.45, duration: 2.5, ease: "none" }, 3);
+
+      // The rush: the tunnel surges again and the wall pushes at the lens.
+      tl.to(cam, { z: 7600, duration: 1.5, ease: "power3.in" }, 4.5);
+      tl.fromTo("#nz-wall", { scale: 1 }, { scale: 1.22, duration: 1.5, ease: "power3.in" }, 4.5);
+      // Deterministic shake, rising over the last 30 frames and settled for the stroke.
+      for (let f = 150; f < 180; f++) {
+        const amp = ((f - 150) / 29) * 14;
+        tl.set("#nz-wall", { x: Math.sin(f * 2.3) * amp, y: Math.cos(f * 3.7) * amp }, f / 30);
+      }
+      tl.set("#nz-wall", { x: 0, y: 0 }, 6);
 
       // 3. The stroke splits the wall; the slit floods to the clean world.
       tl.fromTo("#nz-bar", { scaleX: 0 }, { scaleX: 1, duration: 0.18, ease: "expo.out" }, 6);
       wall.forEach((el, i) => {
-        const up = el.offsetTop + el.offsetHeight / 2 < 540;
-        tl.to(el, { y: up ? -760 : 760, z: -1400, rotationX: up ? 28 : -28, filter: "blur(16px)", duration: 0.55, ease: "power3.in" }, 6.1 + (i % 3) * 0.02);
+        const up = parseFloat(el.style.top) + parseFloat(el.style.fontSize) / 2 < 540; // line-height 1
+        tl.fromTo(
+          el,
+          { y: 0, z: -70 * (wall.length - 1 - i), rotationX: 0, filter: "blur(0px)" },
+          { y: up ? -760 : 760, z: -1400, rotationX: up ? 28 : -28, filter: "blur(16px)", duration: 0.55, ease: "power3.in", immediateRender: false },
+          splitAt(i),
+        );
       });
       tl.to(cam, { dim: 0, duration: 0.3, ease: "power2.in" }, 6.1);
       tl.fromTo("#nz-light", { clipPath: "inset(50% 0% 50% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.4, ease: "power2.inOut" }, 6.12);
 
-      // The bar becomes the full stop after "first".
-      tl.to("#nz-bar", { x: 1328.5, y: 29, scaleX: 30 / 1920, scaleY: 23 / 22, duration: 0.4, ease: "power3.inOut" }, 6.45);
+      // The bar becomes the full stop after "first" (square measured from rendered pixels).
+      const SQ_X = 1713.4;
+      const SQ_Y = 567;
+      tl.to("#nz-bar", { x: SQ_X, y: SQ_Y - 529, scaleX: 41 / 1920, scaleY: 31 / 22, duration: 0.4, ease: "power3.inOut" }, 6.45);
       tl.set("#nz-bar", { opacity: 0 }, 6.85);
       tl.set("#nz-sq", { opacity: 1 }, 6.85);
       document.querySelectorAll(".nz-tw").forEach((el, i) => {
-        tl.fromTo(el, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, ease: "power2.out" }, 6.6 + i * 0.07);
+        tl.fromTo(el, { opacity: 0, y: 70, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.3, ease: "expo.out" }, 6.55 + i * 0.06);
       });
 
       // Fly through the title into the proof world.
       tl.fromTo("#nz-title-wrap", { scale: 1, filter: "blur(0px)", opacity: 1 }, { scale: 6, filter: "blur(14px)", opacity: 0, duration: 10 / 30, ease: "power3.in" }, 7.7);
 
-      tl.eventCallback("onUpdate", render);
-      render();
+      tl.eventCallback("onUpdate", renderWall);
+      renderWall();
       window.__timelines["noise"] = tl;
     })();
   </script>
