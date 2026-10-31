@@ -11,9 +11,11 @@ async function htmlFiles(directory) {
 }
 const files = await htmlFiles(dist);
 const pages = await Promise.all(files.map(async file => ({ file, html: await readFile(file, 'utf8') })));
+const page = route => pages.find(page => page.file === join(dist, route, 'index.html')).html;
+const marketingRoutes = ['', 'why-concise', 'use-cases', 'install', 'configuration', 'console', 'faq'];
 
-test('homepage and all reference routes are generated', async () => {
-  for (const route of ['', 'docs', 'docs/installation', 'docs/console', 'docs/tools', 'docs/host-features', 'docs/configuration', 'docs/categories', 'docs/environment', 'docs/packs']) {
+test('focused marketing pages and all baseline reference routes are generated', async () => {
+  for (const route of [...marketingRoutes, 'docs', 'docs/installation', 'docs/console', 'docs/tools', 'docs/host-features', 'docs/configuration', 'docs/categories', 'docs/environment', 'docs/packs', 'docs/ai-speak-patterns', 'docs/ai-speak-patterns-2', 'docs/ai-speak-patterns-3', 'docs/ai-speak-patterns-4']) {
     assert.ok((await stat(join(dist, route, 'index.html'))).isFile(), route);
   }
   assert.ok((await stat(join(dist, '404.html'))).isFile());
@@ -66,15 +68,43 @@ test('all local navigation links and fragments resolve', async () => {
   }
 });
 
-test('homepage presents real defaults and opt-in configuration', () => {
-  const home = pages.find(page => page.file === join(dist, 'index.html')).html;
-  assert.match(home, /300/);
-  assert.match(home, /disabled until you enable them/);
-  assert.match(home, /An example, not a live agent/);
-  assert.match(home, /0\.152\.0/);
-  assert.ok((home.match(/data-ui/g) || []).length >= 4);
-  assert.match(home, /role="tablist"/);
-  assert.match(home, /aria-live="polite"/);
+test('homepage stays short and links to focused destinations', () => {
+  const home = page('');
+  assert.equal((home.match(/<section\b/g) || []).length, 2);
+  assert.match(home, /Open source\. MIT licensed\./);
+  for (const route of ['why-concise', 'use-cases', 'install', 'docs']) assert.match(home, new RegExp(`href="/${route}/"`));
+  assert.doesNotMatch(home, /data-example=|data-host=|data-console-view=|id="preset"|class="faq-list"/);
+});
+
+test('each marketing page owns its content and shares the interaction bootstrap', () => {
+  const owners = { 'why-concise': 'data-example=', install: 'data-host=', configuration: 'id="preset"', console: 'data-console-view=', faq: 'class="faq-list"' };
+  for (const route of marketingRoutes) {
+    assert.match(page(route), /<script[^>]+src="\/_astro\/MarketingLayout\.[^"]+\.js"/);
+    for (const [owner, marker] of Object.entries(owners)) assert.equal(page(route).includes(marker), route === owner, `${route}: ${marker}`);
+  }
+  assert.match(page('why-concise'), /300/);
+  assert.match(page('why-concise'), /An example, not a live agent/);
+  assert.match(page('why-concise'), /After two denials/);
+  assert.match(page('why-concise'), /role="tablist"/);
+  assert.match(page('why-concise'), /aria-live="polite"/);
+  assert.match(page('faq'), /disabled until you enable them/);
+  assert.match(page('install'), /0\.152\.0/);
+  assert.match(page('install'), /<noscript>[\s\S]*Install for Codex[\s\S]*Install for omp/);
+  assert.match(page('configuration'), /47 writing categories/);
+  assert.match(page('console'), /not as a background daemon/);
+});
+
+test('navigation uses real routes, current states, and a native mobile disclosure', () => {
+  for (const { file, html } of pages) {
+    assert.doesNotMatch(html, /href="\/?#(?:features|use-cases|install)"/, file);
+    assert.match(html, /<details class="mobile-menu">/);
+    assert.match(html, /href="https:\/\/ryanyannelli\.com"/);
+  }
+  for (const route of marketingRoutes.filter(Boolean)) {
+    assert.match(page(route), new RegExp(`href="/${route}/" aria-current="page"`));
+  }
+  assert.match(page('docs/configuration'), /href="\/docs\/" aria-current="page"/);
+  assert.doesNotMatch(pages.find(page => page.file === join(dist, '404.html')).html, /aria-current="page"/);
 });
 
 test('reference table values have build-time mobile labels', () => {
@@ -94,21 +124,20 @@ test('Cloudflare deploys static assets and enables branch previews', async () =>
 });
 
 test('web console is documented with real screenshots', async () => {
-  const home = pages.find(page => page.file === join(dist, 'index.html')).html;
+  const consolePage = page('console');
   const guide = pages.find(page => page.file === join(dist, 'docs', 'console', 'index.html'));
   assert.ok(guide, 'docs/console page exists');
-  const images = [...new Set([...home.matchAll(/\/console\/([a-z]+-(?:light|dark))\.webp/g), ...guide.html.matchAll(/\/console\/([a-z]+-(?:light|dark))\.webp/g)].map(match => match[1]))];
+  const images = [...new Set([...consolePage.matchAll(/\/console\/([a-z]+-(?:light|dark))\.webp/g), ...guide.html.matchAll(/\/console\/([a-z]+-(?:light|dark))\.webp/g)].map(match => match[1]))];
   assert.ok(images.length >= 5);
   for (const view of ['overview', 'activity', 'playground', 'configuration', 'rules']) {
     for (const theme of ['light', 'dark']) await assert.doesNotReject(stat(join(dist, 'console', `${view}-${theme}.webp`)));
   }
-  assert.match(home, /npm install -g @yannelli\/be-concise/);
+  assert.match(consolePage, /npm install -g @yannelli\/be-concise/);
   assert.match(guide.html.replace(/<[^>]+>/g, ""), /concise-web --all/);
 });
 
 test('copy matches the current plugin release', () => {
-  const home = pages.find(page => page.file === join(dist, 'index.html')).html;
-  assert.match(home, /omp plugin install concise@be-concise/);
+  assert.match(page('install'), /omp plugin install concise@be-concise/);
   for (const page of pages) {
     assert.doesNotMatch(page.html, /\b44 (writing )?categor/, page.file);
     assert.doesNotMatch(page.html, /claude-test-last\.log/, page.file);

@@ -12,7 +12,7 @@ Astro, requested by the user. Deployment must be ready for Cloudflare Workers Gi
 
 ## Users
 
-Individual Claude Code and Codex users evaluating and installing Concise. Team maintainers need shared configuration, presets, custom packs, and cloud-agent guidance.
+Individual Claude Code, Codex, and omp users evaluating and installing Concise. Team maintainers need shared configuration, presets, custom packs, and cloud-agent guidance.
 
 ## Product Purpose
 
@@ -24,7 +24,7 @@ PreToolUse hooks check pending additions rather than linting the working tree af
 
 ## Operating Context
 
-Claude Code and Codex CLI (supported baseline 0.152.0). Git, Node.js, Bash, jq, realpath, and core Unix tools are prerequisites. Codex requires hook review and trust.
+Claude Code, Codex CLI (supported baseline 0.152.0), and omp. Git, Node.js, Bash, jq, realpath, and core Unix tools are prerequisites. Codex requires hook review and trust.
 
 ## Capabilities and Constraints
 

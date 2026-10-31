@@ -1,0 +1,13 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Install from '../components/Install.astro';
+import Icon from '../components/Icon.astro';
+---
+<MarketingLayout title="Install Concise — Claude Code, Codex, and omp" description="Install Concise for Claude Code, Codex CLI, or omp. Find the commands, prerequisites, and hook trust instructions for your host.">
+  <header class="page-intro frame"><h1>Install Concise</h1><p>Choose your coding agent. The three core checks work without an account or configuration file.</p></header>
+  <Install />
+  <section class="home-next frame" aria-labelledby="after-heading">
+    <div><h2 id="after-heading">After installation.</h2><p>Keep the defaults, or choose your own limits and optional writing checks.</p></div>
+    <div class="next-links"><a class="text-link" href="/configuration/">Configure your checks <Icon name="arrow" size={17} /></a><a class="text-link" href="/console/">Open the local console <Icon name="arrow" size={17} /></a><a class="text-link" href="/docs/installation/">Verify, update, or uninstall <Icon name="arrow" size={17} /></a></div>
+  </section>
+</MarketingLayout>

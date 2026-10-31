@@ -1,0 +1,37 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Demo from '../components/Demo.astro';
+import Icon from '../components/Icon.astro';
+---
+<MarketingLayout title="Why Concise — Checks before the write" description="See how Concise checks pending comments, whole-file writes, and inline PR bodies, then gives your agent a concrete finding to revise.">
+  <header class="page-intro frame">
+    <h1>Why Concise</h1>
+    <p>Prompts ask an agent to be brief. Concise checks whether it actually was, before the write runs.</p>
+    <a class="button" href="/install/">Install Concise <Icon name="arrow" size={18} /></a>
+  </header>
+  <section class="frame page-section" aria-labelledby="example-heading">
+    <div class="section-intro"><h2 id="example-heading">Catch it before it lands.</h2><p>Concise gives the finding. The agent can revise.<br />It does not rewrite your files.</p></div>
+    <Demo />
+    <p class="example-disclosure">Illustrative examples, not a live agent. No files are changed.</p>
+  </section>
+  <section class="frame page-section" aria-labelledby="defaults-heading">
+    <div class="section-intro"><h2 id="defaults-heading">Three core checks.</h2><p>Enabled without configuration. Checks apply to submitted writes and additions, not the whole repository.</p></div>
+    <dl class="core-checks">
+      <div><dt>Comments</dt><dd>Comment blocks over <strong>2 lines</strong> trigger a denial with the location and limit.</dd></div>
+      <div><dt>Files</dt><dd>Whole-file writes and new-file patches over <strong>300 lines</strong> are flagged. Ordinary update hunks are checked only for additions.</dd></div>
+      <div><dt>PRs and issues</dt><dd>Inline bodies allow <strong>1 prose paragraph</strong> of up to <strong>3 sentences</strong>. Headings and lists are allowed.</dd></div>
+    </dl>
+    <p class="page-note">After two denials on the same target, the next attempt is allowed and flagged. Em-dash and AI-writing checks are optional and off by default.</p>
+    <a class="text-link" href="/configuration/">Choose checks and exceptions <Icon name="arrow" size={17} /></a>
+  </section>
+  <section class="frame page-section test-feature" aria-labelledby="tests-heading">
+    <div><h2 id="tests-heading">Quieter test output.</h2><p>A passing test run reaches the agent as a short summary. A failed run keeps its full output. Each run’s complete log is saved, and its path is printed with the summary.</p><p class="runner-list">pytest, go test, npm test, Jest, and Vitest</p></div>
+    <div class="test-specimen" data-ui><div class="specimen-meta"><span>Example output in Claude Code</span><span>pytest</span></div><pre><code><span class="code-muted">$ pytest tests/</span>
+[filtered] runner=pytest exit=0 (cap 100)
+[filtered] available output: cat '$TMPDIR/concise-test-output-hS2x6f/output.log'
+[filtered] last 5 lines:
+<span class="code-muted">…</span>
+<span class="test-pass">========== 214 passed in 3.82s ==========</span></code></pre><div class="test-footer"><code>NOFILTER=1 pytest tests/</code><span>Bypass for one run</span></div></div>
+  </section>
+  <nav class="page-next frame" aria-label="Explore Concise"><a class="text-link" href="/faq/">Questions and limitations <Icon name="arrow" size={17} /></a><a class="text-link" href="/use-cases/">Where it helps <Icon name="arrow" size={17} /></a></nav>
+</MarketingLayout>

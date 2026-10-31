@@ -1,94 +1,20 @@
 ---
-import SiteLayout from '../layouts/SiteLayout.astro';
-import Demo from '../components/Demo.astro';
-import Install from '../components/Install.astro';
-import Console from '../components/Console.astro';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
 import Film from '../components/Film.astro';
 import Icon from '../components/Icon.astro';
-import Mark from '../components/Mark.astro';
-import { presets } from '../data/examples';
-import '../styles/home.css';
-const guides = [
-  ['Installation', 'From a fresh install to your first useful denial.', 'installation'],
-  ['Configuration', 'Every setting, config layer, and escape hatch.', 'configuration'],
-  ['Web console', 'Edit settings, test text, and watch hook calls live.', 'console'],
-  ['Writing categories', 'All 47 categories, with examples and fixes.', 'categories'],
-  ['Environment variables', 'Session overrides and cloud-agent recipes.', 'environment'],
-  ['Custom packs', 'Add the phrases and rules your team cares about.', 'packs'],
-];
-const questions = [
-  ['What runs without configuration?', 'The three core checks: comment length, file length on whole-file writes and additions, and inline GitHub PR/issue body length. Supported test-runner output is also filtered. Em-dash and AI-writing checks are disabled until you enable them.'],
-  ['Does Concise rewrite my code?', 'No. It denies a supported tool call and gives the agent the exact finding. The agent can then submit a rewrite. The examples above illustrate that exchange; this website does not run an agent or change your files.'],
-  ['What if I want to keep the text?', 'Style checks use confirm mode by default: resubmit the identical text to keep it. You can exempt a line with concise-ignore, allow a phrase, ignore a path, or enable softFail for flagged allows. Core checks and deny mode also have a retry escape after two denials on the same target.'],
-  ['Does it scan the whole repository?', 'No. It checks the submitted write or added text in supported edit and patch calls. It does not rescan surrounding existing content. The 300-line limit applies to whole-file Write calls and patch Add File operations, not ordinary update hunks.'],
-  ['Are the writing checks an AI detector?', 'No. They match configurable phrasing, punctuation, and text-statistics patterns. Human writing can trigger them, and generated writing can pass. Use exceptions and choose categories that fit your project.'],
-  ['Which agents does it support?', 'Claude Code, Codex CLI 0.152.0 or newer, and omp. In Codex, review and trust each Concise hook under /hooks; Codex asks again after a hook definition changes. In omp, subagent replies are not checked.'],
-];
 ---
-<SiteLayout title="Concise — Your agent. Less verbose." description="An open-source Claude Code, Codex, and omp plugin that catches verbose comments, oversized files, and padded PRs before they land. Install in two commands.">
+<MarketingLayout title="Concise — Your agent. Less verbose." description="An open-source Claude Code, Codex, and omp plugin that catches verbose comments, oversized files, and padded PRs before they land. Install in two commands.">
   <section class="hero frame" aria-labelledby="hero-title">
     <div class="hero-copy">
       <h1 id="hero-title" data-hero>Your agent. Less verbose.</h1>
       <p class="hero-description" data-hero>Concise catches verbose comments, oversized files, and padded PRs<br class="desktop-break" /> before your coding agent writes them.</p>
-      <div class="hero-actions" data-hero><a class="button" href="#install">Install Concise <Icon name="arrow" size={18} /></a><a class="text-link" href="https://github.com/yannelli/be-concise"><Icon name="github" size={18} /> View source</a></div>
+      <div class="hero-actions" data-hero><a class="button" href="/install/">Install Concise <Icon name="arrow" size={18} /></a><a class="text-link" href="/why-concise/">See how it works <Icon name="arrow" size={18} /></a></div>
       <p class="hero-note" data-hero>Open source. MIT licensed.</p>
     </div>
     <Film />
-    <div class="hero-demo" data-hero><Demo /></div>
-    <div class="compatibility"><p>Works with</p><div><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2v20M2 12h20M5 5l14 14M5 19 19 5M8 3l8 18M3 8l18 8M3 16l18-8M8 21l8-18" /></svg><span>Claude Code</span></div><div><Icon name="terminal" size={27} /><span>Codex</span></div><div><Icon name="terminal" size={27} /><span>omp</span></div><p class="compatibility-note">Local hooks.<br />No extra service.</p></div>
   </section>
-
-  <section class="features-section frame section-space" id="features" aria-labelledby="features-heading">
-    <div class="section-intro"><h2 id="features-heading" data-reveal>Catch it before<br />it lands.</h2><p data-reveal>Prompts ask an agent to be brief. <br />Concise checks whether it actually was.</p></div>
-    <div class="guardrail-layout">
-      <article class="comment-feature" data-reveal>
-        <div class="feature-copy"><h3>Comments that <br />get to the point.</h3><p>Comments over the default 2-line limit trigger a denial with the exact location and limit, so the agent can revise them.</p></div>
-        <div class="comment-specimen" data-ui><div class="specimen-meta"><span>check-edit</span><span>2-line limit</span></div><pre><code><span class="removed">// It is important to note that this</span>
-<span class="removed">// function will return true when the</span>
-<span class="removed">// token has passed its expiry date.</span>
-
-<span class="added">// Check whether the token has expired.</span>
-return token.expiresAt &lt; Date.now();</code></pre><div class="specimen-result"><Icon name="check" size={16} /> 1 comment line, within the limit.</div></div>
-      </article>
-      <div class="other-guardrails">
-        <article class="file-feature" data-reveal><div class="limit-value">300<span>lines</span></div><div><h3>Focused files.</h3><p>A whole-file write or new-file patch over 300 lines gets flagged. Existing update hunks are checked only for additions.</p></div><div class="file-specimen" data-ui><code>Write: src/session.ts</code><span>324 lines → split the file</span></div></article>
-        <article class="pr-feature" data-reveal><h3>Short PR descriptions.</h3><p>The default allows 1 prose paragraph of up to 3 sentences. Headings and lists are allowed.</p><div class="pr-specimen" data-ui><code>## Summary<br />- Fix the session timeout.<br />- Add expiry tests.</code><span><Icon name="check" size={15} /> Structured body allowed</span></div></article>
-      </div>
-    </div>
-    <div class="test-feature" data-reveal><div><h3>Quiet passing runs. <br />Keep the full log.</h3><p>A passing test run reaches the agent as a short summary. A failed run keeps its full output. Each run’s complete log is saved, and its path is printed with the summary.</p><p class="runner-list">pytest, go test, npm test, Jest, and Vitest</p></div><div class="test-specimen" data-ui><div class="specimen-meta"><span>Filtered output in Claude Code</span><span>pytest</span></div><pre><code><span class="code-muted">$ pytest tests/</span>
-[filtered] runner=pytest exit=0 (cap 100)
-[filtered] available output: cat '$TMPDIR/concise-test-output-hS2x6f/output.log'
-[filtered] last 5 lines:
-<span class="code-muted">…</span>
-<span class="test-pass">========== 214 passed in 3.82s ==========</span></code></pre><div class="test-footer"><code>NOFILTER=1 pytest tests/</code><span>Bypass for one run</span></div></div></div>
+  <section class="home-next frame" aria-labelledby="next-heading">
+    <div><h2 id="next-heading">Start with your agent.</h2><p>For Claude Code, Codex, and omp.<br />Local hooks. No extra service.</p></div>
+    <div class="next-links"><a class="text-link" href="/install/">Choose your install <Icon name="arrow" size={18} /></a><a class="text-link" href="/use-cases/">Find your use case <Icon name="arrow" size={18} /></a><a class="text-link" href="/docs/">Read the docs <Icon name="arrow" size={18} /></a></div>
   </section>
-
-  <section class="use-cases-section section-space" id="use-cases" aria-labelledby="use-cases-heading"><div class="frame use-cases-grid"><div class="use-cases-intro"><h2 id="use-cases-heading" data-reveal>Less to <br />sift through.</h2><p data-reveal>Keep the useful detail.<br />Skip the agent’s running commentary.</p><Mark class="use-case-mark" size={220} /></div><div class="use-case-list">
-    <article data-reveal><h3>Review the change.</h3><p>Keep comments short and PR bodies structured, so a reviewer can get to what changed.</p><a class="text-link" href="/docs/configuration/">See the core checks <Icon name="arrow" size={16} /></a></article>
-    <article data-reveal><h3>Write docs that sound like you.</h3><p>Opt into writing checks for stock phrases, unnecessary qualifiers, and canned conclusions. Start with the technical preset.</p><a class="text-link" href="/docs/categories/">Explore writing categories <Icon name="arrow" size={16} /></a></article>
-    <article data-reveal><h3>Share a team’s house rules.</h3><p>Commit project configuration and add custom pattern packs for the words your team wants to avoid.</p><a class="text-link" href="/docs/packs/">Create a custom pack <Icon name="arrow" size={16} /></a></article>
-    <article data-reveal><h3>Bring the rules to cloud agents.</h3><p>Use environment variables when an agent starts from a fresh checkout. Try soft fail to flag findings without blocking.</p><a class="text-link" href="/docs/environment/">Read the cloud recipes <Icon name="arrow" size={16} /></a></article>
-  </div></div></section>
-
-  <Install />
-
-  <Console />
-
-  <section class="configuration-section frame section-space" aria-labelledby="config-heading"><div class="section-intro"><h2 id="config-heading" data-reveal>Your rules.<br />Your exceptions.</h2><p data-reveal>The basics run out of the box. <br />Turn on the style checks when you want them.</p></div><div class="config-grid"><div class="preset-picker" data-reveal><h3>A preset for your project.</h3><p>Eight starting points, from removing chat boilerplate to checking all 47 writing categories.</p><label for="preset">Writing preset</label><select id="preset">{presets.map(preset => <option value={preset.id}>{preset.id}</option>)}</select><div class="preset-info" aria-live="polite"><strong data-preset-count>21 categories</strong><p data-preset-description>{presets[0].description}</p></div><a class="text-link" href="/docs/categories/">Compare all presets <Icon name="arrow" size={16} /></a></div><div class="config-code" data-ui data-reveal><div class="terminal-meta"><span>.claude/concise.json</span><button class="copy-button" data-copy="config"><Icon name="copy" size={15} /><span>Copy</span></button></div><pre><code data-config-code>{`{
-  "features": {
-    "emDash": { "enabled": true },
-    "aiWriting": {
-      "enabled": true,
-      "preset": "default"
-    }
-  }
-}`}</code></pre><p>Codex uses <code>.codex/concise.json</code>.<br />If both exist, the Claude configuration wins.</p></div></div><div class="exceptions"><p data-reveal><strong>Keep an intentional phrase.</strong> Use <code>concise-ignore</code>, allow a phrase, or exempt a file.</p><p data-reveal><strong>Try it without blocking.</strong> Set <code>softFail: true</code> to receive findings as flagged allows.</p><a class="text-link" href="/docs/configuration/" data-reveal>Every option, documented <Icon name="arrow" size={17} /></a></div></section>
-
-  <section class="docs-section frame section-space" aria-labelledby="docs-heading"><div class="docs-intro"><h2 id="docs-heading" data-reveal>Go as deep <br />as you need.</h2><p data-reveal>Find configuration defaults, examples, and exceptions.</p><a class="button button-dark" href="/docs/" data-reveal>Open the docs <Icon name="book" size={18} /></a><figure class="defaults-table" data-ui data-reveal><figcaption>Core defaults</figcaption><table><thead><tr><th scope="col">Key</th><th scope="col">Default</th></tr></thead><tbody><tr><td><code>maxCommentLines</code></td><td><code>2</code></td></tr><tr><td><code>maxFileLines</code></td><td><code>300</code></td></tr><tr><td><code>maxPrBodyParagraphs</code></td><td><code>1</code></td></tr><tr><td><code>maxPrBodySentences</code></td><td><code>3</code></td></tr><tr><td><code>maxRetries</code></td><td><code>2</code></td></tr><tr><td><code>softFail</code></td><td><code>false</code></td></tr></tbody></table></figure></div><div class="guide-list">{guides.map(([title, description, slug]) => <a href={`/docs/${slug}/`} class="guide-row" data-reveal><div><h3>{title}</h3><p>{description}</p></div><Icon name="diagonal" size={22} /></a>)}</div></section>
-
-  <section class="faq-section frame section-space" aria-labelledby="faq-heading"><div class="faq-intro"><h2 id="faq-heading" data-reveal>A few useful answers.</h2><p class="faq-tail">A specific edge case? <a href="https://github.com/yannelli/be-concise/issues">Open an issue on GitHub.</a></p></div><div class="faq-list">{questions.map(([question, answer]) => <details data-reveal><summary>{question}<span class="faq-plus" aria-hidden="true"></span></summary><p>{answer}</p></details>)}</div></section>
-
-  <section class="closing-section" aria-labelledby="closing-heading"><div class="frame closing-grid"><div><h2 id="closing-heading">Keep the useful part.</h2><p>Your agent can say less.<br />Start with the next write.</p></div><div class="closing-command" data-ui><div class="terminal-meta"><span>Claude Code</span><button class="copy-button" data-copy="claude"><Icon name="copy" size={15} /><span>Copy</span></button></div><pre><code>/plugin marketplace add https://github.com/yannelli/be-concise
-/plugin install concise@be-concise</code></pre></div><div class="closing-actions"><a class="button button-dark" href="#install">All install options <Icon name="arrow" size={18} /></a><span>Free to use. Open to change.</span></div></div></section>
-  <script>import '../scripts/home';</script>
-</SiteLayout>
+</MarketingLayout>

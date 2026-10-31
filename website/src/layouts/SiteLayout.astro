@@ -5,6 +5,12 @@ import Icon from '../components/Icon.astro';
 interface Props { title: string; description?: string; isDocs?: boolean; }
 const { title, description = 'Keep the code. Cut the noise. Concise catches agent verbosity before it lands in Claude Code, Codex, and omp.', isDocs = false } = Astro.props;
 const github = 'https://github.com/yannelli/be-concise';
+const navigation = [
+  ['/why-concise/', 'Why Concise'],
+  ['/use-cases/', 'Use cases'],
+  ['/docs/', 'Docs'],
+];
+const current = (href: string) => Astro.url.pathname === href || (href === '/docs/' && Astro.url.pathname.startsWith('/docs/'));
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL('/social.png', Astro.site);
 const isNotFound = ['/404', '/404/', '/404.html'].includes(Astro.url.pathname);
@@ -35,41 +41,42 @@ const isNotFound = ['/404', '/404/', '/404.html'].includes(Astro.url.pathname);
     <header class="site-header frame">
       <a class="wordmark" href="/" aria-label="Concise home"><Mark size={35} /><span>concise</span></a>
       <nav class="desktop-nav" aria-label="Main navigation">
-        <a href="/#features">Why Concise</a>
-        <a href="/#use-cases">Use cases</a>
-        <a href="/docs/" aria-current={isDocs ? 'page' : undefined}>Docs</a>
+        {navigation.map(([href, label]) => <a href={href} aria-current={current(href) ? 'page' : undefined}>{label}</a>)}
       </nav>
       <div class="header-actions">
         <a class="github-link" href={github} aria-label="Concise on GitHub"><Icon name="github" size={21} /></a>
-        <a class="button button-small button-dark" href="/#install">Install Concise <Icon name="arrow" size={17} /></a>
-        <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open navigation"><Icon name="menu" /></button>
+        <a class="button button-small button-dark" href="/install/" aria-current={current('/install/') ? 'page' : undefined}>Install Concise <Icon name="arrow" size={17} /></a>
+        <details class="mobile-menu">
+          <summary class="menu-toggle" aria-label="Navigation"><Icon name="menu" /></summary>
+          <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation">
+            {navigation.map(([href, label]) => <a href={href} aria-current={current(href) ? 'page' : undefined}>{label}</a>)}
+            <a href={github}>GitHub</a>
+          </nav>
+        </details>
       </div>
-      <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation" hidden>
-        <a href="/#features">Why Concise</a><a href="/#use-cases">Use cases</a><a href="/docs/">Documentation</a><a href={github}>GitHub</a>
-      </nav>
     </header>
     <main id="main"><slot /></main>
-    <footer class:list={['site-footer', { compact: isDocs }]}>
+    <footer class="site-footer compact">
       <div class="frame footer-top">
         <a class="wordmark" href="/" aria-label="Concise home"><Mark size={35} /><span>concise</span></a>
         <p>For Claude Code,<br />Codex, and omp.</p>
-        <nav aria-label="Footer navigation"><a href="/docs/">Documentation</a><a href={github}>Source on GitHub</a><a href={`${github}/issues`}>Report an issue</a></nav>
+        <nav aria-label="Footer navigation">
+          {[...navigation, ['/install/', 'Installation'], ['/configuration/', 'Configuration'], ['/console/', 'Web console'], ['/faq/', 'FAQ']].map(([href, label]) => <a href={href} aria-current={current(href) ? 'page' : undefined}>{label}</a>)}
+          <a href={github}>Source on GitHub</a><a href={`${github}/issues`}>Report an issue</a>
+        </nav>
       </div>
-      {!isDocs && <div class="frame footer-display" aria-hidden="true">Keep it concise<span>.</span></div>}
       <div class="frame footer-bottom"><p>Made by <a href="https://ryanyannelli.com">Ryan Yannelli</a></p><p><a href={`${github}/blob/main/LICENSE`}>MIT licensed</a><span class="footer-separator">/</span><a href="/fonts/OFL-Jost.txt">Typeface license</a></p><a href="#main">Back to top <Icon name="arrow" size={16} /></a></div>
     </footer>
     <script>
-      const toggle = document.querySelector<HTMLButtonElement>('.menu-toggle');
-      const menu = document.querySelector<HTMLElement>('#mobile-nav');
-      function closeMenu() { toggle?.setAttribute('aria-expanded', 'false'); toggle?.setAttribute('aria-label', 'Open navigation'); if (menu) menu.hidden = true; }
-      toggle?.addEventListener('click', () => {
-        const open = toggle.getAttribute('aria-expanded') !== 'true';
-        toggle.setAttribute('aria-expanded', String(open));
-        toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
-        if (menu) menu.hidden = !open;
+      const menu = document.querySelector<HTMLDetailsElement>('.mobile-menu');
+      const toggle = menu?.querySelector<HTMLElement>('summary');
+      menu?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { menu.open = false; }));
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && menu?.open) { menu.open = false; toggle?.focus(); }
       });
-      menu?.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
-      document.addEventListener('keydown', event => { if (event.key === 'Escape' && !menu?.hidden) { closeMenu(); toggle?.focus(); } });
+      window.matchMedia('(min-width: 651px)').addEventListener('change', event => {
+        if (event.matches && menu) menu.open = false;
+      });
     </script>
   </body>
 </html>
