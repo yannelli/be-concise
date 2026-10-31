@@ -1,18 +1,33 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro';
 import Icon from '../components/Icon.astro';
-import Mark from '../components/Mark.astro';
+import HookOutput from '../components/HookOutput.astro';
+import Shot from '../components/Shot.astro';
+import { hookOutputs } from '../data/hook-output';
+const presetNote = 'The technical preset lets “robust” through. The other 3 phrases get a finding.'; // taste-skill-ignore: names a word the hook allows
 ---
-<MarketingLayout title="Use cases — Concise" description="Keep reviews focused, opt into writing checks, share team rules, and configure Concise for cloud agents.">
-  <header class="page-intro frame"><h1>Use cases</h1><p>Keep the useful detail. Skip the agent’s running commentary.</p></header>
-  <section class="use-cases-section" aria-labelledby="use-cases-heading"><div class="frame use-cases-grid">
-    <div class="use-cases-intro"><h2 id="use-cases-heading">Less to sift through.</h2><p>Choose the checks that fit your work.</p><Mark class="use-case-mark" size={220} /></div>
-    <div class="use-case-list">
-      <article><h3>Review the change.</h3><p>Keep comments short and PR bodies structured, so a reviewer can get to what changed.</p><a class="text-link" href="/why-concise/">See the core checks <Icon name="arrow" size={16} /></a></article>
-      <article><h3>Write docs in your voice.</h3><p>Opt into writing checks for stock phrases, unnecessary qualifiers, and canned conclusions. Start with the technical preset.</p><a class="text-link" href="/configuration/">Choose a writing preset <Icon name="arrow" size={16} /></a></article>
-      <article><h3>Share your house rules.</h3><p>Commit project configuration and add custom pattern packs for the words your team wants to avoid.</p><a class="text-link" href="/docs/packs/">Create a custom pack <Icon name="arrow" size={16} /></a></article>
-      <article><h3>Set up cloud agents.</h3><p>Use environment variables when an agent starts from a fresh checkout. Try soft fail to flag findings without blocking.</p><a class="text-link" href="/docs/environment/">Read the cloud recipes <Icon name="arrow" size={16} /></a></article>
-    </div>
-  </div></section>
+<MarketingLayout title="Use cases: Concise" description="Keep reviews focused, opt into writing checks, share team rules, and configure Concise for cloud agents.">
+  <header class="page-intro frame">
+    <h1 data-hero>For reviews, docs, and teams.</h1>
+    <p data-hero>Keep the useful detail. Skip the running commentary of the agent.</p>
+  </header>
+  <div class="frame proof-rows">
+    <section class="proof-row" aria-labelledby="review-heading">
+      <div class="proof-copy"><h2 id="review-heading" data-reveal>Review the change.</h2><p data-reveal>Keep comments short and PR bodies in a structure, so that a reviewer finds what changed.</p><a class="text-link" href="/why-concise/" data-reveal>See the core checks <Icon name="arrow" size={16} /></a></div>
+      <HookOutput output={hookOutputs.pr} />
+    </section>
+    <section class="proof-row" aria-labelledby="docs-heading">
+      <div class="proof-copy"><h2 id="docs-heading" data-reveal>Write docs in your voice.</h2><p data-reveal>Turn on the writing checks for stock phrases, unnecessary qualifiers, and canned conclusions. Start with the technical preset.</p><a class="text-link" href="/configuration/" data-reveal>Choose a writing preset <Icon name="arrow" size={16} /></a></div>
+      <HookOutput output={hookOutputs.docs} caption={presetNote} />
+    </section>
+    <section class="proof-row" aria-labelledby="rules-heading">
+      <div class="proof-copy"><h2 id="rules-heading" data-reveal>Share your house rules.</h2><p data-reveal>Commit the project configuration. Add custom pattern packs for the words that your team does not want.</p><a class="text-link" href="/docs/packs/" data-reveal>Create a custom pack <Icon name="arrow" size={16} /></a></div>
+      <Shot view="rules" />
+    </section>
+    <section class="proof-row" aria-labelledby="cloud-heading">
+      <div class="proof-copy"><h2 id="cloud-heading" data-reveal>Set up cloud agents.</h2><p data-reveal>A cloud agent often starts from a fresh checkout with no configuration file. Set the configuration in environment variables. Soft fail flags findings and does not block.</p><a class="text-link" href="/docs/environment/" data-reveal>Read the cloud recipes <Icon name="arrow" size={16} /></a></div>
+      <HookOutput output={hookOutputs.cloud} />
+    </section>
+  </div>
   <nav class="page-next frame" aria-label="Next steps"><a class="text-link" href="/console/">Watch checks in the web console <Icon name="arrow" size={17} /></a><a class="button" href="/install/">Install Concise <Icon name="arrow" size={18} /></a></nav>
 </MarketingLayout>

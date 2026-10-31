@@ -1,18 +1,35 @@
 ---
 import MarketingLayout from '../layouts/MarketingLayout.astro';
-const questions = [
-  ['What runs without configuration?', 'The three core checks: comment length, file length on whole-file writes and additions, and inline GitHub PR/issue body length. Supported test-runner output is also filtered. Em-dash and AI-writing checks are disabled until you enable them.'],
-  ['Does Concise rewrite my code?', 'No. It denies a supported tool call and gives the agent the exact finding. The agent can then submit a rewrite. The website examples illustrate that exchange; this website does not run an agent or change your files.'],
-  ['What if I want to keep the text?', 'Style checks use confirm mode by default: resubmit the identical text to keep it. You can exempt a line with concise-ignore, allow a phrase, ignore a path, or enable softFail for flagged allows. Core checks and deny mode also have a retry escape after two denials on the same target.'],
-  ['Does it scan the whole repository?', 'No. It checks the submitted write or added text in supported edit and patch calls. It does not rescan surrounding existing content. The 300-line limit applies to whole-file Write calls and patch Add File operations, not ordinary update hunks.'],
-  ['Are the writing checks an AI detector?', 'No. They match configurable phrasing, punctuation, and text-statistics patterns. Human writing can trigger them, and generated writing can pass. Use exceptions and choose categories that fit your project.'],
-  ['Which agents does it support?', 'Claude Code, Codex CLI 0.152.0 or newer, and omp. In Codex, review and trust each Concise hook under /hooks; Codex asks again after a hook definition changes. In omp, subagent replies are not checked.'],
-];
+import HookOutput from '../components/HookOutput.astro';
+import Shot from '../components/Shot.astro';
+import { hookOutputs } from '../data/hook-output';
 ---
-<MarketingLayout title="FAQ — Concise" description="Answers about Concise defaults, retries, supported agents, optional writing checks, and what the hooks do and do not inspect.">
-  <header class="page-intro frame"><h1>Useful answers</h1><p>What Concise checks, what it leaves alone, and how to keep intentional text.</p></header>
-  <section class="faq-section frame page-section" aria-labelledby="faq-heading">
-    <div class="faq-intro"><h2 id="faq-heading">Before you install.</h2><p class="faq-tail">A specific edge case? <a href="https://github.com/yannelli/be-concise/issues">Open an issue on GitHub.</a></p><p class="faq-tail">For exact host coverage, see <a href="/docs/tools/">supported tools</a> and <a href="/docs/host-features/">host features</a>.</p></div>
-    <div class="faq-list">{questions.map(([question, answer]) => <details><summary>{question}<span class="faq-plus" aria-hidden="true"></span></summary><p>{answer}</p></details>)}</div>
-  </section>
+<MarketingLayout title="FAQ: Concise" description="Answers about Concise defaults, retries, supported agents, optional writing checks, and what the hooks do and do not inspect.">
+  <header class="page-intro frame">
+    <h1 data-hero>Answers before you install.</h1>
+    <p data-hero>What Concise checks, what it leaves alone, and how to keep text on purpose.</p>
+  </header>
+  <div class="faq-list frame proof-rows">
+    <section class="proof-row" aria-labelledby="faq-defaults">
+      <div class="proof-copy"><h2 id="faq-defaults" data-reveal>What runs without configuration?</h2><p data-reveal>The 3 core checks run: comment length, file length on whole-file writes and additions, and the length of inline GitHub PR and issue bodies. Concise also filters the output of supported test runners. The em-dash and AI-writing checks are disabled until you enable them.</p></div>
+      <HookOutput output={hookOutputs.comment} />
+    </section>
+    <section class="proof-row" aria-labelledby="faq-rewrite">
+      <div class="proof-copy"><h2 id="faq-rewrite" data-reveal>Does Concise rewrite my code?</h2><p data-reveal>No. Concise denies a supported tool call and gives the agent the exact finding. Then the agent can send a rewrite. The examples on this website show that exchange. This website does not run an agent or change your files.</p></div>
+      <Shot view="activity" caption="Live activity shows the exact response that your agent got." />
+    </section>
+    <section class="proof-row" aria-labelledby="faq-keep">
+      <div class="proof-copy"><h2 id="faq-keep" data-reveal>What if I want to keep the text?</h2><p data-reveal>By default, style checks use confirm mode: send the identical text again to keep it. You can exempt a line with <code>concise-ignore</code>, allow a phrase, ignore a path, or turn on <code>softFail</code> for flagged allows. After 2 denials on the same target, core checks and deny mode let the next attempt through.</p></div>
+      <HookOutput output={hookOutputs.docs} />
+    </section>
+    <section class="proof-row" aria-labelledby="faq-detector">
+      <div class="proof-copy"><h2 id="faq-detector" data-reveal>Are the writing checks an AI detector?</h2><p data-reveal>No. The checks match patterns of phrasing, punctuation, and text statistics that you can configure. Human writing can trigger them, and generated writing can pass. Use exceptions, and choose the categories that fit your project.</p></div>
+      <Shot view="playground" caption="Each match has its rule, its line, and a suggested fix." />
+    </section>
+    <div class="faq-pair">
+      <section aria-labelledby="faq-scope"><h2 id="faq-scope" data-reveal>Does it scan the whole repository?</h2><p data-reveal>No. Concise checks the submitted write or the added text in supported edit and patch calls. It does not scan the existing content around it again. The 300-line limit applies to whole-file <code>Write</code> calls and patch <code>Add File</code> operations, not to ordinary update hunks.</p></section>
+      <section aria-labelledby="faq-agents"><h2 id="faq-agents" data-reveal>Which agents does it support?</h2><p data-reveal>Claude Code, Codex CLI 0.152.0 or newer, and omp. In Codex, review and trust each Concise hook under <code>/hooks</code>. Codex asks again after a hook definition changes. In omp, Concise does not check subagent replies.</p></section>
+    </div>
+    <p class="faq-tail" data-reveal>Do you have a specific edge case? <a href="https://github.com/yannelli/be-concise/issues">Open an issue on GitHub.</a> For exact host coverage, see <a href="/docs/tools/">supported tools</a> and <a href="/docs/host-features/">host features</a>.</p>
+  </div>
 </MarketingLayout>

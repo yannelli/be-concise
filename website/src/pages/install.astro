@@ -2,12 +2,35 @@
 import MarketingLayout from '../layouts/MarketingLayout.astro';
 import Install from '../components/Install.astro';
 import Icon from '../components/Icon.astro';
+import HookOutput from '../components/HookOutput.astro';
+import Shot from '../components/Shot.astro';
+import { hookOutputs } from '../data/hook-output';
 ---
-<MarketingLayout title="Install Concise — Claude Code, Codex, and omp" description="Install Concise for Claude Code, Codex CLI, or omp. Find the commands, prerequisites, and hook trust instructions for your host.">
-  <header class="page-intro frame"><h1>Install Concise</h1><p>Choose your coding agent. The three core checks work without an account or configuration file.</p></header>
+<MarketingLayout title="Install Concise: Claude Code, Codex, and omp" description="Install Concise for Claude Code, Codex CLI, or omp. Find the commands, prerequisites, and hook trust instructions for your host.">
+  <header class="page-intro frame">
+    <h1 data-hero>Install Concise in two commands.</h1>
+    <p data-hero>Choose your coding agent. The 3 core checks work without an account or a configuration file.</p>
+  </header>
   <Install />
-  <section class="home-next frame" aria-labelledby="after-heading">
-    <div><h2 id="after-heading">After installation.</h2><p>Keep the defaults, or choose your own limits and optional writing checks.</p></div>
-    <div class="next-links"><a class="text-link" href="/configuration/">Configure your checks <Icon name="arrow" size={17} /></a><a class="text-link" href="/console/">Open the local console <Icon name="arrow" size={17} /></a><a class="text-link" href="/docs/installation/">Verify, update, or uninstall <Icon name="arrow" size={17} /></a></div>
+  <section class="frame page-section proof-row" aria-labelledby="verify-heading">
+    <div class="proof-copy">
+      <h2 id="verify-heading" data-reveal>Make sure that it works.</h2>
+      <ol class="steps" data-reveal>
+        <li>Open a scratch project in your agent.</li>
+        <li>Tell the agent to write <code>concise-demo.js</code> with a comment of 3 lines.</li>
+        <li>Read the denial. The agent gets the same text and can shorten the comment.</li>
+        <li>Delete the demo file.</li>
+      </ol>
+      <a class="text-link" href="/docs/installation/#verify-the-core-checks" data-reveal>Read the full check <Icon name="arrow" size={16} /></a>
+    </div>
+    <HookOutput output={hookOutputs.demo} />
+  </section>
+  <section class="frame page-section" aria-labelledby="after-heading">
+    <div class="section-intro"><h2 id="after-heading" data-reveal>After installation.</h2><p data-reveal>Keep the defaults, or set your own limits and optional writing checks.</p></div>
+    <div class="shot-pair">
+      <Shot view="configuration" caption="Change the limits and turn on optional checks." />
+      <Shot view="overview" caption="See hook calls and findings for each project." />
+    </div>
+    <div class="next-links next-row" data-reveal><a class="text-link" href="/configuration/">Configure your checks <Icon name="arrow" size={17} /></a><a class="text-link" href="/console/">Open the local console <Icon name="arrow" size={17} /></a><a class="text-link" href="/docs/installation/">Verify, update, or uninstall <Icon name="arrow" size={17} /></a></div>
   </section>
 </MarketingLayout>

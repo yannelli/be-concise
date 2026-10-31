@@ -73,18 +73,18 @@ test('homepage stays short and links to focused destinations', () => {
   assert.equal((home.match(/<section\b/g) || []).length, 2);
   assert.match(home, /Open source\. MIT licensed\./);
   for (const route of ['why-concise', 'use-cases', 'install', 'docs']) assert.match(home, new RegExp(`href="/${route}/"`));
-  assert.doesNotMatch(home, /data-example=|data-host=|data-console-view=|id="preset"|class="faq-list"/);
+  assert.doesNotMatch(home, /data-example=|data-host=|data-console-theme=|id="preset"|class="faq-list/);
 });
 
 test('each marketing page owns its content and shares the interaction bootstrap', () => {
-  const owners = { 'why-concise': 'data-example=', install: 'data-host=', configuration: 'id="preset"', console: 'data-console-view=', faq: 'class="faq-list"' };
+  const owners = { 'why-concise': 'data-example=', install: 'data-host=', configuration: 'id="preset"', console: 'data-console-theme=', faq: 'class="faq-list ' };
   for (const route of marketingRoutes) {
     assert.match(page(route), /<script[^>]+src="\/_astro\/MarketingLayout\.[^"]+\.js"/);
     for (const [owner, marker] of Object.entries(owners)) assert.equal(page(route).includes(marker), route === owner, `${route}: ${marker}`);
   }
   assert.match(page('why-concise'), /300/);
   assert.match(page('why-concise'), /An example, not a live agent/);
-  assert.match(page('why-concise'), /After two denials/);
+  assert.match(page('why-concise'), /After 2 denials/);
   assert.match(page('why-concise'), /role="tablist"/);
   assert.match(page('why-concise'), /aria-live="polite"/);
   assert.match(page('faq'), /disabled until you enable them/);

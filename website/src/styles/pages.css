@@ -1,19 +1,18 @@
 .marketing-page { padding-bottom: 80px; }
-.page-intro { padding-block: 52px 48px; }
-.page-intro h1 { font-size: var(--type-head); }
-.page-intro > p { max-width: 62ch; margin-top: 24px; }
-.page-intro > .button { margin-top: 28px; }
-.page-section { margin-top: 64px; }
+.page-intro { padding-block: 72px 24px; }
+.page-intro h1 { font-size: clamp(36px, 6.2vw, 92px); font-weight: 550; letter-spacing: -.05em; line-height: 1.02; max-width: 15em; }
+.page-intro > p { max-width: 48ch; margin-top: 32px; font-size: 20px; line-height: 1.5; }
+.page-intro > .button { margin-top: 36px; }
+.page-section { margin-top: 136px; }
 .page-intro + .page-section,
-.page-intro + .install-section,
-.page-intro + .console-section { margin-top: 0; }
+.page-intro + .proof-rows,
+.page-intro + .console-section { margin-top: 112px; }
+.page-intro + .install-section { margin-top: 64px; }
 .page-section .section-intro h2,
 .home-next h2,
 .preset-picker h2,
 .test-feature h2,
 .console-section .section-intro h2,
-.marketing-page .faq-intro > h2,
-.marketing-page .use-cases-intro h2,
 .marketing-page .install-copy h2 { font-size: var(--type-lead); }
 .page-section .section-intro { margin-bottom: 28px; align-items: start; }
 .page-section .section-intro > p { max-width: 62ch; }
@@ -30,18 +29,92 @@
 .page-next { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; margin-top: 64px; }
 .no-script-install pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; margin-block: 16px; }
 .no-script-install h3:not(:first-child) { margin-top: 32px; }
+/* Real pictures: console screenshots and captured hook output. */
+.shot { margin: 0; }
+.shot-frame { position: relative; padding: 12px; background: var(--soft); border-radius: 14px; transition: background 420ms ease; }
+.shot-frame.is-dark { background: #2a2b2e; }
+.shot-frame img { display: block; width: 100%; height: auto; border-radius: 6px; }
+.shot-frame .console-next { position: absolute; top: 12px; left: 12px; width: calc(100% - 24px); opacity: 0; border-radius: 6px; transition: opacity 300ms ease; }
+.shot-frame .console-next.is-in { opacity: 1; }
+.shot figcaption { margin-top: 16px; max-width: 60ch; font-size: 16px; color: var(--muted); }
+.shot-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.section-link { margin-top: 32px; }
+.hook-output { margin: 0; padding: 22px 26px 26px; background: var(--dark); color: var(--code-ink); }
+.hook-meta { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; font-size: 14px; color: var(--code-muted); }
+.hook-decision { padding: 2px 10px; font-size: 14px; font-weight: 500; }
+.hook-decision.is-deny { background: #4a2118; color: #ffc2b1; }
+.hook-decision.is-allow { background: #1f3a2b; color: #b4e2c2; }
+.hook-output pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.7; }
+.hook-output[data-ui] .hook-env { padding-bottom: 14px; margin-bottom: 14px !important; color: #c6d5bd; border-bottom: 1px solid #414240; }
+.hook-call { margin-bottom: 8px; color: var(--code-muted); }
+.hook-input { padding: 12px 0 14px 14px; margin-bottom: 16px !important; color: #c6d5bd; border-left: 2px solid #414240; }
+.hook-call code { font-size: 14px; background: none; padding: 0; color: inherit; }
+.hook-output[data-ui] figcaption { margin-top: 18px; padding-top: 16px; border-top: 1px solid #414240; font-size: 15px; color: var(--code-ink); }
+/* Text beside its picture; rows alternate sides. */
+.proof-rows { display: grid; gap: 136px; }
+.proof-row { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 72px; align-items: center; }
+.proof-rows > .proof-row:nth-child(even) { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+.proof-rows > .proof-row:nth-child(even) > .proof-copy { order: 2; }
+.proof-copy h2 { font-size: var(--type-head); font-weight: 550; letter-spacing: -.04em; line-height: 1.08; }
+.proof-copy > p, .proof-copy > ol { max-width: 46ch; margin-top: 24px; font-size: 17px; line-height: 1.6; }
+.proof-copy > .text-link { margin-top: 28px; }
+.steps { padding-left: 1.3em; display: grid; gap: 10px; }
+.steps li::marker { color: var(--accent-ink); font-weight: 550; }
+.marketing-page .home-next { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 72px; align-items: start; margin-top: 136px; }
+.home-next-copy { position: sticky; top: 120px; }
+.home-next-copy .next-links { margin-top: 36px; }
+.home-proof-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.home-proof-grid > .shot { grid-column: 1 / -1; }
+.next-row { display: flex; flex-wrap: wrap; gap: 20px 48px; margin-top: 40px; }
+.faq-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; }
+.faq-pair h2 { font-size: var(--type-lead); font-weight: 550; }
+.faq-pair p { margin-top: 18px; max-width: 52ch; font-size: 17px; line-height: 1.6; }
+.marketing-page .faq-tail { grid-column: auto; margin: 0; font-size: 16px; color: var(--ink); }
+/* Console page: five real screenshots, lead view first. */
+.page-intro .console-theme { display: inline-flex; margin-top: 32px; }
+.console-views { display: grid; gap: 120px; }
+.console-view { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 56px; align-items: center; }
+.console-view:nth-child(even) { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); }
+.console-view:nth-child(even) > .console-view-copy { order: 2; }
+.console-view.is-lead { grid-template-columns: 1fr; gap: 32px; }
+.console-view.is-lead .console-view-copy { display: flex; justify-content: space-between; align-items: end; gap: 40px; }
+.console-view-copy h2 { font-size: var(--type-head); font-weight: 550; letter-spacing: -.04em; line-height: 1.08; }
+.console-view-copy p { max-width: 44ch; margin-top: 20px; font-size: 17px; line-height: 1.6; }
+.console-view.is-lead .console-view-copy p { margin-top: 0; }
+.marketing-page .console-start { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 72px; align-items: center; }
+.console-notes h2 { font-size: var(--type-lead); font-weight: 550; }
 @media (max-width: 800px) {
+  .shot-pair, .home-proof-grid, .faq-pair, .marketing-page .home-next { grid-template-columns: 1fr; }
+  .home-next-copy { position: static; }
+  .marketing-page .home-next { margin-top: 96px; gap: 40px; }
+  .proof-rows, .console-views { gap: 88px; }
+  .proof-row, .console-view, .marketing-page .console-start { grid-template-columns: 1fr; gap: 32px; }
+  .proof-rows > .proof-row:nth-child(even), .console-view:nth-child(even) { grid-template-columns: 1fr; }
+  .proof-rows > .proof-row:nth-child(even) > .proof-copy, .console-view:nth-child(even) > .console-view-copy { order: 0; }
+  .page-intro + .page-section, .page-intro + .proof-rows, .page-intro + .console-section { margin-top: 80px; }
+  .console-view.is-lead .console-view-copy { display: block; }
+  .console-view.is-lead .console-view-copy p { margin-top: 20px; }
   .marketing-page { padding-bottom: 64px; }
-  .page-intro { padding-block: 40px; }
+  .page-intro { padding-block: 48px 16px; }
+  .page-section { margin-top: 96px; }
   .core-checks { grid-template-columns: 1fr; gap: 24px; }
   .core-checks dt { margin-bottom: 8px; }
   .page-section .section-intro { flex-direction: column; gap: 20px; }
 }
 @media (max-width: 550px) {
   .marketing-page { padding-bottom: 48px; }
-  .page-intro { padding-block: 32px; }
+  .page-intro { padding-block: 36px 8px; }
+  .page-intro > p { font-size: 18px; }
+  .hook-output { padding: 18px 18px 20px; }
+  .hook-output pre, .hook-call code { font-size: 13px; }
+  .shot-frame { padding: 6px; border-radius: 10px; }
+  .shot-frame .console-next { top: 6px; left: 6px; width: calc(100% - 12px); }
+  .page-intro + .page-section, .page-intro + .proof-rows, .page-intro + .console-section { margin-top: 64px; }
+  .page-intro + .install-section { margin-top: 40px; }
   .page-intro > p { margin-top: 20px; }
-  .page-section, .page-next, .home-next { margin-top: 48px; }
+  .page-section { margin-top: 80px; }
+  .page-next, .home-next { margin-top: 48px; }
+  .proof-rows, .console-views { gap: 72px; }
   .home-next { grid-template-columns: 1fr; gap: 28px; }
   .core-checks { padding: 24px; }
   .hero-actions { flex-wrap: wrap; gap: 16px 24px; }

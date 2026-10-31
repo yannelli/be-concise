@@ -43,7 +43,6 @@
       { "name": "reveal-stagger", "value": "70ms", "purpose": "Intersection reveal delay is (element index modulo 3) times 70ms; rows enter from translateX(18px)." },
       { "name": "guide-hover", "value": "200ms", "purpose": "Unboxed guide links move right 4px; no background change in the final overrides." },
       { "name": "example-replay", "value": "1400ms", "purpose": "After pane fades to .2 and moves down 7px, then returns; hook square pulses to scale(2). The button resets after 1450ms." },
-      { "name": "mark-settle", "value": "7s", "purpose": "Large use-case mark alternates a horizontal drift from 0 to 12px; hidden at 550px and below." },
       { "name": "docs-menu-in", "value": "180ms cubic-bezier(.16, 1, .3, 1)", "purpose": "Native mobile documentation disclosure clips from inset(0 0 5%) to inset(0)." },
       { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce)", "purpose": "Disable all animations and transitions, set scroll-behavior:auto, remove button hover translation, and report replay's final result immediately." }
     ],

@@ -1,0 +1,11 @@
+---
+import { consoleViews } from '../data/examples';
+type ViewId = typeof consoleViews[number]['id'];
+interface Props { view: ViewId; caption?: string; eager?: boolean; }
+const { view, caption, eager = false } = Astro.props;
+const item = consoleViews.find(entry => entry.id === view)!;
+---
+<figure class="shot" data-reveal>
+  <div class="shot-frame"><img data-console-shot={item.id} data-alt={item.alt} src={`/console/${item.id}-light.webp`} width="1440" height="900" alt={item.alt} loading={eager ? 'eager' : 'lazy'} decoding="async" /></div>
+  {caption !== '' && <figcaption>{caption ?? item.caption}</figcaption>}
+</figure>

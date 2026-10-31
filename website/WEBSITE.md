@@ -23,17 +23,17 @@ CI runs the website build, typecheck, and tests in a separate Website job. The p
 
 ## Routes and layout
 
-The homepage is deliberately short: an introduction, the existing film, and links to the next step. Main navigation uses real pages, not homepage anchors.
+The homepage is deliberately short: an introduction with the film, then one section with the next-step links beside real hook output and a console screenshot. Main navigation uses real pages, not homepage anchors.
 
 | Route | Content |
 | --- | --- |
 | `/` | Introduction, film, install and discovery links |
-| `/why-concise/` | Interactive examples, core defaults, retry behavior, test-output filtering |
-| `/use-cases/` | Reviews, writing, team rules, cloud agents |
-| `/install/` | Host commands, prerequisites, trust and reload instructions |
-| `/configuration/` | Preset picker, copyable configuration, exceptions |
-| `/console/` | Real console screenshots, view/theme controls, foreground CLI setup |
-| `/faq/` | Defaults, scope, retries, limitations, supported hosts |
+| `/why-concise/` | Interactive examples, core defaults, console activity and playground, test-output filtering |
+| `/use-cases/` | Reviews, writing, team rules, cloud agents, each with real hook output or a console screenshot |
+| `/install/` | Host commands, prerequisites, trust and reload instructions, a 4-step check with its real denial |
+| `/configuration/` | Preset picker, copyable configuration, confirm mode, soft fail, console configuration |
+| `/console/` | All 5 real console screenshots with one light/dark switch, foreground CLI setup |
+| `/faq/` | Defaults, scope, retries, limitations, supported hosts, with real output beside 4 answers |
 | `/docs/` | Overview and all existing reference routes |
 
 `SiteLayout.astro` supplies shared navigation and the compact footer. Active links reflect the current route; documentation children keep Docs active. The mobile navigation is a native disclosure, so it works without JavaScript. Escape closes it and returns focus when JavaScript is available.
@@ -43,6 +43,10 @@ The homepage is deliberately short: an introduction, the existing film, and link
 All 15 baseline output pages (including 404) remain; the six new marketing routes bring the total to 21. Website tests verify route ownership, current navigation, the short homepage, and local links/fragments across the full build.
 
 Reference pages render the original Markdown in `../plugins/concise/docs/`, so plugin documentation edits flow into the next website build. A new file there fails the build until it has a description in `src/pages/docs/[slug].astro` and a sidebar entry in `src/layouts/DocsLayout.astro`. The overview, installation, and web console guides are site pages in `src/content/docs/`.
+
+## Hook output on the marketing pages
+
+`src/data/hook-output.ts` holds the hook responses shown by `HookOutput.astro`. They were captured by piping each tool input into `plugins/concise/hooks/check-edit.mjs` or `check-bash.mjs` with a throwaway `HOME` (shown as `~`) and the project `~/code/billing-api`. Long reference paths are cut with `…`. If a hook message changes, capture the new text the same way; do not edit a response by hand.
 
 ## Console screenshots
 
@@ -128,7 +132,7 @@ If npm reports that `workerd`'s install script was blocked, review and allow tha
 
 ## Content and accessibility
 
-The code and diagnostic examples are illustrative, not a live agent or a performance benchmark. The demo never sends entered data to a service. Main content, initial code examples, the first console screenshot, docs, FAQ, and mobile navigation remain readable without JavaScript. The `/install/` page includes the Codex and omp commands even when scripting is off. The preset page keeps its default configuration example and links to all preset values without JavaScript. Tabs support arrow keys, Home, and End; controls have visible focus; motion respects reduced-motion preferences. Copy controls select text for manual copying if clipboard access is denied.
+The code and diagnostic examples are illustrative, not a live agent or a performance benchmark. The demo never sends entered data to a service. Main content, initial code examples, the console screenshots, docs, FAQ, and mobile navigation remain readable without JavaScript. The `/install/` page includes the Codex and omp commands even when scripting is off. The preset page keeps its default configuration example and links to all preset values without JavaScript. Tabs support arrow keys, Home, and End; controls have visible focus; motion respects reduced-motion preferences. Copy controls select text for manual copying if clipboard access is denied.
 
 There are no customer quotes, invented adoption figures, tracking scripts, cookies, external font requests, or unrelated stock photographs. The console screenshots come from the real console and real hook runs on sample projects. The mark is the repository's existing MIT-licensed asset. Jost is served locally under its SIL Open Font License in `public/fonts/OFL-Jost.txt`; the license is linked in the footer. The original repository banner is used for social metadata.
 

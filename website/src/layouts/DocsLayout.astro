@@ -54,9 +54,9 @@ const contents = headings.filter(heading => heading.depth === 2 || heading.depth
         ))}
       </nav>
     </aside>
-    <details class="docs-mobile-nav">
+    <nav class="docs-mobile-nav" aria-label="Documentation on mobile"><details>
       <summary>Documentation menu</summary>
-      <nav aria-label="Documentation on mobile">
+      <div class="docs-mobile-links">
         {groups.map(group => (
           <div class="docs-nav-group">
             <p class="docs-nav-title">{group.title}</p>
@@ -65,8 +65,8 @@ const contents = headings.filter(heading => heading.depth === 2 || heading.depth
             ))}</ul>
           </div>
         ))}
-      </nav>
-    </details>
+      </div>
+    </details></nav>
     <div class="docs-reading">
       <article id="docs-content" class="docs-prose" aria-label={title} tabindex="-1">
         <slot />
