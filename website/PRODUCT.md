@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Astro, requested by the user. Deployment must be ready for Cloudflare Workers Git repository integration.
+Astro, requested by the user. Deployment must be ready for Cloudflare Workers Git repository integration. Public origin: https://concise.chat. Automatic deployments should watch only website/ changes.
 
 ## Users
 

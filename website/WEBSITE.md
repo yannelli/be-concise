@@ -2,6 +2,8 @@
 
 The marketing website and local reference docs live in `website/` and use Astro with static output. The plugin (`plugins/concise/`) and the npm package (root `package.json`) do not depend on the site. Run every command below from `website/`.
 
+The public site origin is **https://concise.chat**, set in `astro.config.mjs`. Page canonical URLs, Open Graph URLs, and social-image URLs use that origin; the 404 page is marked `noindex`.
+
 ## Local development
 
 Use Node.js 22.12.0 or newer.
@@ -98,6 +100,17 @@ In Cloudflare, open **Workers & Pages → Create → Import a repository**, conn
 
 `wrangler.jsonc` declares the Worker name `be-concise` and the `dist/` static asset directory. There is no server-side runtime, database, secret, or adapter requirement. Cloudflare supplies deployment authentication for its Git integration. Attach a custom domain in the Worker settings after deployment. The empty `"previews": {}` block enables `wrangler preview` for non-production branches. Keep production on `wrangler deploy`; `npm run cf:preview` is a different command that starts the local development runtime.
 
+### Website-only automatic deployments
+
+In the Cloudflare dashboard for `be-concise`, open **Settings → Build → Build watch paths**:
+
+- **Include paths:** `website/*`
+- **Exclude paths:** leave empty.
+
+These patterns are relative to the repository root, even though the build root is `website`. Cloudflare's `*` matches nested paths too. This is a Workers Builds setting, not a field in `wrangler.jsonc`; `build.watch_dir` controls local custom-build watching and does not configure repository triggers.
+
+Changes outside `website/` will not normally trigger an automatic deployment. Because the site imports plugin Markdown from outside that path, manually rebuild when you want to publish changes to those source docs. Manual builds still run, and Cloudflare also bypasses path matching for empty pushes, pushes with 3,000+ changed files, or pushes with 20+ commits. See [Cloudflare build watch paths](https://developers.cloudflare.com/workers/ci-cd/builds/build-watch-paths/).
+
 For a manual authenticated deployment:
 
 ```sh
@@ -119,4 +132,4 @@ The code and diagnostic examples are illustrative, not a live agent or a perform
 
 There are no customer quotes, invented adoption figures, tracking scripts, cookies, external font requests, or unrelated stock photographs. The console screenshots come from the real console and real hook runs on sample projects. The mark is the repository's existing MIT-licensed asset. Jost is served locally under its SIL Open Font License in `public/fonts/OFL-Jost.txt`; the license is linked in the footer. The original repository banner is used for social metadata.
 
-Before launch, optionally set an absolute public site origin and absolute social-image URL when a domain has been assigned. They are intentionally not guessed in this repository. Test examples and presets should be updated when plugin defaults change.
+Connect `concise.chat` in the Worker's custom-domain settings if it is not already connected; setting Astro's public origin does not create DNS records or attach the domain. Test examples and presets should be updated when plugin defaults change.
