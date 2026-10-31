@@ -92,10 +92,11 @@ In Cloudflare, open **Workers & Pages → Create → Import a repository**, conn
 | --- | --- |
 | Build command | `npm run build` |
 | Deploy command | `npx wrangler deploy` |
+| Non-production deploy command | `npx wrangler preview` |
 | Root directory | `website` |
 | Node version | `24` or another supported version >=22.12.0 |
 
-`wrangler.jsonc` declares the Worker name `be-concise` and the `dist/` static asset directory. There is no server-side runtime, database, secret, or adapter requirement. Cloudflare supplies deployment authentication for its Git integration. Attach a custom domain in the Worker settings after deployment. Preview branches can use Cloudflare's configured non-production deploy command.
+`wrangler.jsonc` declares the Worker name `be-concise` and the `dist/` static asset directory. There is no server-side runtime, database, secret, or adapter requirement. Cloudflare supplies deployment authentication for its Git integration. Attach a custom domain in the Worker settings after deployment. The empty `"previews": {}` block enables `wrangler preview` for non-production branches. Keep production on `wrangler deploy`; `npm run cf:preview` is a different command that starts the local development runtime.
 
 For a manual authenticated deployment:
 

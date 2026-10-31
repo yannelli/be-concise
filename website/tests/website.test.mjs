@@ -98,11 +98,12 @@ test('reference table values have build-time mobile labels', () => {
   assert.match(config, /data-label="What it does"/);
 });
 
-test('Cloudflare deploys the static production directory', async () => {
+test('Cloudflare deploys static assets and enables branch previews', async () => {
   const config = JSON.parse(await readFile('wrangler.jsonc', 'utf8'));
   assert.equal(config.assets.directory, './dist');
   assert.equal(config.assets.not_found_handling, '404-page');
   assert.equal(config.main, undefined);
+  assert.deepEqual(config.previews, {});
 });
 
 test('web console is documented with real screenshots', async () => {
