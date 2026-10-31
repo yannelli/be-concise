@@ -109,12 +109,11 @@ You can keep persistent defaults in `~/.claude/test-filter.conf` or `~/.codex/te
 - [Installation](/docs/installation/): prerequisites, the 3 hosts, hook trust, optional features, and sample denials.
 - [Web console](/docs/console/): `concise-web` for settings, a hook playground, live activity, and pattern packs.
 - [Configuration](/docs/configuration/): all defaults, the 5 layers, merge rules, confirmation modes, ignore paths, and log settings.
-- [Categories](/docs/categories/): all 47 category ids, their presets and scopes, and example fixes.
 - [Environment variables](/docs/environment/): all `BEC_` variables, with examples for cloud agents, overrides, and log settings.
 - [Pattern packs](/docs/packs/): the JSON and script formats, the load order, custom detectors, validation, and how to generate references.
 - [Settings tools](/docs/tools/): the `concise-config` CLI, the MCP server tools, and the tuner that adjusts settings to samples of your text.
 - [Host features](/docs/host-features/): the Claude Code, Codex, and omp features that Concise uses, with the date of each source.
-- [Pattern library](/docs/patterns/): the flagged words and the suggested fix for each built-in pattern, with 1 page for each category.
+- [Pattern library](/docs/patterns/): all 47 categories by group, with their presets and scopes. Each category has 1 page with the flagged words and the suggested fix for each pattern.
 
 The reference pages use the Markdown source files of the plugin.
 

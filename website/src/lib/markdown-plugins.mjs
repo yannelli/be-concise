@@ -1,26 +1,36 @@
 import { dirname, relative, resolve, sep } from 'node:path';
+import { referenceTarget, repoRoot } from './reference.mjs';
 
-// Commands run from website/, and bundled pages lose their source URL, so resolve from the working directory.
-const repoRoot = resolve(process.cwd(), '..');
 const docsPage = /^plugins\/concise\/docs\/(?!INDEX\.md$)[^/]+\.md$/;
 const patternPage = /^plugins\/concise\/skills\/concise-rules\/references\/ai-speak-patterns[^/]*\.md$/;
 
+// Where a site docs path (with an optional anchor) lands after the split and the Categories merge.
+export function docsUrl(slug, hash) {
+  if (slug === 'categories') return `/docs/patterns/${hash ? `#${hash}` : ''}`;
+  return referenceTarget(slug, hash) ?? `/docs/${slug}/${hash ? `#${hash}` : ''}`;
+}
+
 // Relative .md links become site pages when one exists, and GitHub links otherwise.
+// Links into split reference docs and the old Categories page are sent to their new pages.
 export function documentationLinks() {
   return (tree, file) => {
+    const path = file?.path ? relative(repoRoot, file.path).split(sep).join('/') : '';
+    const current = docsPage.test(path) ? path.split('/').pop().replace(/\.md$/, '') : null;
     const from = file?.path ? dirname(file.path) : repoRoot;
     const visit = (node) => {
-      if (node.type === 'link' && node.url && !/^[a-z][a-z0-9+.-]*:|^[/#]/i.test(node.url)) {
+      if (node.type === 'link' && node.url) {
         const [target, hash] = node.url.split('#');
-        if (target.endsWith('.md')) {
-          const path = relative(repoRoot, resolve(from, target)).split(sep).join('/');
-          const anchor = hash ? `#${hash}` : '';
+        const site = target.match(/^\/docs\/([a-z-]+)\/$/);
+        if (site) node.url = docsUrl(site[1], hash);
+        else if (!target && hash && current) node.url = docsUrl(current, hash);
+        else if (!/^[a-z][a-z0-9+.-]*:|^[/#]/i.test(node.url) && target.endsWith('.md')) {
+          const linked = relative(repoRoot, resolve(from, target)).split(sep).join('/');
           // The pattern library has one page per category; an anchor names the category.
-          node.url = patternPage.test(path)
+          node.url = patternPage.test(linked)
             ? `/docs/patterns/${hash ? `${hash}/` : ''}`
-            : docsPage.test(path)
-              ? `/docs/${path.split('/').pop().replace(/\.md$/, '')}/${anchor}`
-              : `https://github.com/yannelli/be-concise/blob/main/${path}${anchor}`;
+            : docsPage.test(linked)
+              ? docsUrl(linked.split('/').pop().replace(/\.md$/, ''), hash)
+              : `https://github.com/yannelli/be-concise/blob/main/${linked}${hash ? `#${hash}` : ''}`;
         }
       }
       node.children?.forEach(visit);

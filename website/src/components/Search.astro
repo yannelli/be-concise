@@ -1,0 +1,126 @@
+---
+import Icon from './Icon.astro';
+---
+<button class="search-open" type="button" data-search-open hidden aria-haspopup="dialog" aria-keyshortcuts="/ Control+K Meta+K">
+  <Icon name="search" size={19} /><span class="search-open-label">Search</span>
+</button>
+<dialog class="search-dialog" data-search-dialog aria-label="Search Concise">
+  <div class="search-field" role="search">
+    <Icon name="search" size={20} />
+    <label class="visually-hidden" for="site-search">Search Concise</label>
+    <input id="site-search" type="search" placeholder="Search docs, patterns, and pages" autocomplete="off" spellcheck="false" enterkeyhint="go" data-search-input />
+    <button class="search-close" type="button" data-search-close aria-label="Close search"><Icon name="close" size={20} /></button>
+  </div>
+  <p class="search-status" role="status" aria-live="polite" data-search-status>Type a word, a setting, or a phrase that Concise flags.</p>
+  <ul class="search-results" data-search-results></ul>
+</dialog>
+
+<script>
+  // Site search with Pagefind. The index is written to /pagefind/ by `npm run build`.
+  type Result = { url: string; excerpt: string; meta: { title?: string }; sub_results?: { url: string; title: string; excerpt: string }[] };
+  type Pagefind = { init: () => Promise<void>; debouncedSearch: (term: string, options?: object, wait?: number) => Promise<{ results: { data: () => Promise<Result> }[] } | null> };
+
+  const open = document.querySelector<HTMLButtonElement>('[data-search-open]');
+  const dialog = document.querySelector<HTMLDialogElement>('[data-search-dialog]');
+  const input = document.querySelector<HTMLInputElement>('[data-search-input]');
+  const status = document.querySelector<HTMLElement>('[data-search-status]');
+  const list = document.querySelector<HTMLUListElement>('[data-search-results]');
+  const hint = status?.textContent || '';
+  let engine: Promise<Pagefind | null> | null = null;
+
+  const load = () => engine ??= (async () => {
+    try {
+      const url = '/pagefind/pagefind.js';
+      const pagefind = await import(/* @vite-ignore */ url) as Pagefind;
+      await pagefind.init();
+      return pagefind;
+    } catch {
+      return null;
+    }
+  })();
+
+  const section = (url: string) => {
+    const parts = url.split('#')[0].split('/').filter(Boolean);
+    if (parts[0] !== 'docs') return 'Concise';
+    if (parts[1] === 'patterns') return 'Pattern library';
+    const names: Record<string, string> = { configuration: 'Configuration', packs: 'Pattern packs', 'host-features': 'Host features', tools: 'Settings tools', environment: 'Environment variables', installation: 'Installation', console: 'Web console' };
+    return parts[1] && names[parts[1]] ? `Docs · ${names[parts[1]]}` : 'Docs';
+  };
+  const span = (className: string, text?: string, html?: string) => {
+    const node = document.createElement('span');
+    node.className = className;
+    // Pagefind escapes page text and adds only <mark> to excerpts.
+    if (html !== undefined) node.innerHTML = html; else node.textContent = text ?? '';
+    return node;
+  };
+  const entry = (url: string, parts: HTMLElement[]) => {
+    const item = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = url;
+    link.append(...parts);
+    item.append(link);
+    return item;
+  };
+
+  function render(term: string, results: Result[]) {
+    if (!list || !status) return;
+    status.textContent = results.length ? `${results.length === 8 ? 'Top 8' : results.length} result${results.length === 1 ? '' : 's'} for “${term}”` : `No results for “${term}”. Try a shorter word.`;
+    list.replaceChildren(...results.map(result => {
+      const item = entry(result.url, [span('search-section', section(result.url)), span('search-title', result.meta.title || result.url), span('search-excerpt', undefined, result.excerpt)]);
+      const subs = (result.sub_results || []).filter(sub => sub.url !== result.url && sub.title !== result.meta.title && sub.excerpt !== result.excerpt).slice(0, 2);
+      if (subs.length) {
+        const nested = document.createElement('ul');
+        nested.append(...subs.map(sub => entry(sub.url, [span('search-title', sub.title), span('search-excerpt', undefined, sub.excerpt)])));
+        item.append(nested);
+      }
+      return item;
+    }));
+  }
+
+  async function search() {
+    if (!input || !status || !list) return;
+    const term = input.value.trim();
+    if (!term) { list.replaceChildren(); status.textContent = hint; return; }
+    const pagefind = await load();
+    if (!pagefind) { status.textContent = 'Search is not available here. Run npm run build to create the index.'; return; }
+    const found = await pagefind.debouncedSearch(term, {}, 150);
+    if (found === null || input.value.trim() !== term) return;
+    render(term, await Promise.all(found.results.slice(0, 8).map(result => result.data())));
+  }
+
+  function show() {
+    if (!dialog || dialog.open) return;
+    dialog.showModal();
+    input?.select();
+    load();
+  }
+
+  if (open && dialog && input && list) {
+    open.hidden = false;
+    open.addEventListener('click', show);
+    open.addEventListener('pointerenter', () => { load(); }, { once: true });
+    document.querySelector('[data-search-close]')?.addEventListener('click', () => dialog.close());
+    input.addEventListener('input', search);
+    // A click on the backdrop (outside the panel) closes the dialog.
+    dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    list.addEventListener('click', event => { if ((event.target as HTMLElement).closest('a')) dialog.close(); });
+    document.addEventListener('keydown', event => {
+      const typing = event.target instanceof HTMLElement && event.target.closest('input, textarea, select, [contenteditable="true"]');
+      if ((event.key === 'k' && (event.metaKey || event.ctrlKey)) || (event.key === '/' && !typing && !event.metaKey && !event.ctrlKey && !event.altKey)) {
+        event.preventDefault();
+        show();
+      }
+    });
+    // Arrow keys move between the field and the results.
+    dialog.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      const links = Array.from(list.querySelectorAll<HTMLAnchorElement>('a'));
+      if (!links.length) return;
+      const index = links.indexOf(document.activeElement as HTMLAnchorElement);
+      event.preventDefault();
+      if (event.key === 'ArrowDown') links[Math.min(index + 1, links.length - 1)].focus();
+      else if (index <= 0) input.focus();
+      else links[index - 1].focus();
+    });
+  }
+</script>

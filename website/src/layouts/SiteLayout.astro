@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Mark from '../components/Mark.astro';
+import Search from '../components/Search.astro';
 import Icon from '../components/Icon.astro';
 interface Props { title: string; description?: string; isDocs?: boolean; }
 const { title, description = 'Keep the code. Cut the noise. Concise catches agent verbosity before it lands in Claude Code, Codex, and omp.', isDocs = false } = Astro.props;
@@ -44,6 +45,7 @@ const isNotFound = ['/404', '/404/', '/404.html'].includes(Astro.url.pathname);
         {navigation.map(([href, label]) => <a href={href} aria-current={current(href) ? 'page' : undefined}>{label}</a>)}
       </nav>
       <div class="header-actions">
+        <Search />
         <a class="github-link" href={github} aria-label="Concise on GitHub"><Icon name="github" size={21} /></a>
         <a class="button button-small button-dark" href="/install/" aria-current={current('/install/') ? 'page' : undefined}>Install Concise <Icon name="arrow" size={17} /></a>
         <details class="mobile-menu">
@@ -55,7 +57,7 @@ const isNotFound = ['/404', '/404/', '/404.html'].includes(Astro.url.pathname);
         </details>
       </div>
     </header>
-    <main id="main"><slot /></main>
+    <main id="main" data-pagefind-body={isNotFound ? undefined : true}><slot /></main>
     <footer class="site-footer compact">
       <div class="frame footer-top">
         <a class="wordmark" href="/" aria-label="Concise home"><Mark size={35} /><span>concise</span></a>

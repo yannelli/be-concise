@@ -1,0 +1,30 @@
+---
+import type { GetStaticPaths } from 'astro';
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import { readReference, splitDocs } from '../../../lib/reference.mjs';
+import { renderMarkdown } from '../../../lib/render';
+
+type Reference = ReturnType<typeof readReference>;
+interface Props { reference: Reference; index: number; }
+export const getStaticPaths = (() => splitDocs.flatMap(doc => {
+  const reference = readReference(doc);
+  return reference.pages.map((page, index) => ({ params: { doc, section: page.slug }, props: { reference, index } }));
+})) satisfies GetStaticPaths;
+
+const { reference, index } = Astro.props;
+const page = reference.pages[index];
+const { html, headings } = await renderMarkdown(page.markdown, reference.file);
+const link = (item?: { title: string; slug: string }) => item && { title: item.title, href: `/docs/${reference.slug}/${item.slug}/` };
+---
+<DocsLayout
+  title={`${page.title} · ${reference.title}`}
+  description={page.summary ? `${reference.title} reference: ${page.summary.replace(/`/g, '')}` : `The ${page.title} section of the Concise ${reference.title.toLowerCase()} reference.`}
+  headings={headings}
+  sourcePath={reference.file}
+  previous={link(reference.pages[index - 1]) ?? { title: reference.title, href: `/docs/${reference.slug}/` }}
+  next={link(reference.pages[index + 1])}
+>
+  <p class="pattern-back" data-pagefind-ignore><a href={`/docs/${reference.slug}/`}>{reference.title}</a></p>
+  <h1>{page.title}</h1>
+  <Fragment set:html={html} />
+</DocsLayout>

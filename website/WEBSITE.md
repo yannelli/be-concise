@@ -40,9 +40,11 @@ The homepage is deliberately short: an introduction with the film, then one sect
 
 `MarketingLayout.astro` loads the existing marketing styles and `src/scripts/home.ts` on every marketing route. The script enhances only elements present on that page; film behavior is unchanged. `src/styles/pages.css` supplies the shorter page rhythm without changing the existing palette, type, or mark. Interactive examples and preset metadata remain in `src/data/examples.ts`.
 
-The build has 65 pages: 7 marketing routes, 10 guide and reference routes, the pattern library index, 47 pattern category pages, and 404. Website tests verify route ownership, current navigation, the short homepage, and local links/fragments across the full build.
+The build has 96 pages: 7 marketing routes, the docs overview and 2 guides, 5 reference overviews, 32 reference section pages, the pattern library index, 47 pattern category pages, and 404. Website tests verify route ownership, current navigation, the short homepage, and local links/fragments across the full build.
 
-Reference pages render the original Markdown in `../plugins/concise/docs/`, so plugin documentation edits flow into the next website build. A new file there fails the build until it has a description in `src/pages/docs/[slug].astro` and a sidebar entry in `src/layouts/DocsLayout.astro`. The overview, installation, and web console guides are site pages in `src/content/docs/`.
+Reference pages render the original Markdown in `../plugins/concise/docs/`, so plugin documentation edits flow into the next website build. A new file there fails the build until it has a description in `src/pages/docs/[slug].astro` and a sidebar entry in `src/layouts/DocsLayout.astro`.
+
+Long references (`configuration`, `packs`, `host-features`, `tools`, listed in `splitDocs` in `src/lib/reference.mjs`) are split at build time: `/docs/<doc>/` is an overview with the intro and one line for each section, and every `## ` section is its own page at `/docs/<doc>/<section>/`, with its sections listed under the doc in the sidebar. Links to an old anchor, in Markdown or in a visitor's bookmark, go to the section page. `categories.md` is shown in the pattern library index; `/docs/categories/` redirects there. The overview, installation, and web console guides are site pages in `src/content/docs/`.
 
 ## Hook output on the marketing pages
 
@@ -53,6 +55,10 @@ Reference pages render the original Markdown in `../plugins/concise/docs/`, so p
 The plugin keeps its pattern reference in `plugins/concise/skills/concise-rules/references/ai-speak-patterns*.md`, generated in 300-line parts so an agent can read one part at a time. The website does not show those parts. `src/lib/patterns.ts` splits the same Markdown at each `## ` category heading and builds `/docs/patterns/` (a directory with a preset filter) and one page per category at `/docs/patterns/<category>/`. A category added to the plugin's index table gets its page on the next build; a category with no section fails the build.
 
 The old part URLs (`/docs/ai-speak-patterns/` through `-4/`) redirect to the index through `public/_redirects`. An old link with a category anchor, such as `#vocabulary`, continues to that category's page. Plugin docs that link to the parts are rewritten to the category pages by `src/lib/markdown-plugins.mjs`.
+
+## Site search
+
+`npm run build` runs Pagefind after Astro and writes the index to `dist/pagefind/`. Each page's `<main>` is indexed (`data-pagefind-body`); docs navigation, pagination, and hook-output labels carry `data-pagefind-ignore`, and 404 is not indexed. The header Search button opens a dialog (`src/components/Search.astro`); `/` and Ctrl+K or Cmd+K open it too. Under `npm run dev` there is no index, and the dialog says so.
 
 ## Console screenshots
 
