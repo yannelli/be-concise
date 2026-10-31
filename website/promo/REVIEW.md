@@ -107,7 +107,7 @@ The existing IBM Plex Mono code face is intentional under SPEC.md. A value-speci
 exception is scoped to the three film compositions only; website typography is unchanged. An
 existing DESIGN.md/sidecar freshness warning was not repaired as a side effect of this film edit.
 
-## Proof-title motifs (source preview; not yet rendered)
+## Proof-title motifs (rendered for PR review)
 
 Started on a new branch only after PRs #49, #52 and #53 were merged and all 21 production routes,
 metadata, homepage assets, and the exact refined MP4 were verified at concise.chat. The user
@@ -135,10 +135,19 @@ the commit symbol is less apparent than the other two because its simple geometr
 covered by the heading; accepted as a quiet background mark rather than increasing its weight.
 Phone-size diagnostic detail still belongs to the existing readable transcript.
 
-The source player answers HTTP 200 on port 4397. No replacement MP4 was rendered or listened to;
-all rendered-file/audio numbers above describe the already shipped pre-motif film, not this edit.
-The public MP4 and poster remain unchanged. HyperFrames usage remains unknown (unsupported_harness).
-Rendering requires approval of this source preview. This separate PR is not authorized to merge.
+The user approved rendering for PR review only, not merging. The replacement web MP4 is
+3,699,058 bytes, H.264/AAC, 30 fps, 930 frames, exactly 31.000 s; audio and video both start at 0.
+Measured audio: −14.56 LUFS, −1.27 dBTP, no clipping. Encoded AAC packet SHA-256 is identical to the
+previous shipped film (5d844e918caa9b9a8093ba58f53331f2695f84cf14db1730c9809948ff8a1e64),
+confirming the soundtrack did not change. Sound was measured, not listened to.
+
+Opened the three-proof-frame contact sheet decoded from the new web MP4 and the full-resolution
+18.5 s PR frame. All three marks survive compression without overpowering the headings; copy,
+qualifications and layering match the approved preview. The unchanged title-frame poster is
+retained because 7.3 s precedes this scene. The master rendered in 24.6 s with screenshot capture
+and software GPU. The source player answers HTTP 200 on port 4397. HyperFrames usage remains
+unknown (unsupported_harness). The replacement MP4 is included only in this PR; production remains
+unchanged until a later authorized merge. This PR must remain unmerged for the user's review.
 
 Independent advisor (sae4b5561): ship-for-source-preview, no introduced P0/P1. The motifs remain
 subordinate and topic-consistent, titles and qualifications stay legible above the SVGs, and both
