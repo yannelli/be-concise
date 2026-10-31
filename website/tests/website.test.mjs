@@ -104,6 +104,7 @@ test('navigation uses real routes, current states, and a native mobile disclosur
     assert.match(page(route), new RegExp(`href="/${route}/" aria-current="page"`));
   }
   assert.match(page('docs/configuration'), /href="\/docs\/" aria-current="page"/);
+  assert.doesNotMatch(pages.find(page => page.file === join(dist, '404.html')).html, /aria-current="page"/);
 });
 
 test('reference table values have build-time mobile labels', () => {

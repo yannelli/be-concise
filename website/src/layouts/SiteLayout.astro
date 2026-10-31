@@ -10,7 +10,7 @@ const navigation = [
   ['/use-cases/', 'Use cases'],
   ['/docs/', 'Docs'],
 ];
-const current = (href: string) => Astro.url.pathname === href || (href === '/docs/' && isDocs);
+const current = (href: string) => Astro.url.pathname === href || (href === '/docs/' && Astro.url.pathname.startsWith('/docs/'));
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL('/social.png', Astro.site);
 const isNotFound = ['/404', '/404/', '/404.html'].includes(Astro.url.pathname);
