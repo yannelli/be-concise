@@ -188,3 +188,32 @@
 .docs-prose .docs-shot figcaption { margin-top: .7rem; color: var(--muted); font-size: .9rem; line-height: 1.5; }
 /* github-dark comments (#6A737D) are 3.3:1 on the block; lift them to 5.8:1. */
 .astro-code span[style*="#6A737D"] { color: #9da5b0 !important; }
+/* Pattern library: an index of categories and one short page per category. */
+@media (min-width: 1280px) { .docs-reading-wide { grid-column: 2 / -1; } }
+.docs-reading-wide, .docs-reading-wide .docs-prose { max-width: none; }
+.docs-reading-wide .docs-prose > p { max-width: 72ch; }
+.pattern-filter { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.5rem 0 1rem; }
+.pattern-filter button { min-height: 44px; padding: .5rem 1rem; border: 0; background: var(--soft); color: var(--ink); font: inherit; cursor: pointer; }
+.pattern-filter button:hover { background: #e2e3de; }
+.pattern-filter button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.pattern-count { color: var(--muted); }
+.docs-prose .pattern-index { display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 1.75rem 2.5rem; list-style: none; padding: 0; margin: 2rem 0 0; }
+.docs-prose .pattern-index li { margin: 0; }
+.docs-prose .pattern-index li[hidden] { display: none; }
+.docs-prose .pattern-index a { font-size: 1.125rem; font-weight: 600; }
+.docs-prose .pattern-index p { margin: .35rem 0 0; line-height: 1.5; }
+.docs-prose .pattern-index .pattern-presets { color: var(--muted); font-size: .9375rem; }
+.docs-prose .pattern-back { margin: 0 0 1rem; }
+.docs-prose .pattern-lead { font-size: 1.25rem; line-height: 1.5; }
+.docs-prose .pattern-meta { display: flex; flex-wrap: wrap; gap: .5rem 2.5rem; margin: 1.5rem 0 2rem; }
+.docs-prose .pattern-meta dt { color: var(--muted); font-size: .9375rem; }
+.docs-prose .pattern-meta dd { margin: 0; }
+.docs-prose .pattern-source { margin-top: 2.5rem; color: var(--muted); font-size: .9375rem; }
+/* On phones a Flagged/Fix row reads as the flagged text with its fix under it, not as two labeled cards. */
+@media (max-width: 650px) {
+  .docs-prose .pattern-table table[data-columns="2"] tr { margin-bottom: 0; padding: .875rem 0; background: none; border-bottom: 1px solid var(--line); }
+  .docs-prose .pattern-table table[data-columns="2"] td { padding: 0; background: none; }
+  .docs-prose .pattern-table table[data-columns="2"] td::before { content: none; }
+  .docs-prose .pattern-table table[data-columns="2"] td + td { margin-top: .35rem; color: var(--muted); }
+  .docs-prose .pattern-table table[data-columns="2"] td + td::before { content: "Fix: "; display: inline; font-weight: 600; }
+}

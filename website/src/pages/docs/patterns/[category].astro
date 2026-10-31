@@ -1,0 +1,30 @@
+---
+import type { GetStaticPaths } from 'astro';
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import { categories, renderMarkdown, type PatternCategory } from '../../../lib/patterns';
+
+interface Props { category: PatternCategory; index: number; }
+export const getStaticPaths = (() => categories.map((category, index) => ({ params: { category: category.id }, props: { category, index } }))) satisfies GetStaticPaths;
+
+const { category, index } = Astro.props;
+const html = await renderMarkdown(category.body);
+const link = (item?: PatternCategory) => item && { title: item.title, href: `/docs/patterns/${item.id}/` };
+---
+<DocsLayout
+  title={`${category.title} patterns`}
+  description={`${category.description || `The ${category.label} category`} The flagged text and the fix Concise prints for the ${category.id} category.`}
+  headings={[]}
+  sourcePath={category.file}
+  previous={link(categories[index - 1]) ?? { title: 'All categories', href: '/docs/patterns/' }}
+  next={link(categories[index + 1])}
+>
+  <p class="pattern-back"><a href="/docs/patterns/">All {categories.length} categories</a></p>
+  <h1>{category.title}</h1>
+  {category.description && <p class="pattern-lead">{category.description}</p>}
+  <dl class="pattern-meta">
+    <div><dt>Category</dt><dd><code>{category.id}</code></dd></div>
+    <div><dt>Presets</dt><dd>{category.presets.join(', ')}</dd></div>
+  </dl>
+  <div class="pattern-table"><Fragment set:html={html} /></div>
+  {category.source && <p class="pattern-source">Source: <Fragment set:html={category.source.replace(/`([^`]+)`/g, '<code>$1</code>')} /></p>}
+</DocsLayout>

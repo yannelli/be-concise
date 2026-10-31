@@ -177,7 +177,7 @@ In the default `confirm` mode, you can select one of these options:
 2. To keep the words, send the identical write again. Concise allows it and reports that the text was kept after confirmation.
 3. To stop the check for this one instance, put `concise-ignore` on that line.
 
-The [pattern library](/docs/ai-speak-patterns/) explains each finding. The [confirmation modes](/docs/configuration/#mode) section describes `confirm`, `ask`, and `deny`.
+The [pattern library](/docs/patterns/) explains each finding. The [confirmation modes](/docs/configuration/#mode) section describes `confirm`, `ask`, and `deny`.
 
 ## If nothing is flagged
 

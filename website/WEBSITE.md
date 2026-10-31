@@ -40,13 +40,19 @@ The homepage is deliberately short: an introduction with the film, then one sect
 
 `MarketingLayout.astro` loads the existing marketing styles and `src/scripts/home.ts` on every marketing route. The script enhances only elements present on that page; film behavior is unchanged. `src/styles/pages.css` supplies the shorter page rhythm without changing the existing palette, type, or mark. Interactive examples and preset metadata remain in `src/data/examples.ts`.
 
-All 15 baseline output pages (including 404) remain; the six new marketing routes bring the total to 21. Website tests verify route ownership, current navigation, the short homepage, and local links/fragments across the full build.
+The build has 65 pages: 7 marketing routes, 10 guide and reference routes, the pattern library index, 47 pattern category pages, and 404. Website tests verify route ownership, current navigation, the short homepage, and local links/fragments across the full build.
 
 Reference pages render the original Markdown in `../plugins/concise/docs/`, so plugin documentation edits flow into the next website build. A new file there fails the build until it has a description in `src/pages/docs/[slug].astro` and a sidebar entry in `src/layouts/DocsLayout.astro`. The overview, installation, and web console guides are site pages in `src/content/docs/`.
 
 ## Hook output on the marketing pages
 
 `src/data/hook-output.ts` holds the hook responses shown by `HookOutput.astro`. They were captured by piping each tool input into `plugins/concise/hooks/check-edit.mjs` or `check-bash.mjs` with a throwaway `HOME` (shown as `~`) and the project `~/code/billing-api`. Long reference paths are cut with `…`. If a hook message changes, capture the new text the same way; do not edit a response by hand.
+
+## Pattern library
+
+The plugin keeps its pattern reference in `plugins/concise/skills/concise-rules/references/ai-speak-patterns*.md`, generated in 300-line parts so an agent can read one part at a time. The website does not show those parts. `src/lib/patterns.ts` splits the same Markdown at each `## ` category heading and builds `/docs/patterns/` (a directory with a preset filter) and one page per category at `/docs/patterns/<category>/`. A category added to the plugin's index table gets its page on the next build; a category with no section fails the build.
+
+The old part URLs (`/docs/ai-speak-patterns/` through `-4/`) redirect to the index through `public/_redirects`. An old link with a category anchor, such as `#vocabulary`, continues to that category's page. Plugin docs that link to the parts are rewritten to the category pages by `src/lib/markdown-plugins.mjs`.
 
 ## Console screenshots
 

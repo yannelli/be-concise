@@ -8,8 +8,13 @@ interface Props {
   description: string;
   headings: MarkdownHeading[];
   sourcePath: string;
+  /** Overrides for pages outside the sidebar order, such as single pattern categories. */
+  previous?: { title: string; href: string };
+  next?: { title: string; href: string };
+  /** Lets the reading column take the table-of-contents column on pages without one. */
+  wide?: boolean;
 }
-const { title, description, headings, sourcePath } = Astro.props;
+const { title, description, headings, sourcePath, wide = false } = Astro.props;
 const groups = [
   { title: 'Get started', pages: [
     { title: 'Overview', slug: '' },
@@ -25,18 +30,18 @@ const groups = [
     { title: 'Host features', slug: 'host-features' },
   ] },
   { title: 'Pattern library', pages: [
-    { title: 'AI patterns, part 1', slug: 'ai-speak-patterns' },
-    { title: 'AI patterns, part 2', slug: 'ai-speak-patterns-2' },
-    { title: 'AI patterns, part 3', slug: 'ai-speak-patterns-3' },
-    { title: 'AI patterns, part 4', slug: 'ai-speak-patterns-4' },
+    { title: 'All categories', slug: 'patterns' },
   ] },
 ];
 const href = (slug: string) => `/docs/${slug ? `${slug}/` : ''}`;
 const path = `${Astro.url.pathname.replace(/\/$/, '')}/`;
 const pages = groups.flatMap(group => group.pages);
 const position = pages.findIndex(page => href(page.slug) === path);
-const previous = pages[position - 1];
-const next = pages[position + 1];
+const inPatterns = path.startsWith('/docs/patterns/');
+const previous = Astro.props.previous ?? (pages[position - 1] && { title: pages[position - 1].title, href: href(pages[position - 1].slug) });
+const next = Astro.props.next ?? (pages[position + 1] && { title: pages[position + 1].title, href: href(pages[position + 1].slug) });
+// A category page marks its library index as the current section, not as the current page.
+const current = (slug: string) => href(slug) === path ? 'page' : slug === 'patterns' && inPatterns ? 'true' : undefined;
 const contents = headings.filter(heading => heading.depth === 2 || heading.depth === 3);
 ---
 <SiteLayout title={`${title} · Concise Docs`} description={description} isDocs={true}>
@@ -48,7 +53,7 @@ const contents = headings.filter(heading => heading.depth === 2 || heading.depth
           <div class="docs-nav-group">
             <p class="docs-nav-title">{group.title}</p>
             <ul>{group.pages.map(page => (
-              <li><a href={href(page.slug)} aria-current={href(page.slug) === path ? 'page' : undefined}>{page.title}</a></li>
+              <li><a href={href(page.slug)} aria-current={current(page.slug)}>{page.title}</a></li>
             ))}</ul>
           </div>
         ))}
@@ -61,13 +66,13 @@ const contents = headings.filter(heading => heading.depth === 2 || heading.depth
           <div class="docs-nav-group">
             <p class="docs-nav-title">{group.title}</p>
             <ul>{group.pages.map(page => (
-              <li><a href={href(page.slug)} aria-current={href(page.slug) === path ? 'page' : undefined}>{page.title}</a></li>
+              <li><a href={href(page.slug)} aria-current={current(page.slug)}>{page.title}</a></li>
             ))}</ul>
           </div>
         ))}
       </div>
     </details></nav>
-    <div class="docs-reading">
+    <div class:list={["docs-reading", { "docs-reading-wide": wide && contents.length === 0 }]}>
       <article id="docs-content" class="docs-prose" aria-label={title} tabindex="-1">
         <slot />
       </article>
@@ -75,8 +80,8 @@ const contents = headings.filter(heading => heading.depth === 2 || heading.depth
       <div class="docs-page-end">
         <a class="docs-source" href={`https://github.com/yannelli/be-concise/blob/main/${sourcePath}`}>View this page on GitHub</a>
         <nav class="docs-pagination" aria-label="Documentation pages">
-          {previous && <a href={href(previous.slug)} rel="prev">Previous: {previous.title}</a>}
-          {next && <a href={href(next.slug)} rel="next">Next: {next.title}</a>}
+          {previous && <a href={previous.href} rel="prev">Previous: {previous.title}</a>}
+          {next && <a href={next.href} rel="next">Next: {next.title}</a>}
         </nav>
       </div>
     </div>
