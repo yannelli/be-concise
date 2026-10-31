@@ -19,7 +19,7 @@
     }
     #cs-title {
       position: absolute;
-      left: 140px;
+      left: 160px;
       top: 92px;
       font-size: 104px;
       font-weight: 550;
@@ -50,7 +50,7 @@
     }
     #cs-plane {
       position: absolute;
-      left: 140px;
+      left: 160px;
       top: 270px;
       width: 1900px;
       height: 900px;
@@ -95,9 +95,9 @@
       // Colour flood: the payoff gets the accent ground.
       tl.fromTo("#cs-ground", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.35, ease: "power2.inOut" }, 0.02);
 
-      // The real console rises out of depth and lands flat.
-      tl.fromTo("#cs-plane", { x: 420, z: -3000 }, { x: 0, z: 0, duration: 0.8, ease: "expo.out" }, 0.24);
-      tl.fromTo("#cs-plane", { opacity: 0 }, { opacity: 1, duration: 0.1, ease: "none" }, 0.24);
+      // Finish the flood, then rise on the 21.5 s pulse and settle at frame 661.
+      tl.fromTo("#cs-plane", { x: 420, z: -3000 }, { x: 0, z: 0, duration: 16 / 30, ease: "expo.out" }, 0.5);
+      tl.fromTo("#cs-plane", { opacity: 0 }, { opacity: 1, duration: 1 / 30, ease: "none" }, 0.5);
       document.querySelectorAll(".cs-tw").forEach((el, i) => {
         tl.fromTo(el, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, ease: "power2.out" }, 0.55 + i * 0.07);
       });

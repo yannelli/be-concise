@@ -9,7 +9,7 @@
   script. The comment, the commit and the PR are the same writes the console screenshots record, so
   the payoff shows the exact deny record (Leverage / robust / seamless) the commit station just made.
 - Every hook message is real output from plugins/concise/hooks. Two are shortened on screen with an
-  ellipsis: the comment path (`…/src/invoice.ts:1`) and the PR message (cut after "(limit 1),").
+  ellipsis: the comment location (now `Comment …`) and the PR message (cut after "(limit 1),").
   The commit station shows only the first line of its denial.
 - Wall phrases come from Concise's own pattern references.
 - The payoff takes the accent ground: the brand rations orange to flagged words, the payoff and the mark.
@@ -21,7 +21,7 @@
   outro (a final hit, then a held chord) is generated onto it. A volume lane makes the one-beat stop
   at 5.55–5.97 s. Credits: assets/music/CREDITS.md, assets/sfx/CREDITS.md (Pixabay licence).
 
-## Measured
+## Baseline delivery measurements
 
 - `hyperframes check`: ok, no errors. Kept warnings (`line_unread`):
   - the noise phrases (0–6 s): unreadable on purpose, they are the noise;
@@ -41,10 +41,68 @@
   360 px. The 34 px code and the hook text inside the planes do not; on a phone the planes carry the
   story by shape (long → short) and the orange line, not by their words.
 
-## Weakest shot, and what I'd change with more time
+## Baseline weak points
 
 - 21.0–21.4 s: the console plane rises from depth while the orange flood is still completing. It
   reads as intended at speed, but the first 0.1 s of the plane is semi-transparent on orange. With
   more time: hold the plane until the flood finishes and land it on the 21.5 beat.
 - The end card is plain: the mark draws, its square locks, the command fades in. A camera move
   through the square into the lockup would carry the depth idea to the end.
+
+## Beat and title refinement (replacement delivery)
+
+The user asked for stronger music synchronization and tighter left-slide titles. No new storyline,
+UI, music generation or duration was introduced.
+
+Measured waveform attacks support 120 BPM with a roughly +40–50 ms phase, not an exact zero-phase
+half-second grid. The shipped MP4 and music source have no measured offset. At 30 fps, the new
+proof start is frame 241; camera moves run frames 361–376 and 496–511. The console plane waits
+until the orange flood finishes, becomes opaque at frame 646 and settles at frame 661. The end
+square settles and the name wipe starts together at frame 856. SFX starts compensate for their
+actual internal attacks: the existing stroke and lock offsets were already right and are unchanged.
+The old two-stage payoff impact is replaced by the shorter impact-bass-1, peaking near 21.5 s.
+
+Proof titles now share x160/y340, 112 px type with 0.92 leading, a 24 px subtitle gap, and 42 px
+subtitles. Console titles now use the same left anchor; the claim leading is 0.94. Subtitles identify
+the numeric defaults and say that style checks are optional and off by default.
+
+The faster camera moves initially shortened the repaired lines' reading holds. The comment repair
+now arrives at 10.4 s and the commit repair at frame 436; denial cues remain at 9.2, 13.5 and 17.5 s.
+The comment location is abbreviated further because the file path is already visible above it.
+
+Verification so far: all 16 website/timeline regression tests pass. HyperFrames check runs the browser
+and passes lint, runtime, layout, motion and contrast with zero errors or warnings in those gates.
+Its eight craft warnings are only the intentionally verbose before text and noise-wall phrases.
+All denials and repaired lines clear their reading floors. Four informational occlusion findings are
+the outgoing console title being covered by the intentional outro flood.
+
+Opened: before/after comment, commit and PR frames; claim and square-lock frames; the review beat
+and phone sheets, all five seam strips, the camera-move strip, the console-entrance strip, and the
+updated repaired-text sheet. Large labels fit, the PR subtitle has two deliberate lines, and the
+console no longer arrives over an unfinished flood. Diagnostic detail remains unreadable at phone
+width; the homepage's text transcript remains available. Automatic review sheet sampling catches
+some transition frames rather than the held title/claim/end card, so targeted full-size frames were
+also reviewed.
+
+The user approved rendering and shipping the refinement without motifs. Replacement web MP4:
+3,690,504 bytes, H.264/AAC, 1920×1080, 30 fps, 930 frames, exactly 31.000 s. FFmpeg measurements of
+the encoded file: −14.56 LUFS integrated, −1.27 dBTP, no clipping. Normalized waveform correlation
+against the music source found 0 ms offset in clean windows 10.9–11.8, 14.9–15.8 and 23.8–24.8 s
+(correlation 0.998–1.000, 2 kHz analysis, 0.5 ms sample resolution). This verifies placement, not
+perceived musical feel; sound was measured, not listened to. The unchanged title-frame poster is
+retained because the title at 7.3 s did not change.
+
+The delivery master rendered in 24.2 s using screenshot capture and software GPU (system Chrome).
+Opened an eight-frame contact sheet decoded from the web MP4 plus the full-resolution 14 s commit
+frame: labels, optional/default-off text, code, console entrance, claim and end card match the
+reviewed source. The managed browser launcher failed to start, but HyperFrames checks and snapshots
+ran in system Chrome; both editor and lightweight-player endpoints answer HTTP 200.
+
+Independent review (sa30eb4a2): ship for preview, with no introduced P0/P1. The reviewer compared
+before/after frames and all review sheets, confirmed that the tighter claim has no glyph collision,
+that both two-line proof subtitles fit, and that the console handoff is clean. This does not verify
+perceived musical sync by listening. The subsequent replacement encode checks are recorded above.
+
+The existing IBM Plex Mono code face is intentional under SPEC.md. A value-specific detector
+exception is scoped to the three film compositions only; website typography is unchanged. An
+existing DESIGN.md/sidecar freshness warning was not repaired as a side effect of this film edit.

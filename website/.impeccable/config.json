@@ -1,0 +1,19 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "ibm plex mono",
+        "files": [
+          "promo/compositions/console.html",
+          "promo/compositions/outro.html",
+          "promo/compositions/proof.html"
+        ],
+        "createdAt": "2026-10-30T23:35:16.538Z",
+        "reason": "Agent: existing HyperFrames film uses the bundled IBM Plex Mono for source code and real hook output, as specified in promo/SPEC.md; the website typography is unchanged."
+      }
+    ]
+  }
+}
