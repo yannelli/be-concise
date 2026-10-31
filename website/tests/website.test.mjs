@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir, stat } from 'node:fs/promises';
-import { resolve, dirname, join } from 'node:path';
+import { resolve, dirname, join, relative, sep } from 'node:path';
 
 const dist = resolve('dist');
 async function htmlFiles(directory) {
@@ -30,6 +30,22 @@ test('each route has a unique title, description and one h1', () => {
     assert.equal((html.match(/<h1(?:\s|>)/g) || []).length, 1, `One h1: ${file}`);
     assert.match(html, /<html lang="en"/);
     assert.match(html, /id="main"/);
+  }
+});
+
+test('canonical and social metadata use the production domain', () => {
+  for (const { file, html } of pages) {
+    assert.match(html, /<meta property="og:image" content="https:\/\/concise\.chat\/social\.png"/);
+    assert.match(html, /<meta name="twitter:image" content="https:\/\/concise\.chat\/social\.png"/);
+    if (file === join(dist, '404.html')) {
+      assert.match(html, /<meta name="robots" content="noindex"/);
+      assert.doesNotMatch(html, /rel="canonical"/);
+      continue;
+    }
+    const path = relative(dist, file).split(sep).join('/').replace(/index\.html$/, '');
+    const expected = new URL(path, 'https://concise.chat/').href;
+    assert.equal(html.match(/<link rel="canonical" href="([^"]+)"/)?.[1], expected, file);
+    assert.equal(html.match(/<meta property="og:url" content="([^"]+)"/)?.[1], expected, file);
   }
 });
 

@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Astro, requested by the user. Deployment must be ready for Cloudflare Workers Git repository integration.
+Astro, requested by the user. Deployment must be ready for Cloudflare Workers Git repository integration. Public origin: https://concise.chat. Automatic deployments should watch only website/ changes.
 
 ## Users
 
@@ -28,7 +28,7 @@ Claude Code and Codex CLI (supported baseline 0.152.0). Git, Node.js, Bash, jq, 
 
 ## Capabilities and Constraints
 
-Three core checks work without configuration. Optional em-dash and AI-writing checks ship disabled. Eight AI-writing presets and 44 categories are documented. Test-output filtering supports pytest, go test, npm test, Jest, and Vitest. Pattern matching uses heuristics and may produce false positives. After two denied retries on one target, the next action is allowed and flagged. File-body GH commands and commit -F inputs are not inspected.
+Three core checks work without configuration. Optional em-dash and AI-writing checks ship disabled. Eight AI-writing presets and 47 categories are documented. Test-output filtering supports pytest, go test, npm test, Jest, and Vitest. Pattern matching uses heuristics and may produce false positives. After two denied retries on one target, the next action is allowed and flagged. File-body GH commands and commit -F inputs are not inspected.
 
 ## Brand Commitments
 

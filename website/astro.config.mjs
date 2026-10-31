@@ -54,6 +54,7 @@ function responsiveTables() {
 }
 
 export default defineConfig({
+  site: 'https://concise.chat',
   output: 'static',
   vite: { server: { fs: { allow: ['..'] } } },
   trailingSlash: 'always',
