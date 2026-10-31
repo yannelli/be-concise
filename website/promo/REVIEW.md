@@ -153,3 +153,72 @@ Independent advisor (sae4b5561): ship-for-source-preview, no introduced P0/P1. T
 subordinate and topic-consistent, titles and qualifications stay legible above the SVGs, and both
 camera-move sheets show no problematic cropping or neighbor bleed. This verdict does not approve
 a render, audition sound, verify a new encode, or approve the whole film.
+
+## Round 3: even grid, hand-drawn motifs, faster wall (source preview; not rendered)
+
+The user rejected the rendered icon motifs (PR #54 head 4704499). They looked like smudges over the
+titles, and the label sat about 50 px from the card against a 160 px left and 100 px right margin.
+Changes:
+
+- Even grid at 120 px: margin 120 | label 490 | gutter 120 | card 1070 | margin 120. Measured
+  heading ink 124–609 px (Comments), card 730–1800. The commit card is vertically centred
+  (top 352). The film's shared left anchor moved to 120 in the opening title (bar morph x 1288.5),
+  console and claim; the console command already sat 120 from the right.
+- Motifs are drawn for this film: "//" slashes, a commit lane through two rings and a PR branch
+  turning back to its base lane. They use #EEEFEB on #F7F7F5, sit behind labels and cards, and are
+  cropped by the frame edges. The Lucide sources and license were removed. No layout-ignore flags.
+- Wall: 22 real phrases. Slams at f90/105/120, then gaps of 7, 6, 5, 4, 3, 3, 2, 2, 2 frames and
+  one frame apart until f178. The tunnel surges again (z 4200→7600), the wall scales to 1.22 and a
+  deterministic shake rises to 14 px, zeroed at 6.0. Wall depth is computed per frame; the split
+  uses fixed coordinates instead of DOM measurement. Audio and every other cue are unchanged.
+
+Checks: HyperFrames check ok with no lint, runtime, layout, motion or contrast errors or warnings.
+Four existing outro-flood occlusion infos remain. line_unread rose from 8 to 16: the 8 new ones
+are the added barrage phrases, which are meant to be too fast to read. Website build, Astro check
+and 22 tests pass. Opened: stills at 11.5, 14 and 18.5 s; the 4.5–6.3 s rush sheets (15 frames);
+6.25, 7.3, 23 and 26.8 s; and both camera-move sheets. No snapping in the barrage and no neighbour
+bleed during moves. Not rendered or listened to; PR #54 still holds the rejected render.
+
+## Round 4: the rest of the film matches the faster intro (source preview; not rendered)
+
+The user said everything after the new intro felt flat. Diagnosis from a 6–31 s sheet: a small 132 px
+title on an empty frame; proof stations mostly still for about 4 s each, with quiet blur swaps; two
+small console screenshots with one swap; an empty cream frame at about 25.8 s; and a claim that just
+appeared. Meanwhile the bed holds full energy from 6 to 28 s, with breaks at 13–14 and 21–22 s and
+re-entries at 14.0 and 22.0 s that landed on nothing.
+
+Changes (music bed unchanged; new SFX only where something happens on screen):
+- Title 180 px on one line (ink 128–1704, measured orange stop 1714–1754), words rise in.
+- Proof: whip moves (expo.inOut, blur 16) with motifs on a deeper plane for parallax, plus a slow
+  drift. Labels rise in. Each denial punches its card. The comment is struck by the stroke at
+  f301 and the lines fly at the lens. The three buzzwords blow out on the 14.0 s re-entry (f421)
+  and the clean message types in at f436. The PR paragraphs are crushed into one line, which slams
+  in at f556. Denials dim after their repairs (the PR denial at 20.6 s, keeping its 3.1 s floor).
+  Cards clip their own contents.
+- Console: the denied commit holds two beats, then hard cuts one per beat (f691/706/721/736) to
+  real Overview, Configuration, Playground and Rules & usage screenshots, shown at native 1:1
+  scale (about twice the previous text size).
+- Claim: one word per beat (f766–811). At 27.967 s the stroke returns, splits the claim and
+  shrinks into the mark's square (measured 783,395 26×19), locking on f856. The mark is drawn out
+  of it. The empty cream gap is gone (outro starts 25.3 s).
+
+Checks: HyperFrames check ok, no lint/runtime/layout/motion/contrast warnings. 16 line_unread
+warnings remain, all barrage or deliberately verbose "before" text. 4 text_occluded infos remain
+from the existing floods, plus 2 new content_overlap infos at 10.56 s and 14.20 s: rejected text
+leaving while its replacement arrives, under 0.3 s. Website build (21 pages), Astro check (0/0/0)
+and 24 tests pass. Opened: full 6–31 s sheets; strike, burst, crush, console and end-stroke
+frame sheets; review beat and phone sheets; and the seams I tiled myself. Fixed from that review:
+struck lines spilling past the card, lingering burst smudges, the "S" cropped off "Session", and
+crops flush to the panel edge. Not rendered or listened to; new SFX levels are unmeasured in a mix.
+
+### Round 4 delivery (approved: "after that is fixed, ship it")
+
+- Fix: the end-card wordmark's last "e" was clipped by its wipe's clip-path, because negative
+  tracking let the glyph overhang its box. The box now has padding-right 16 px and margin-right
+  -16 px, so the layout is unchanged (end square still measures 783,395 26×19).
+- Encode: public/promo/concise-promo.mp4, H.264 CRF 25 + AAC 160k, 1920×1080, 30 fps, 930 frames,
+  31.000 s, both streams start at 0, 4,531,066 bytes. Audio measured −14.59 LUFS integrated,
+  −1.27 dBTP, 6.20 LU LRA (measured, not listened to).
+- Decoded-frame review: a 12-frame sheet covering wall, title, strike, burst, typed fix, PR,
+  console, claim, stroke and end card, plus the full-resolution 30.5 s end card with the "e" intact.
+- Poster regenerated from the new encode's 7.3 s title frame (the title is now 180 px).

@@ -19,7 +19,7 @@
     }
     #cs-title {
       position: absolute;
-      left: 160px;
+      left: 120px;
       top: 92px;
       font-size: 104px;
       font-weight: 550;
@@ -50,7 +50,7 @@
     }
     #cs-plane {
       position: absolute;
-      left: 160px;
+      left: 120px;
       top: 270px;
       width: 1900px;
       height: 900px;
@@ -68,9 +68,12 @@
     }
     .cs-shot img {
       position: absolute;
-      width: 2304px;
-      height: 1440px;
+      width: 2880px;
+      height: 1800px;
       max-width: none;
+    }
+    .cs-shot + .cs-shot {
+      opacity: 0;
     }
   </style>
   <div data-hf-id="hf-0tl0" id="root" data-composition-id="console" data-width="1920" data-height="1080">
@@ -79,11 +82,21 @@
     <div data-hf-id="hf-n0h6" id="cs-cmd">concise-web --all</div>
     <div data-hf-id="hf-vfsz" id="cs-stage" data-layout-allow-overflow>
       <div data-hf-id="hf-r4ye" id="cs-plane">
+        <!-- Real console screenshots (2880x1800, shown 1:1), cropped to one panel each. -->
         <div data-hf-id="hf-rsfr" class="cs-shot" id="cs-activity">
-          <img data-hf-id="hf-tke5" id="cs-activity-img" src="assets/img/activity-dark.webp" alt="Concise console, Live activity: a denied git commit with three vocabulary matches" style="left: -448px; top: -24px" />
+          <img data-hf-id="hf-tke5" id="cs-activity-img" src="assets/img/activity-dark.webp" alt="Concise console, Live activity: a denied git commit with three vocabulary matches" style="left: -528px; top: -30px" />
         </div>
-        <div data-hf-id="hf-7njk" class="cs-shot" id="cs-overview" style="opacity: 0">
-          <img data-hf-id="hf-lo8i" id="cs-overview-img" src="assets/img/overview-dark.webp" alt="Concise console, Overview: active configuration and matched rules" style="left: -448px; top: -650px" />
+        <div data-hf-id="hf-7njk" class="cs-shot" id="cs-overview">
+          <img data-hf-id="hf-lo8i" id="cs-overview-img" src="assets/img/overview-dark.webp" alt="Concise console, Overview: hook calls, interventions and active configuration" style="left: -528px; top: -500px" />
+        </div>
+        <div class="cs-shot" id="cs-configuration">
+          <img id="cs-configuration-img" src="assets/img/configuration-dark.webp" alt="Concise console, Configuration: scanned text, thresholds and AI writing settings" style="left: -1104px; top: -690px" />
+        </div>
+        <div class="cs-shot" id="cs-playground">
+          <img id="cs-playground-img" src="assets/img/playground-dark.webp" alt="Concise console, Playground: text matches for delve, In conclusion and game-changer" style="left: -528px; top: -650px" />
+        </div>
+        <div class="cs-shot" id="cs-rules">
+          <img id="cs-rules-img" src="assets/img/rules-dark.webp" alt="Concise console, Rules and usage: 50 pattern packs with active toggles" style="left: -528px; top: -380px" />
         </div>
       </div>
     </div>
@@ -92,22 +105,31 @@
     (function () {
       const tl = gsap.timeline({ paused: true });
 
-      // Colour flood: the payoff gets the accent ground.
+      // Colour flood in the bed's break: the payoff gets the accent ground.
       tl.fromTo("#cs-ground", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.35, ease: "power2.inOut" }, 0.02);
+      document.querySelectorAll(".cs-tw").forEach((el, i) => {
+        tl.fromTo(el, { opacity: 0, y: 60, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.35, ease: "expo.out" }, 0.4 + i * 0.07);
+      });
+      tl.fromTo("#cs-cmd", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, 0.7);
 
-      // Finish the flood, then rise on the 21.5 s pulse and settle at frame 661.
+      // The plane slams home on the 22.0 s re-entry (frame 661).
       tl.fromTo("#cs-plane", { x: 420, z: -3000 }, { x: 0, z: 0, duration: 16 / 30, ease: "expo.out" }, 0.5);
       tl.fromTo("#cs-plane", { opacity: 0 }, { opacity: 1, duration: 1 / 30, ease: "none" }, 0.5);
-      document.querySelectorAll(".cs-tw").forEach((el, i) => {
-        tl.fromTo(el, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, ease: "power2.out" }, 0.55 + i * 0.07);
-      });
-      tl.fromTo("#cs-cmd", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, 0.85);
 
-      // Push toward the denied commit, then swap to the overview on the bar.
-      tl.fromTo("#cs-activity-img", { scale: 1 }, { scale: 1.05, transformOrigin: "40% 30%", duration: 2.1, ease: "power1.inOut" }, 0.4);
-      tl.to("#cs-activity", { opacity: 0, filter: "blur(8px)", duration: 0.15, ease: "power2.in" }, 2.4);
-      tl.fromTo("#cs-overview", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, ease: "power2.out" }, 2.5);
-      tl.fromTo("#cs-overview-img", { scale: 1 }, { scale: 1.05, transformOrigin: "35% 35%", duration: 2.5, ease: "power1.inOut" }, 2.5);
+      // Hold the denied commit for two beats, pushing toward its findings.
+      tl.fromTo("#cs-activity-img", { scale: 1 }, { scale: 1.1, transformOrigin: "0% 14%", duration: 1.533, ease: "power1.inOut" }, 0.5);
+
+      // Then one console view per beat: hard cut, small punch, slow drift.
+      const views = ["#cs-overview", "#cs-configuration", "#cs-playground", "#cs-rules"];
+      let prev = "#cs-activity";
+      views.forEach((view, i) => {
+        const t = 61 / 30 + i * 0.5; // 22.033 s + 1 s, then every beat
+        tl.set(prev, { opacity: 0 }, t);
+        tl.set(view, { opacity: 1 }, t);
+        tl.fromTo(`${view}-img`, { scale: 1.07 }, { scale: 1, transformOrigin: "30% 30%", duration: 0.4, ease: "expo.out" }, t);
+        tl.to(`${view}-img`, { x: -30, duration: 1.2, ease: "none" }, t);
+        prev = view;
+      });
 
       window.__timelines["console"] = tl;
     })();
