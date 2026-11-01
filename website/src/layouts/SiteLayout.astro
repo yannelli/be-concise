@@ -45,9 +45,9 @@ const isNotFound = ['/404', '/404/', '/404.html'].includes(Astro.url.pathname);
         {navigation.map(([href, label]) => <a href={href} aria-current={current(href) ? 'page' : undefined}>{label}</a>)}
       </nav>
       <div class="header-actions">
-        <Search />
         <a class="github-link" href={github} aria-label="Concise on GitHub"><Icon name="github" size={21} /></a>
         <a class="button button-small button-dark" href="/install/" aria-current={current('/install/') ? 'page' : undefined}>Install Concise <Icon name="arrow" size={17} /></a>
+        <Search />
         <details class="mobile-menu">
           <summary class="menu-toggle" aria-label="Navigation"><Icon name="menu" /></summary>
           <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation">
