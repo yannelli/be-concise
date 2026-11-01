@@ -1,34 +1,49 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
-import { categories, presets, sourceDir } from '../../../lib/patterns';
+import { categories, categoriesNotes, categoriesSource, groups, presets } from '../../../lib/patterns';
+import { renderMarkdown } from '../../../lib/render';
+const scopes = (await renderMarkdown(categoriesNotes.scopes, categoriesSource)).html;
+const emDash = (await renderMarkdown(categoriesNotes.emDash, categoriesSource)).html;
 ---
 <DocsLayout
   title="Pattern library"
-  description={`All ${categories.length} Concise AI-writing categories, each with its own page of flagged text and the fix the hook prints. Filter by preset.`}
+  description={`All ${categories.length} Concise AI-writing categories by group, with presets, scopes, and a page of flagged text and fixes for each. Filter by preset.`}
   headings={[]}
-  sourcePath={`${sourceDir}/ai-speak-patterns.md`}
+  sourcePath={categoriesSource}
   wide
 >
   <h1>Pattern library</h1>
-  <p>Concise has {categories.length} AI-writing categories. Each page lists the flagged text and the fix that the hook prints. Choose a preset to see the categories that it turns on.</p>
-  <div class="pattern-filter" role="group" aria-label="Filter by preset" hidden data-pattern-filter>
+  <p>Concise has {categories.length} AI-writing categories. Each page lists the flagged text and the fix that the hook prints. Choose a preset to see the categories that it turns on. To choose categories yourself, set <code>features.aiWriting.categories</code> in the <a href="/docs/configuration/">configuration</a>.</p>
+  <div class="pattern-filter" data-pagefind-ignore role="group" aria-label="Filter by preset" hidden data-pattern-filter>
     <button type="button" aria-pressed="true" data-preset="">All</button>
     {presets.filter(preset => preset !== 'all').map(preset => <button type="button" aria-pressed="false" data-preset={preset}>{preset}</button>)}
   </div>
-  <p class="pattern-count" aria-live="polite" data-pattern-count>{categories.length} categories</p>
-  <ul class="pattern-index">
-    {categories.map(category => (
-      <li data-presets={category.presets.join(' ')}>
-        <a href={`/docs/patterns/${category.id}/`}>{category.title}</a>
-        <p>{category.description}</p>
-        <p class="pattern-presets">{category.presets.filter(preset => preset !== 'all').join(', ')}</p>
-      </li>
-    ))}
-  </ul>
+  <p class="pattern-count" data-pagefind-ignore aria-live="polite" data-pattern-count>{categories.length} categories</p>
+  {groups.map(group => {
+    const members = categories.filter(category => category.group === group.title);
+    return members.length > 0 && (
+      <section class="pattern-group" aria-labelledby={group.id} data-pattern-group>
+        <h2 id={group.id}>{group.title}</h2>
+        <ul class="pattern-index">
+          {members.map(category => (
+            <li data-presets={category.presets.join(' ')}>
+              <a href={`/docs/patterns/${category.id}/`}>{category.title}</a>
+              <p>{category.description}</p>
+              <p class="pattern-presets">{category.presets.filter(preset => preset !== 'all').join(', ')}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  })}
+  <div class="pattern-notes">
+    <Fragment set:html={scopes} />
+    <Fragment set:html={emDash} />
+  </div>
 </DocsLayout>
 
 <script>
-  // Old part URLs carried the category as an anchor; send those visitors to the category page.
+  // Old links carried a category or a Categories group as an anchor.
   const wanted = decodeURIComponent(location.hash.slice(1));
   if (wanted && document.querySelector(`a[href="/docs/patterns/${CSS.escape(wanted)}/"]`)) location.replace(`/docs/patterns/${wanted}/`);
 
@@ -48,6 +63,7 @@ import { categories, presets, sourceDir } from '../../../lib/patterns';
         item.hidden = !match;
         if (match) shown += 1;
       });
+      document.querySelectorAll<HTMLElement>('[data-pattern-group]').forEach(group => { group.hidden = !group.querySelector('li:not([hidden])'); });
       if (count) count.textContent = preset ? `${shown} categories in the ${preset} preset` : `${items.length} categories`;
     });
   }

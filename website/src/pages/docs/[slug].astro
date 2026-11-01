@@ -1,6 +1,8 @@
 ---
 import type { GetStaticPaths, MarkdownInstance } from 'astro';
 import DocsLayout from '../../layouts/DocsLayout.astro';
+import { readReference, splitDocs } from '../../lib/reference.mjs';
+import { renderMarkdown } from '../../lib/render';
 
 type Reference = MarkdownInstance<Record<string, unknown>>;
 interface Props {
@@ -13,12 +15,13 @@ export const getStaticPaths = (async () => {
   const sources = import.meta.glob<Reference>([
     '../../../../plugins/concise/docs/*.md',
     '!../../../../plugins/concise/docs/INDEX.md',
+    // The pattern library shows the Categories reference; /docs/categories/ redirects there.
+    '!../../../../plugins/concise/docs/categories.md',
   ]);
   const descriptions: Record<string, string> = {
     configuration: 'Every Concise configuration key and default, five configuration layers, merge rules, confirmation modes, ignore paths, and logging.',
     tools: 'Read and change Concise settings with the concise-config CLI, the concise MCP server tools, and the config and tune skills, including the writing-sample tuner.',
     'host-features': 'The Claude Code, Codex, and omp hook, skill, and MCP features that the Concise manifests and omp extension use, with dated host documentation sources.',
-    categories: 'All 47 Concise AI-writing categories with examples, suggested fixes, presets, and supported scanning scopes.',
     environment: 'Every BEC_ environment variable for Concise, with cloud-agent setup, configuration overrides, and session logging examples.',
     packs: 'Create Concise pattern packs with JSON or JavaScript. Reference pack fields, loading order, presets, custom detectors, and validation commands.',
   };
@@ -37,11 +40,38 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { document, description, sourcePath } = Astro.props;
+const { slug } = Astro.params;
+// A long reference is an overview here, with one page per section under it.
+const reference = splitDocs.includes(slug) ? readReference(slug) : null;
+const intro = reference ? await renderMarkdown(reference.intro, reference.file) : null;
 const { Content, getHeadings } = document;
-const headings = getHeadings();
-const title = headings.find(heading => heading.depth === 1)?.text;
+const escape = (text: string) => text.replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char]!);
+const inline = (markdown: string) => escape(markdown).replace(/`([^`]+)`/g, '<code>$1</code>');
+const headings = reference ? [] : getHeadings();
+const title = reference?.title ?? headings.find(heading => heading.depth === 1)?.text;
 if (!title) throw new Error(`Documentation needs a page title: ${sourcePath}`);
 ---
 <DocsLayout title={title} description={description} headings={headings} sourcePath={sourcePath}>
-  <Content />
+  {reference && intro ? (
+    <>
+      <h1>{reference.title}</h1>
+      <Fragment set:html={intro.html} />
+      <ul class="reference-sections">
+        {reference.pages.map(page => (
+          <li><a href={`/docs/${slug}/${page.slug}/`}>{page.title}</a>{page.summary && <p set:html={inline(page.summary)} />}</li>
+        ))}
+      </ul>
+      <script is:inline type="application/json" data-reference-anchors set:html={JSON.stringify(reference.anchors)} />
+    </>
+  ) : <Content />}
 </DocsLayout>
+
+<script>
+  // Old links pointed at a section anchor on the single long page; continue to its own page.
+  const anchors = document.querySelector('[data-reference-anchors]');
+  const wanted = decodeURIComponent(location.hash.slice(1));
+  if (anchors && wanted) {
+    const target = (JSON.parse(anchors.textContent || '{}') as Record<string, string>)[wanted];
+    if (target) location.replace(target);
+  }
+</script>

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview --host 0.0.0.0",
     "screenshots": "node scripts/console-screenshots.mjs",
     "check": "astro check",
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "pagefind": "^1.5.2",
     "typescript": "^5.9.3",
     "wrangler": "^4.156.0"
   }

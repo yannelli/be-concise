@@ -15,7 +15,7 @@ const page = route => pages.find(page => page.file === join(dist, route, 'index.
 const marketingRoutes = ['', 'why-concise', 'use-cases', 'install', 'configuration', 'console', 'faq'];
 
 test('focused marketing pages and all baseline reference routes are generated', async () => {
-  for (const route of [...marketingRoutes, 'docs', 'docs/installation', 'docs/console', 'docs/tools', 'docs/host-features', 'docs/configuration', 'docs/categories', 'docs/environment', 'docs/packs', 'docs/patterns', 'docs/patterns/chatbot', 'docs/patterns/vocabulary', 'docs/patterns/unicode-glyphs']) {
+  for (const route of [...marketingRoutes, 'docs', 'docs/installation', 'docs/console', 'docs/tools', 'docs/host-features', 'docs/configuration', 'docs/configuration/mode', 'docs/packs/pack-fields', 'docs/tools/tuner', 'docs/host-features/omp', 'docs/environment', 'docs/packs', 'docs/patterns', 'docs/patterns/chatbot', 'docs/patterns/vocabulary', 'docs/patterns/unicode-glyphs']) {
     assert.ok((await stat(join(dist, route, 'index.html'))).isFile(), route);
   }
   assert.ok((await stat(join(dist, '404.html'))).isFile());
@@ -122,8 +122,32 @@ test('the pattern library has one short page per category and redirects the old 
   for (const old of ['', '-2', '-3', '-4']) assert.match(redirects, new RegExp(`^/docs/ai-speak-patterns${old}/ /docs/patterns/ 301$`, 'm'));
 });
 
+test('long references are split into an overview and one page per section', async () => {
+  const overview = page('docs/configuration');
+  const sections = [...overview.matchAll(/<li><a href="\/docs\/configuration\/([a-z0-9-]+)\/">/g)].map(match => match[1]);
+  assert.ok(sections.includes('mode') && sections.includes('every-key-and-its-default'), sections.join(', '));
+  assert.match(overview, /data-reference-anchors/);
+  const mode = page('docs/configuration/mode');
+  assert.match(mode, /<h1>mode<\/h1>/);
+  assert.match(mode, /href="\/docs\/configuration\/" aria-current="true"/);
+  assert.match(mode, /href="\/docs\/configuration\/mode\/" aria-current="page"/);
+  assert.match(page('docs/installation'), /href="\/docs\/configuration\/mode\/"/);
+  await assert.rejects(stat(join(dist, 'docs', 'categories')));
+  assert.match(await readFile(join(dist, '_redirects'), 'utf8'), /^\/docs\/categories\/ \/docs\/patterns\/ 301$/m);
+  assert.match(page('docs/patterns'), /<h2 id="phrase-categories">Phrase categories<\/h2>/);
+});
+
+test('site search indexes the page content of every route but 404', async () => {
+  assert.ok((await stat(join(dist, 'pagefind', 'pagefind.js'))).isFile());
+  for (const { file, html } of pages) {
+    assert.match(html, /data-search-open/, file);
+    assert.equal(/data-pagefind-body/.test(html), !file.endsWith('404.html'), file);
+  }
+  assert.match(page('docs/configuration/mode'), /data-pagefind-ignore class="docs-sidebar"/);
+});
+
 test('reference table values have build-time mobile labels', () => {
-  const config = pages.find(page => page.file === join(dist, 'docs/configuration/index.html')).html;
+  const config = pages.find(page => page.file === join(dist, 'docs/configuration/every-key-and-its-default/index.html')).html;
   assert.match(config, /data-responsive-table/);
   assert.match(config, /data-label="Key"/);
   assert.match(config, /data-label="Default"/);

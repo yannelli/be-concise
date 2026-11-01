@@ -2,6 +2,7 @@
 import type { MarkdownHeading } from 'astro';
 import SiteLayout from './SiteLayout.astro';
 import '../styles/docs.css';
+import { readReference, splitDocs } from '../lib/reference.mjs';
 
 interface Props {
   title: string;
@@ -23,7 +24,6 @@ const groups = [
   ] },
   { title: 'Reference', pages: [
     { title: 'Configuration', slug: 'configuration' },
-    { title: 'Categories', slug: 'categories' },
     { title: 'Environment variables', slug: 'environment' },
     { title: 'Pattern packs', slug: 'packs' },
     { title: 'Settings tools', slug: 'tools' },
@@ -37,36 +37,47 @@ const href = (slug: string) => `/docs/${slug ? `${slug}/` : ''}`;
 const path = `${Astro.url.pathname.replace(/\/$/, '')}/`;
 const pages = groups.flatMap(group => group.pages);
 const position = pages.findIndex(page => href(page.slug) === path);
-const inPatterns = path.startsWith('/docs/patterns/');
+// Inside a split reference or the pattern library, its sidebar entry marks the current section.
+const inside = (slug: string) => slug !== '' && path !== href(slug) && path.startsWith(href(slug));
 const previous = Astro.props.previous ?? (pages[position - 1] && { title: pages[position - 1].title, href: href(pages[position - 1].slug) });
 const next = Astro.props.next ?? (pages[position + 1] && { title: pages[position + 1].title, href: href(pages[position + 1].slug) });
 // A category page marks its library index as the current section, not as the current page.
-const current = (slug: string) => href(slug) === path ? 'page' : slug === 'patterns' && inPatterns ? 'true' : undefined;
+const current = (slug: string) => href(slug) === path ? 'page' : inside(slug) ? 'true' : undefined;
+// The open reference lists its sections under its sidebar entry.
+const children = (slug: string) => splitDocs.includes(slug) && (href(slug) === path || inside(slug)) ? readReference(slug).pages : [];
 const contents = headings.filter(heading => heading.depth === 2 || heading.depth === 3);
 ---
 <SiteLayout title={`${title} · Concise Docs`} description={description} isDocs={true}>
   <div class="docs-shell">
-    <a class="docs-skip" href="#docs-content">Skip documentation navigation</a>
-    <aside class="docs-sidebar" aria-label="Documentation sidebar">
+    <a data-pagefind-ignore class="docs-skip" href="#docs-content">Skip documentation navigation</a>
+    <aside data-pagefind-ignore class="docs-sidebar" aria-label="Documentation sidebar">
       <nav aria-label="Documentation">
         {groups.map(group => (
           <div class="docs-nav-group">
             <p class="docs-nav-title">{group.title}</p>
             <ul>{group.pages.map(page => (
-              <li><a href={href(page.slug)} aria-current={current(page.slug)}>{page.title}</a></li>
+              <li><a href={href(page.slug)} aria-current={current(page.slug)}>{page.title}</a>{children(page.slug).length > 0 && (
+                <ul class="docs-nav-children">{children(page.slug).map(child => (
+                  <li><a href={`${href(page.slug)}${child.slug}/`} aria-current={`${href(page.slug)}${child.slug}/` === path ? 'page' : undefined}>{child.title}</a></li>
+                ))}</ul>
+              )}</li>
             ))}</ul>
           </div>
         ))}
       </nav>
     </aside>
-    <nav class="docs-mobile-nav" aria-label="Documentation on mobile"><details>
+    <nav data-pagefind-ignore class="docs-mobile-nav" aria-label="Documentation on mobile"><details>
       <summary>Documentation menu</summary>
       <div class="docs-mobile-links">
         {groups.map(group => (
           <div class="docs-nav-group">
             <p class="docs-nav-title">{group.title}</p>
             <ul>{group.pages.map(page => (
-              <li><a href={href(page.slug)} aria-current={current(page.slug)}>{page.title}</a></li>
+              <li><a href={href(page.slug)} aria-current={current(page.slug)}>{page.title}</a>{children(page.slug).length > 0 && (
+                <ul class="docs-nav-children">{children(page.slug).map(child => (
+                  <li><a href={`${href(page.slug)}${child.slug}/`} aria-current={`${href(page.slug)}${child.slug}/` === path ? 'page' : undefined}>{child.title}</a></li>
+                ))}</ul>
+              )}</li>
             ))}</ul>
           </div>
         ))}
@@ -77,7 +88,7 @@ const contents = headings.filter(heading => heading.depth === 2 || heading.depth
         <slot />
       </article>
       <p class="docs-copy-status" role="status" aria-live="polite" aria-atomic="true"></p>
-      <div class="docs-page-end">
+      <div class="docs-page-end" data-pagefind-ignore>
         <a class="docs-source" href={`https://github.com/yannelli/be-concise/blob/main/${sourcePath}`}>View this page on GitHub</a>
         <nav class="docs-pagination" aria-label="Documentation pages">
           {previous && <a href={previous.href} rel="prev">Previous: {previous.title}</a>}
@@ -86,7 +97,7 @@ const contents = headings.filter(heading => heading.depth === 2 || heading.depth
       </div>
     </div>
     {contents.length > 0 && (
-      <aside class="docs-toc" aria-label="On this page">
+      <aside data-pagefind-ignore class="docs-toc" aria-label="On this page">
         <p class="docs-nav-title">On this page</p>
         <nav aria-label="Page contents">
           <ul>{contents.map(heading => (

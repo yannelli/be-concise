@@ -7,3 +7,6 @@
 /docs/ai-speak-patterns-3/ /docs/patterns/ 301
 /docs/ai-speak-patterns-4 /docs/patterns/ 301
 /docs/ai-speak-patterns-4/ /docs/patterns/ 301
+# Categories now live in the pattern library index, grouped as before.
+/docs/categories /docs/patterns/ 301
+/docs/categories/ /docs/patterns/ 301

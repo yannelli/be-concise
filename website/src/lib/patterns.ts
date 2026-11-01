@@ -1,5 +1,4 @@
-import { createMarkdownProcessor } from '@astrojs/markdown-remark';
-import { documentationLinks, responsiveTables } from './markdown-plugins.mjs';
+import { readDoc, slugify } from './reference.mjs';
 
 // The plugin keeps its pattern reference in 300-line parts so an agent can read one part at a time.
 // The website splits the same generated Markdown into one page per category.
@@ -17,6 +16,8 @@ export interface PatternCategory {
   body: string;
   rows: number;
   file: string;
+  group: string;
+  scopes: string[];
 }
 
 const partOrder = (file: string) => Number(file.match(/ai-speak-patterns-(\d+)\.md$/)?.[1] ?? 1);
@@ -49,21 +50,35 @@ for (const file of files) {
       body: blocks.slice(blocks[1]?.startsWith('|') ? 1 : 2).join('\n\n'),
       rows: rest.filter(line => /^\| /.test(line)).length - 1,
       file: `${sourceDir}/${file.split('/').pop()}`,
+      group: '', scopes: [],
     });
   }
 }
 
 const missing = [...index.keys()].filter(id => !sections.has(id));
 if (missing.length) throw new Error(`Pattern index lists categories with no section: ${missing.join(', ')}`);
+// The Categories reference groups the categories and gives the scopes each one runs in.
+export const categoriesSource = 'plugins/concise/docs/categories.md';
+const categoriesDoc = readDoc('categories');
+export const groups: { title: string; id: string }[] = [];
+let group = '';
+for (const line of categoriesDoc.split('\n')) {
+  const heading = line.match(/^## (.+)$/);
+  if (heading) { group = heading[1].trim(); groups.push({ title: group, id: slugify(group) }); continue; }
+  const cells = line.split('|').map((cell: string) => cell.trim());
+  const id = cells[1]?.match(/^`([^`]+)`$/)?.[1];
+  const section = id && sections.get(id);
+  if (section && group) { section.group = group; section.scopes = ticks(cells[6] ?? ''); }
+}
+const ungrouped = [...sections.values()].filter(section => !section.group);
+if (ungrouped.length) groups.push({ title: 'Other categories', id: 'other-categories' });
+ungrouped.forEach(section => { section.group = 'Other categories'; });
+/** Paragraphs of the Categories reference that explain scopes and the em-dash feature. */
+export const categoriesNotes = {
+  scopes: categoriesDoc.split(/\n{2,}/).find((block: string) => block.startsWith('Scope names:')) ?? '',
+  emDash: categoriesDoc.split(/\n{2,}/).find((block: string) => block.startsWith('The `emDash` feature')) ?? '',
+};
+
 // Alphabetical by title, so the index reads as a directory.
 export const categories: PatternCategory[] = [...index.keys()].map(id => sections.get(id)!).sort((a, b) => a.title.localeCompare(b.title));
 export const presets = ['default', 'technical', 'ryan', 'minimal', 'git', 'ste', 'statistical', 'all'];
-
-const processor = createMarkdownProcessor({
-  remarkPlugins: [documentationLinks],
-  rehypePlugins: [responsiveTables],
-  shikiConfig: { theme: 'github-dark' },
-});
-export async function renderMarkdown(markdown: string) {
-  return (await (await processor).render(markdown)).code;
-}

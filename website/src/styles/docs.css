@@ -108,8 +108,8 @@
 }
 .docs-prose pre code { display: block; width: max-content; min-width: 100%; padding: 0; background: none; border-radius: 0; }
 .docs-code-frame { margin: 1.5rem 0; background: var(--dark); }
-.docs-code-frame pre { margin: 0; padding-top: .5rem; }
-.docs-code-toolbar { display: flex; justify-content: flex-end; padding: .5rem .75rem 0; }
+.docs-code-frame pre { margin: 0; padding-top: .25rem; padding-bottom: 1rem; }
+.docs-code-toolbar { display: flex; justify-content: flex-end; padding: .25rem .5rem 0; }
 .docs-copy {
   min-height: 44px;
   padding: .4rem .75rem;
@@ -217,3 +217,15 @@
   .docs-prose .pattern-table table[data-columns="2"] td + td { margin-top: .35rem; color: var(--muted); }
   .docs-prose .pattern-table table[data-columns="2"] td + td::before { content: "Fix: "; display: inline; font-weight: 600; }
 }
+.docs-prose .pattern-group { margin-top: 2.75rem; }
+.docs-prose .pattern-group[hidden] { display: none; }
+.docs-prose .pattern-group h2 { margin: 0; }
+.docs-prose .pattern-group .pattern-index { margin-top: 1.25rem; }
+.docs-reading-wide .docs-prose .pattern-notes { max-width: 72ch; margin-top: 3rem; color: var(--muted); }
+/* Split references: the open reference lists its sections in the sidebar. */
+.docs-nav-children { margin: .25rem 0 .5rem .75rem !important; }
+.docs-sidebar .docs-nav-children a, .docs-mobile-nav .docs-nav-children a { font-size: .9375rem; }
+.docs-prose .reference-sections { list-style: none; padding: 0; margin: 2rem 0 0; display: grid; gap: 1.25rem; }
+.docs-prose .reference-sections li { margin: 0; }
+.docs-prose .reference-sections a { font-size: 1.125rem; font-weight: 600; }
+.docs-prose .reference-sections p { margin: .25rem 0 0; line-height: 1.5; }
