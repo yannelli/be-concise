@@ -108,7 +108,7 @@
 }
 .docs-prose pre code { display: block; width: max-content; min-width: 100%; padding: 0; background: none; border-radius: 0; }
 .docs-code-frame { margin: 1.5rem 0; background: var(--dark); }
-.docs-code-frame pre { margin: 0; padding-top: .5rem; }
+.docs-code-frame pre { min-height: 4.75rem; margin: 0; padding-top: .5rem; }
 .docs-code-toolbar { display: flex; justify-content: flex-end; padding: .5rem .75rem 0; }
 .docs-copy {
   min-height: 44px;
